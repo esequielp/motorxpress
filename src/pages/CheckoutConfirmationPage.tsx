@@ -41,9 +41,9 @@ export default function CheckoutConfirmationPage() {
       </p>
       
       <div className="flex gap-4">
-        <button className="bg-[#1F1F24] text-white hover:bg-[#333] transition-colors border border-gray-700 px-6 py-3 rounded font-medium">
+        <Link to="/cuenta" className="bg-[#1F1F24] text-white hover:bg-[#333] transition-colors border border-gray-700 px-6 py-3 rounded font-medium">
           Ver estado del pedido
-        </button>
+        </Link>
         <Link to="/" className="bg-[#E31C25] hover:bg-red-700 text-white transition-colors px-6 py-3 rounded font-bold">
           Seguir comprando
         </Link>

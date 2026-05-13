@@ -2,16 +2,29 @@ import express from 'express';
 import { createServer as createViteServer } from 'vite';
 import path from 'path';
 import { GoogleGenAI } from '@google/genai';
+import cors from 'cors';
+import { initDb } from './server/db';
+import apiRoutes from './server/routes';
 
 async function startServer() {
   const app = express();
   const PORT = 3000;
 
+  app.use(cors());
   app.use(express.json());
 
-  // Wait for requests to simulate external APIs if real keys are absent
-  
-  // API Routes
+  // Initialize Database
+  try {
+    initDb();
+    console.log("Database initialized successfully.");
+  } catch (err) {
+    console.error("Failed to initialize database:", err);
+  }
+
+  // Use API Routes
+  app.use('/api', apiRoutes);
+
+  // Remaining specialized API Routes
   app.post('/api/chat', async (req, res) => {
     try {
       const { messages } = req.body;
@@ -97,52 +110,6 @@ async function startServer() {
       console.error(error);
       res.status(500).json({ error: 'Chilexpress quote failed' });
     }
-  });
-
-  app.get('/api/products', (req, res) => {
-    // Mock catalog for the preview
-    res.json([
-      {
-        id: '1',
-        sku: 'MX-FLT-001',
-        name: 'KIT FILTROS TOYOTA COROLLA 1.6',
-        vehicle: 'Toyota Corolla 2005-2012 Sedán',
-        price: 18990,
-        stock: 5,
-        image: 'https://images.unsplash.com/photo-1619642751034-765dfdf7c58e?auto=format&fit=crop&w=400&q=80',
-        maxStock: 5
-      },
-      {
-        id: '2',
-        sku: 'MX-BUJ-002',
-        name: 'BUJIAS IRIDIUM TOYOTA COROLLA',
-        vehicle: 'Toyota Corolla 2005-2012 Sedán',
-        price: 8500,
-        stock: 12,
-        image: 'https://images.unsplash.com/photo-1601362840469-51e4d8d58785?auto=format&fit=crop&w=400&q=80',
-        maxStock: 12
-      },
-      {
-        id: '3',
-        sku: 'MX-PST-003',
-        name: 'PASTILLAS DE FRENO CERÁMICAS',
-        vehicle: 'Universal',
-        price: 32900,
-        stock: 2,
-        image: 'https://images.unsplash.com/photo-1536700503339-1e4b06520771?auto=format&fit=crop&w=400&q=80',
-        maxStock: 2
-      },
-      {
-        id: '4',
-        sku: 'MX-ACE-004',
-        name: 'ACEITE SINTÉTICO 5W30 4L',
-        vehicle: 'Universal',
-        price: 26500,
-        stock: 20,
-        image: 'https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?auto=format&fit=crop&w=400&q=80',
-        maxStock: 20
-      }
-    ]);
   });
 
   // Vite middleware for development

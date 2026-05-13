@@ -14,6 +14,7 @@ import AccountPage from './pages/AccountPage';
 import OrderDetailPage from './pages/OrderDetailPage';
 import SupportChat from './components/chat/SupportChat';
 import ScrollToTop from './components/layout/ScrollToTop';
+import AdminDashboardPage from './pages/admin/AdminDashboardPage';
 
 // Information pages
 import ReturnsPage from './pages/info/ReturnsPage';
@@ -36,6 +37,7 @@ export default function App() {
             <Route path="/checkout/confirmacion" element={<CheckoutConfirmationPage />} />
             <Route path="/cuenta" element={<AccountPage />} />
             <Route path="/cuenta/pedidos/:id" element={<OrderDetailPage />} />
+            <Route path="/admin" element={<AdminDashboardPage />} />
             
             <Route path="/retornos" element={<ReturnsPage />} />
             <Route path="/faq" element={<FaqPage />} />

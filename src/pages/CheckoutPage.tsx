@@ -54,22 +54,28 @@ export default function CheckoutPage() {
   const handlePayment = async () => {
     setIsProcessingPayment(true);
     try {
-      // Simulate order creation and getting flow redirect url
-      const res = await fetch('/api/flow/create', {
+      // Simulate order creation in db
+      const savedUserStr = localStorage.getItem('motorxpress_user');
+      const user = savedUserStr ? JSON.parse(savedUserStr) : null;
+      
+      const res = await fetch('/api/orders', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
-          orderId: `MX-${Date.now()}`,
-          shippingData,
-          shippingOption,
+          user_id: user ? user.id : null,
+          customer_name: `${shippingData.firstName} ${shippingData.lastName}`,
+          customer_email: shippingData.email,
+          customer_phone: shippingData.phone,
+          shipping_address: `${shippingData.address}, ${shippingData.commune}, ${shippingData.region}`,
           items,
           total: finalTotal
         })
       });
       const data = await res.json();
       
-      if (data.redirectUrl) {
-        window.location.href = data.redirectUrl;
+      if (data.orderId) {
+        // We do a mock flow page or just go to confirmation directly since real Flow needs API keys
+        navigate('/checkout/confirmacion', { state: { orderId: data.orderId, isSuccess: true } });
       }
     } catch (err) {
       console.error(err);

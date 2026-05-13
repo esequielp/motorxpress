@@ -3,65 +3,50 @@ import { Package, CheckCircle2, Truck, ArrowLeft, Clock, Download } from 'lucide
 import { formatCLP } from '../lib/utils/formatCLP';
 import { useEffect, useState } from 'react';
 
-const ALL_MOCK_ORDERS: Record<string, any> = {
-  'MX-2024-00001': {
-    id: 'MX-2024-00001',
-    date: '2024-05-10 14:30',
-    status: 'shipped', // pending, paid, preparing, shipped, delivered
-    trackingNumber: 'OT-987654321',
-    shippingAddress: 'Av. Providencia 1234, Depto 4B, Providencia, RM',
-    subtotal: 27490,
-    shipping: 4990,
-    total: 32480,
-    items: [
-      { sku: 'MX-FLT-001', name: 'KIT FILTROS TOYOTA COROLLA 1.6', qty: 1, price: 18990 },
-      { sku: 'MX-BUJ-002', name: 'BUJIAS IRIDIUM TOYOTA COROLLA', qty: 1, price: 8500 }
-    ]
-  },
-  'MX-2024-00002': {
-    id: 'MX-2024-00002',
-    date: '2024-04-15 09:12',
-    status: 'delivered',
-    trackingNumber: 'OT-123456789',
-    shippingAddress: 'Av. Las Condes 5555, Las Condes, RM',
-    subtotal: 8500,
-    shipping: 2990,
-    total: 11490,
-    items: [
-      { sku: 'MX-BUJ-002', name: 'BUJIAS IRIDIUM TOYOTA COROLLA', qty: 1, price: 8500 }
-    ]
-  }
-};
-
 export default function OrderDetailPage() {
   const { id } = useParams();
   const [order, setOrder] = useState<any>(null);
   const [isDownloading, setIsDownloading] = useState(false);
 
   useEffect(() => {
-    // Simulate fetch order by id
-    if (id && ALL_MOCK_ORDERS[id]) {
-       setOrder(ALL_MOCK_ORDERS[id]);
-    } else {
-       // Fallback mock if completely unknown ID
-       setOrder({
-          id: id || 'MX-UNKNOWN',
-          date: new Date().toLocaleString(),
-          status: 'preparing',
-          trackingNumber: null,
-          shippingAddress: 'Dirección ingresada en el checkout',
-          subtotal: 10000,
-          shipping: 4990,
-          total: 14990,
-          items: [
-            { sku: 'MX-GEN-001', name: 'Repuesto Genérico', qty: 1, price: 10000 }
-          ]
-       });
+    const fetchOrder = async () => {
+      try {
+        const res = await fetch(`/api/orders/${id}`);
+        if (res.ok) {
+          const data = await res.json();
+          // Map DB structure to what UI expects
+          setOrder({
+            id: data.id,
+            date: new Date(data.created_at).toLocaleString(),
+            status: data.status,
+            trackingNumber: data.status === 'shipped' || data.status === 'delivered' ? `OT-MX-${data.id * 1234}` : null,
+            shippingAddress: data.shipping_address,
+            // we don't have separate shipping/subtotal in db, so we fake the split for now
+            subtotal: data.total - 5990,
+            shipping: 5990,
+            total: data.total,
+            items: data.items.map((i: any) => ({
+              sku: i.product_id ? `MX-PRD-${i.product_id}` : 'MX-GEN-001',
+              name: i.product_name,
+              qty: i.quantity,
+              price: i.price
+            }))
+          });
+        } else {
+           // Fallback if not found
+           setOrder(null);
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    };
+    if (id) {
+      fetchOrder();
     }
   }, [id]);
 
-  if (!order) {
-    return <div className="container mx-auto px-4 py-20 text-center text-white">Cargando pedido...</div>;
+  if (order === null) {
+    return <div className="container mx-auto px-4 py-20 text-center text-white">Cargando pedido o pedido no encontrado...</div>;
   }
 
   const handleDownload = () => {
@@ -99,6 +84,19 @@ export default function OrderDetailPage() {
           <section className="bg-[#18181C] border border-[#1F1F24] rounded-lg p-6">
             <h2 className="text-xl font-bold mb-6 flex items-center gap-2"><Truck className="w-5 h-5 text-[#E31C25]" /> Estado del Envío</h2>
             
+            {order.status === 'cancelled' || order.status === 'rejected' ? (
+              <div className="bg-red-900/20 border border-red-500/30 p-6 rounded-lg text-center">
+                <div className="w-16 h-16 bg-red-900/50 text-red-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Package className="w-8 h-8" />
+                </div>
+                <h3 className="text-xl font-bold text-red-400 mb-2">Pedido {order.status === 'rejected' ? 'Rechazado' : 'Cancelado'}</h3>
+                <p className="text-gray-400">
+                  {order.status === 'rejected' 
+                    ? 'Hubo un problema procesando tu pago. Por favor, intenta realizar la compra nuevamente.'
+                    : 'Este pedido ha sido cancelado y ya no será procesado.'}
+                </p>
+              </div>
+            ) : (
             <div className="relative">
               <div className="absolute left-6 top-0 bottom-0 w-0.5 bg-[#1F1F24]"></div>
               
@@ -153,6 +151,7 @@ export default function OrderDetailPage() {
                 </div>
               </div>
             </div>
+            )}
           </section>
 
           <section className="bg-[#18181C] border border-[#1F1F24] rounded-lg p-6">

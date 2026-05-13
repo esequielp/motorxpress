@@ -111,6 +111,9 @@ export default function Header() {
           </div>
 
           <div className="flex items-center gap-6">
+            <Link to="/admin" className="text-gray-400 hover:text-[#E31C25] font-bold transition-colors hidden md:block text-sm uppercase tracking-wider" title="Dashboard">
+              Admin
+            </Link>
             <Link to="/cuenta" className="text-gray-300 hover:text-white transition-colors hidden md:block" title="Mi Cuenta">
               <User className="w-6 h-6" />
             </Link>
