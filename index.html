@@ -4,6 +4,25 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>My Google AI Studio App</title>
+    <script>
+      // Prevent extensions or polyfills from crashing the app due to fetch getter issues
+      try {
+        [window, Window.prototype].forEach(obj => {
+          if (!obj) return;
+          const desc = Object.getOwnPropertyDescriptor(obj, 'fetch');
+          if (desc && !desc.writable && !desc.set && desc.configurable) {
+            Object.defineProperty(obj, 'fetch', {
+              get: desc.get || function() { return desc.value; },
+              set: function(val) { console.warn('Ignored attempt to overwrite fetch'); },
+              configurable: true,
+              enumerable: desc.enumerable
+            });
+          }
+        });
+      } catch(e) {
+        console.warn('Could not reconfigure fetch', e);
+      }
+    </script>
   </head>
   <body>
     <div id="root"></div>
