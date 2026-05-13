@@ -34,6 +34,7 @@ export function initDb() {
     CREATE TABLE IF NOT EXISTS products (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       sku TEXT UNIQUE NOT NULL,
+      mpn TEXT,
       name TEXT NOT NULL,
       vehicle TEXT NOT NULL,
       price INTEGER NOT NULL,
@@ -42,6 +43,11 @@ export function initDb() {
       image TEXT,
       category_id INTEGER REFERENCES categories(id) ON DELETE SET NULL,
       brand_id INTEGER REFERENCES brands(id) ON DELETE SET NULL,
+      is_featured BOOLEAN DEFAULT 0,
+      is_offer BOOLEAN DEFAULT 0,
+      is_new BOOLEAN DEFAULT 0,
+      offer_price INTEGER,
+      description TEXT,
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
       updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
     );
@@ -71,6 +77,12 @@ export function initDb() {
       key TEXT PRIMARY KEY,
       value TEXT NOT NULL
     );
+
+    CREATE TABLE IF NOT EXISTS newsletters (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      email TEXT UNIQUE NOT NULL,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    );
   `);
 
   // Seed data if empty
@@ -97,32 +109,32 @@ function seedDatabase() {
   };
 
   const insertProduct = db.prepare(`
-    INSERT INTO products (sku, name, vehicle, price, stock, maxStock, image, category_id, brand_id)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+    INSERT INTO products (sku, mpn, name, vehicle, price, stock, maxStock, image, category_id, brand_id, is_featured, is_offer, is_new, offer_price, description)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `);
 
   insertProduct.run(
-    'MX-FLT-001', 'KIT FILTROS TOYOTA COROLLA 1.6', 'Toyota Corolla 2005-2012 Sedán',
+    'MX-FLT-001', 'FLT-TOY-001', 'KIT FILTROS TOYOTA COROLLA 1.6', 'Toyota Corolla 2005-2012 Sedán',
     18990, 5, 5, 'https://images.unsplash.com/photo-1619642751034-765dfdf7c58e?auto=format&fit=crop&w=400&q=80',
-    catIds.filtros, brandIds.toyota
+    catIds.filtros, brandIds.toyota, 1, 0, 0, null, 'Filtro de aire, aceite y cabina de alta retención de partículas. Extiende la vida útil de tu motor garantizando un flujo limpio y constante. Dimensiones OEM.'
   );
 
   insertProduct.run(
-    'MX-BUJ-002', 'BUJIAS IRIDIUM TOYOTA COROLLA', 'Toyota Corolla 2005-2012 Sedán',
-    8500, 12, 12, 'https://images.unsplash.com/photo-1601362840469-51e4d8d58785?auto=format&fit=crop&w=400&q=80',
-    catIds.bujias, brandIds.toyota
+    'MX-BUJ-002', 'BUJ-IRI-002', 'BUJIAS IRIDIUM TOYOTA COROLLA', 'Toyota Corolla 2005-2012 Sedán',
+    12500, 12, 12, 'https://images.unsplash.com/photo-1601362840469-51e4d8d58785?auto=format&fit=crop&w=400&q=80',
+    catIds.bujias, brandIds.toyota, 0, 1, 0, 8500, 'Bujías de Iridium con electrodo central ultra fino (0.4mm). Proporciona mejor aceleración, ignición más rápida y ahorro de combustible de hasta un 5%.'
   );
 
   insertProduct.run(
-    'MX-PST-003', 'PASTILLAS DE FRENO CERÁMICAS', 'Universal',
+    'MX-PST-003', 'PST-CER-003', 'PASTILLAS DE FRENO CERÁMICAS', 'Universal',
     32900, 2, 2, 'https://images.unsplash.com/photo-1536700503339-1e4b06520771?auto=format&fit=crop&w=400&q=80',
-    catIds.frenos, brandIds.universal
+    catIds.frenos, brandIds.universal, 1, 0, 1, null, 'Compuesto cerámico avanzado que reduce el polvo en las llantas y ruidos ("chillidos") molestos durante el frenado continuo. Resistentes a altas temperaturas (hasta 600°C).'
   );
 
   insertProduct.run(
-    'MX-ACE-004', 'ACEITE SINTÉTICO 5W30 4L', 'Universal',
+    'MX-ACE-004', 'ACE-5W30-004', 'ACEITE SINTÉTICO 5W30 4L', 'Universal',
     26500, 20, 20, 'https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?auto=format&fit=crop&w=400&q=80',
-    catIds.aceite, brandIds.universal
+    catIds.aceite, brandIds.universal, 0, 0, 1, null, 'Lubricante 100% sintético diseñado con aditivos anti-desgaste y dispersantes de hollín. Mantiene el motor limpio y protegido incluso en arranques en frío extremos.'
   );
   
   // Seed admin user and other users

@@ -7,18 +7,15 @@
     <script>
       // Prevent extensions or polyfills from crashing the app due to fetch getter issues
       try {
-        [window, Window.prototype].forEach(obj => {
-          if (!obj) return;
-          const desc = Object.getOwnPropertyDescriptor(obj, 'fetch');
-          if (desc && !desc.writable && !desc.set && desc.configurable) {
-            Object.defineProperty(obj, 'fetch', {
-              get: desc.get || function() { return desc.value; },
-              set: function(val) { console.warn('Ignored attempt to overwrite fetch'); },
-              configurable: true,
-              enumerable: desc.enumerable
-            });
-          }
-        });
+        const desc = Object.getOwnPropertyDescriptor(window, 'fetch');
+        if (!desc || (desc && !desc.writable && !desc.set && desc.configurable)) {
+          Object.defineProperty(window, 'fetch', {
+            value: window.fetch,
+            writable: true,
+            configurable: true,
+            enumerable: true
+          });
+        }
       } catch(e) {
         console.warn('Could not reconfigure fetch', e);
       }

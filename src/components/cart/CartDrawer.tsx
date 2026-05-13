@@ -55,7 +55,16 @@ export default function CartDrawer() {
                       <X className="w-4 h-4" />
                     </button>
                   </div>
-                  <p className="text-[#E31C25] font-bold mt-1">{formatCLP(item.price)}</p>
+                  <div className="mt-1 flex flex-col">
+                    {item.is_offer === 1 && item.offer_price ? (
+                      <>
+                        <span className="text-[#E31C25] font-bold">{formatCLP(item.offer_price)}</span>
+                        <span className="text-gray-500 text-xs line-through">{formatCLP(item.price)}</span>
+                      </>
+                    ) : (
+                      <span className="text-[#E31C25] font-bold">{formatCLP(item.price)}</span>
+                    )}
+                  </div>
                   <div className="flex items-center mt-2 border border-gray-700 rounded w-fit">
                     <button 
                       onClick={() => updateQty(item.sku, item.quantity - 1)}

@@ -1,10 +1,12 @@
 import { useEffect, useState } from 'react';
 import ProductCard from '../components/product/ProductCard';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, Mail } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 export default function HomePage() {
   const [products, setProducts] = useState([]);
+  const [newsletterEmail, setNewsletterEmail] = useState('');
+  const [newsletterStatus, setNewsletterStatus] = useState('');
 
   useEffect(() => {
     fetch('/api/products')
@@ -12,6 +14,56 @@ export default function HomePage() {
       .then(data => setProducts(data))
       .catch(console.error);
   }, []);
+
+  const handleNewsletterSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newsletterEmail) return;
+    try {
+      const res = await fetch('/api/newsletter', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: newsletterEmail })
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setNewsletterStatus(data.message);
+        setNewsletterEmail('');
+      } else {
+        setNewsletterStatus(data.error);
+      }
+    } catch(err) {
+      setNewsletterStatus('Ocurrió un error. Inténtalo nuevamente.');
+    }
+  };
+
+  const RenderProductSection = ({ title, filteredProducts, limit = 4 }: { title: string, filteredProducts: any[], limit?: number }) => {
+    if (filteredProducts.length === 0) return null;
+    return (
+      <section className="py-12 container mx-auto px-4">
+        <div className="flex justify-between items-end mb-8">
+          <div>
+            <h2 className="text-4xl font-bebas tracking-wide uppercase">{title}</h2>
+            <div className="h-1 w-20 bg-[#E31C25] mt-2"></div>
+          </div>
+          <Link to="/catalogo" className="text-gray-400 hover:text-white flex items-center gap-1 group">
+            Ver todos <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+          </Link>
+        </div>
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+          {filteredProducts.slice(0, limit).map((p: any) => (
+            <ProductCard key={p.id} product={p} />
+          ))}
+        </div>
+      </section>
+    );
+  };
+
+  const featured = products.filter((p: any) => p.is_featured === 1);
+  const offers = products.filter((p: any) => p.is_offer === 1);
+  const newArrivals = products.filter((p: any) => p.is_new === 1);
+  
+  // Fallback if no tagged products exist yet
+  const displayFeatured = featured.length > 0 ? featured : products.slice(0, 4);
 
   return (
     <div className="flex flex-col min-h-screen bg-[#0A0A0C] text-white selection:bg-[#E31C25] selection:text-white">
@@ -42,31 +94,52 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Featured Products */}
-      <section className="py-20 container mx-auto px-4">
-        <div className="flex justify-between items-end mb-10">
-          <div>
-            <h2 className="text-4xl font-bebas tracking-wide">DESTACADOS</h2>
-            <div className="h-1 w-20 bg-[#E31C25] mt-2"></div>
-          </div>
-          <Link to="/catalogo" className="text-gray-400 hover:text-white flex items-center gap-1 group">
-            Ver todos <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-          </Link>
-        </div>
-
-        {products.length === 0 ? (
+      {products.length === 0 ? (
+        <section className="py-20 container mx-auto px-4">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 animate-pulse">
             {[...Array(4)].map((_, i) => (
               <div key={i} className="bg-[#18181C] h-80 rounded-lg"></div>
             ))}
           </div>
-        ) : (
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
-            {products.slice(0, 4).map((p: any) => (
-              <ProductCard key={p.sku} product={p} />
-            ))}
+        </section>
+      ) : (
+        <div className="py-12">
+          <RenderProductSection title="Destacados" filteredProducts={displayFeatured} />
+          <RenderProductSection title="En Oferta" filteredProducts={offers} />
+          <RenderProductSection title="Recién Llegados" filteredProducts={newArrivals} />
+        </div>
+      )}
+
+      {/* Newsletter Section */}
+      <section className="py-20 bg-gradient-to-t from-[#18181C] to-[#0A0A0C]">
+        <div className="container mx-auto px-4">
+          <div className="max-w-3xl mx-auto text-center border border-[#1F1F24] p-10 rounded-2xl bg-[#0A0A0C] relative overflow-hidden">
+             <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-[#E31C25] to-transparent opacity-50"></div>
+             <Mail className="w-12 h-12 mx-auto text-[#E31C25] mb-6" />
+             <h2 className="text-4xl font-bebas mb-4">ÚNETE A LA REVOLUCIÓN MOTORXPRESS</h2>
+             <p className="text-gray-400 mb-8 max-w-lg mx-auto">Suscríbete para recibir ofertas exclusivas, novedades de repuestos y tips de expertos directamente en tu correo.</p>
+             
+             <form onSubmit={handleNewsletterSubmit} className="flex flex-col sm:flex-row max-w-md mx-auto gap-2">
+               <input 
+                 type="email" 
+                 required
+                 value={newsletterEmail}
+                 onChange={(e) => setNewsletterEmail(e.target.value)}
+                 placeholder="Tu correo electrónico"
+                 className="flex-1 bg-[#18181C] border border-[#1F1F24] text-white px-4 py-3 rounded outline-none focus:border-[#E31C25]"
+               />
+               <button 
+                 type="submit"
+                 className="bg-[#E31C25] hover:bg-red-600 text-white font-bold px-6 py-3 rounded transition-colors"
+               >
+                 Suscribirme
+               </button>
+             </form>
+             {newsletterStatus && (
+               <p className="mt-4 text-sm text-gray-300 font-medium">{newsletterStatus}</p>
+             )}
           </div>
-        )}
+        </div>
       </section>
 
       {/* Trust Badges */}
@@ -93,3 +166,4 @@ export default function HomePage() {
     </div>
   );
 }
+

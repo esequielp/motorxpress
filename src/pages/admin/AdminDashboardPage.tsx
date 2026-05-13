@@ -13,6 +13,45 @@ export default function AdminDashboardPage() {
   const [currentUser, setCurrentUser] = useState<any>(null);
   const [userFilter, setUserFilter] = useState<'all' | 'staff' | 'customers'>('all');
 
+  // Filtering & Pagination State
+  const [productSearch, setProductSearch] = useState('');
+  const [productPage, setProductPage] = useState(1);
+  const itemsPerPage = 8;
+
+  const [orderSearch, setOrderSearch] = useState('');
+  const [orderStatusFilter, setOrderStatusFilter] = useState('all');
+  const [orderPage, setOrderPage] = useState(1);
+
+  const [userSearchText, setUserSearchText] = useState('');
+  const [userPage, setUserPage] = useState(1);
+
+  // Computed state
+  const filteredProducts = products.filter(p => 
+    p.name.toLowerCase().includes(productSearch.toLowerCase()) || 
+    p.sku.toLowerCase().includes(productSearch.toLowerCase())
+  );
+  const paginatedProducts = filteredProducts.slice((productPage - 1) * itemsPerPage, productPage * itemsPerPage);
+  const totalProductPages = Math.ceil(filteredProducts.length / itemsPerPage) || 1;
+
+  const filteredOrders = orders.filter(o => 
+    (o.id.toString().includes(orderSearch) || 
+     o.customer_name.toLowerCase().includes(orderSearch.toLowerCase()) || 
+     o.customer_email.toLowerCase().includes(orderSearch.toLowerCase())) &&
+    (orderStatusFilter === 'all' || o.status === orderStatusFilter)
+  );
+  const paginatedOrders = filteredOrders.slice((orderPage - 1) * itemsPerPage, orderPage * itemsPerPage);
+  const totalOrderPages = Math.ceil(filteredOrders.length / itemsPerPage) || 1;
+
+  const activeUsers = users.filter((u: any) => userFilter === 'all' || (userFilter === 'staff' && (u.role === 'admin' || u.role === 'ejecutivo')) || (userFilter === 'customers' && u.role === 'customer'));
+  const filteredUsers = activeUsers.filter(u =>
+    u.name.toLowerCase().includes(userSearchText.toLowerCase()) || 
+    u.email.toLowerCase().includes(userSearchText.toLowerCase()) ||
+    u.id.toString().includes(userSearchText)
+  );
+  const paginatedUsers = filteredUsers.slice((userPage - 1) * itemsPerPage, userPage * itemsPerPage);
+  const totalUserPages = Math.ceil(filteredUsers.length / itemsPerPage) || 1;
+
+
   // Modals state
   const [isProductModalOpen, setProductModalOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<any>(null);
@@ -98,11 +137,20 @@ export default function AdminDashboardPage() {
   const handleProductSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
-    const data = Object.fromEntries(formData.entries());
+    const data: any = Object.fromEntries(formData.entries());
     
     // cast numbers
     data.price = Number(data.price);
     data.stock = Number(data.stock);
+    if (data.offer_price) {
+      data.offer_price = Number(data.offer_price);
+    } else {
+      data.offer_price = null;
+    }
+
+    data.is_featured = formData.get('is_featured') ? 1 : 0;
+    data.is_offer = formData.get('is_offer') ? 1 : 0;
+    data.is_new = formData.get('is_new') ? 1 : 0;
 
     if (editingProduct) {
       await fetch(`/api/products/${editingProduct.id}`, {
@@ -162,81 +210,157 @@ export default function AdminDashboardPage() {
             <SettingsIcon size={24} />
           </div>
           <div>
-            <p className="text-gray-400 text-sm">Configuración</p>
-            <p className="text-2xl font-bold">Flow / Chil.E</p>
+            <p className="text-gray-400 text-sm">Integraciones</p>
+            <p className="text-2xl font-bold">Activas</p>
           </div>
         </div>
       </div>
 
       {/* Tabs */}
       <div className="flex gap-4 border-b border-[#1F1F24] mb-6 overflow-x-auto">
-        {['products', 'orders', 'users', 'settings'].map(tab => (
+        {['products', 'orders', 'users', 'customers', 'settings'].map(tab => (
           <button 
             key={tab}
-            onClick={() => setActiveTab(tab)}
-            className={`pb-2 px-4 transition-colors whitespace-nowrap capitalize ${activeTab === tab ? 'border-b-2 border-[#E31C25] text-[#E31C25]' : 'text-gray-400 hover:text-white'}`}
+            onClick={() => {
+              if (tab === 'users') {
+                 setActiveTab('users');
+                 setUserFilter('staff');
+              } else if (tab === 'customers') {
+                 setActiveTab('users');
+                 setUserFilter('customers');
+              } else {
+                 setActiveTab(tab);
+                 if (tab === 'products' || tab === 'orders' || tab === 'settings') {
+                    setUserFilter('all'); // reset or ignore
+                 }
+              }
+            }}
+            className={`pb-2 px-4 transition-colors whitespace-nowrap capitalize ${activeTab === tab || (activeTab === 'users' && tab === 'users' && userFilter === 'staff') || (activeTab === 'users' && tab === 'customers' && userFilter === 'customers') ? 'border-b-2 border-[#E31C25] text-[#E31C25]' : 'text-gray-400 hover:text-white'}`}
           >
-            {tab === 'products' ? 'Productos' : tab === 'orders' ? 'Órdenes' : tab === 'users' ? 'Usuarios' : 'Configuración'}
+            {tab === 'products' ? 'Productos' : tab === 'orders' ? 'Órdenes' : tab === 'users' ? 'Admin. Staff' : tab === 'customers' ? 'Clientes' : 'Configuración'}
           </button>
         ))}
       </div>
 
       {/* Products Table */}
       {activeTab === 'products' && (
-        <div className="bg-[#18181C] border border-[#1F1F24] rounded-lg overflow-hidden">
-          <div className="p-4 border-b border-[#1F1F24] flex justify-between items-center">
-            <h2 className="font-bold text-lg">Catálogo de Productos</h2>
-            <button 
-              onClick={() => { setEditingProduct(null); setProductModalOpen(true); }}
-              className="bg-[#E31C25] text-white px-4 py-2 rounded text-sm font-bold flex items-center gap-2 hover:bg-red-700 transition"
-            >
-              <Plus size={16} /> Añadir Producto
-            </button>
+        <div className="bg-[#18181C] border border-[#1F1F24] rounded-lg overflow-hidden flex flex-col min-h-[500px]">
+          <div className="p-4 border-b border-[#1F1F24] flex flex-col sm:flex-row justify-between items-center gap-4">
+            <h2 className="font-bold text-lg">Catálogo (<span className="text-[#E31C25]">{filteredProducts.length}</span>)</h2>
+            <div className="flex gap-4 w-full sm:w-auto">
+              <input 
+                type="text" 
+                placeholder="Buscar por nombre o SKU..." 
+                className="bg-[#0A0A0C] border border-[#1F1F24] text-white text-sm rounded px-3 py-2 outline-none focus:border-[#E31C25] min-w-[250px]"
+                value={productSearch}
+                onChange={e => { setProductSearch(e.target.value); setProductPage(1); }}
+              />
+              <button 
+                onClick={() => { setEditingProduct(null); setProductModalOpen(true); }}
+                className="bg-[#E31C25] text-white px-4 py-2 rounded text-sm font-bold flex items-center gap-2 hover:bg-red-700 transition"
+              >
+                <Plus size={16} /> Añadir Producto
+              </button>
+            </div>
           </div>
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto flex-1">
             <table className="w-full text-left text-sm text-gray-400">
               <thead className="bg-[#0A0A0C] text-xs uppercase">
                 <tr>
-                  <th className="px-6 py-3">SKU</th>
+                  <th className="px-6 py-3">SKU / MPN</th>
                   <th className="px-6 py-3">Nombre</th>
                   <th className="px-6 py-3">Precio</th>
+                  <th className="px-6 py-3">Precio Oferta</th>
                   <th className="px-6 py-3">Stock</th>
                   <th className="px-6 py-3 text-right">Acciones</th>
                 </tr>
               </thead>
               <tbody>
-                {products.map(p => (
-                  <tr key={p.id} className="border-b border-[#1F1F24] hover:bg-[#1F1F24]/50">
-                    <td className="px-6 py-4 font-mono text-xs">{p.sku}</td>
-                    <td className="px-6 py-4 text-white font-medium">{p.name}</td>
-                    <td className="px-6 py-4">${p.price.toLocaleString('es-CL')}</td>
-                    <td className="px-6 py-4">{p.stock}</td>
-                    <td className="px-6 py-4 text-right flex justify-end gap-3">
-                      <button 
-                        onClick={() => { setEditingProduct(p); setProductModalOpen(true); }}
-                        className="text-blue-400 hover:text-blue-300 transition"
-                      >
-                        <Edit size={18} />
-                      </button>
-                      <button onClick={() => handleDeleteProduct(p.id)} className="text-[#E31C25] hover:text-red-400 transition">
-                        <Trash2 size={18} />
-                      </button>
-                    </td>
+                {paginatedProducts.length === 0 ? (
+                  <tr>
+                    <td colSpan={6} className="px-6 py-8 text-center text-gray-500">No se encontraron productos.</td>
                   </tr>
-                ))}
+                ) : (
+                  paginatedProducts.map(p => (
+                    <tr key={p.id} className="border-b border-[#1F1F24] hover:bg-[#1F1F24]/50">
+                      <td className="px-6 py-4 font-mono text-xs">
+                        <div>{p.sku}</div>
+                        {p.mpn && <div className="text-gray-500 mt-1">{p.mpn}</div>}
+                      </td>
+                      <td className="px-6 py-4 text-white font-medium">{p.name}</td>
+                      <td className="px-6 py-4">
+                        <span className={p.is_offer ? "line-through text-gray-500" : ""}>
+                          ${p.price.toLocaleString('es-CL')}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 text-[#E31C25] font-bold">
+                        {p.is_offer && p.offer_price ? `$${p.offer_price.toLocaleString('es-CL')}` : '-'}
+                      </td>
+                      <td className="px-6 py-4">{p.stock}</td>
+                      <td className="px-6 py-4 text-right flex justify-end gap-3">
+                        <button 
+                          onClick={() => { setEditingProduct(p); setProductModalOpen(true); }}
+                          className="text-blue-400 hover:text-blue-300 transition"
+                        >
+                          <Edit size={18} />
+                        </button>
+                        <button onClick={() => handleDeleteProduct(p.id)} className="text-[#E31C25] hover:text-red-400 transition">
+                          <Trash2 size={18} />
+                        </button>
+                      </td>
+                    </tr>
+                  ))
+                )}
               </tbody>
             </table>
+          </div>
+          <div className="p-4 border-t border-[#1F1F24] flex justify-between items-center bg-[#0A0A0C]">
+            <span className="text-gray-500 text-sm">Mostrando {paginatedProducts.length} de {filteredProducts.length}</span>
+            <div className="flex gap-2">
+              <button 
+                onClick={() => setProductPage(Math.max(1, productPage - 1))}
+                disabled={productPage === 1}
+                className="px-3 py-1 bg-[#18181C] border border-[#1F1F24] rounded text-sm disabled:opacity-50"
+              >Anterior</button>
+              <span className="px-3 py-1 text-sm bg-[#1F1F24] rounded">{productPage} / {totalProductPages}</span>
+              <button 
+                onClick={() => setProductPage(Math.min(totalProductPages, productPage + 1))}
+                disabled={productPage === totalProductPages}
+                className="px-3 py-1 bg-[#18181C] border border-[#1F1F24] rounded text-sm disabled:opacity-50"
+              >Siguiente</button>
+            </div>
           </div>
         </div>
       )}
 
       {/* Orders Table */}
       {activeTab === 'orders' && (
-        <div className="bg-[#18181C] border border-[#1F1F24] rounded-lg overflow-hidden">
-          <div className="p-4 border-b border-[#1F1F24]">
-            <h2 className="font-bold text-lg">Administración de Órdenes</h2>
+        <div className="bg-[#18181C] border border-[#1F1F24] rounded-lg overflow-hidden flex flex-col min-h-[500px]">
+          <div className="p-4 border-b border-[#1F1F24] flex flex-col sm:flex-row justify-between items-center gap-4">
+            <h2 className="font-bold text-lg">Órdenes (<span className="text-[#E31C25]">{filteredOrders.length}</span>)</h2>
+            <div className="flex gap-4 w-full sm:w-auto">
+              <input 
+                type="text" 
+                placeholder="Buscar por ID, nombre o email..." 
+                className="bg-[#0A0A0C] border border-[#1F1F24] text-white text-sm rounded px-3 py-2 outline-none focus:border-[#E31C25] min-w-[250px]"
+                value={orderSearch}
+                onChange={e => { setOrderSearch(e.target.value); setOrderPage(1); }}
+              />
+              <select 
+                className="bg-[#0A0A0C] border border-[#1F1F24] text-white text-sm rounded px-3 py-2 outline-none focus:border-[#E31C25]"
+                value={orderStatusFilter}
+                onChange={e => { setOrderStatusFilter(e.target.value); setOrderPage(1); }}
+              >
+                <option value="all">Todos los estados</option>
+                <option value="pending">Pago Pendiente</option>
+                <option value="paid">Pagado</option>
+                <option value="shipped">Enviado</option>
+                <option value="delivered">Entregado</option>
+                <option value="cancelled">Cancelado</option>
+              </select>
+            </div>
           </div>
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto flex-1">
             <table className="w-full text-left text-sm text-gray-400">
               <thead className="bg-[#0A0A0C] text-xs uppercase">
                 <tr>
@@ -249,12 +373,12 @@ export default function AdminDashboardPage() {
                 </tr>
               </thead>
               <tbody>
-                {orders.length === 0 ? (
+                {paginatedOrders.length === 0 ? (
                   <tr>
-                    <td colSpan={6} className="px-6 py-8 text-center text-gray-500">No hay órdenes registradas.</td>
+                    <td colSpan={6} className="px-6 py-8 text-center text-gray-500">No hay órdenes para mostrar.</td>
                   </tr>
                 ) : (
-                  orders.map(o => (
+                  paginatedOrders.map(o => (
                     <tr key={o.id} className="border-b border-[#1F1F24] hover:bg-[#1F1F24]/50">
                       <td className="px-6 py-4 text-white font-mono">#{o.id}</td>
                       <td className="px-6 py-4">
@@ -290,38 +414,47 @@ export default function AdminDashboardPage() {
               </tbody>
             </table>
           </div>
+          <div className="p-4 border-t border-[#1F1F24] flex justify-between items-center bg-[#0A0A0C]">
+            <span className="text-gray-500 text-sm">Mostrando {paginatedOrders.length} de {filteredOrders.length}</span>
+            <div className="flex gap-2">
+              <button 
+                onClick={() => setOrderPage(Math.max(1, orderPage - 1))}
+                disabled={orderPage === 1}
+                className="px-3 py-1 bg-[#18181C] border border-[#1F1F24] rounded text-sm disabled:opacity-50"
+              >Anterior</button>
+              <span className="px-3 py-1 text-sm bg-[#1F1F24] rounded">{orderPage} / {totalOrderPages}</span>
+              <button 
+                onClick={() => setOrderPage(Math.min(totalOrderPages, orderPage + 1))}
+                disabled={orderPage === totalOrderPages}
+                className="px-3 py-1 bg-[#18181C] border border-[#1F1F24] rounded text-sm disabled:opacity-50"
+              >Siguiente</button>
+            </div>
+          </div>
         </div>
       )}
 
       {/* Users Table */}
       {activeTab === 'users' && (
-        <div className="bg-[#18181C] border border-[#1F1F24] rounded-lg overflow-hidden">
-          <div className="p-4 border-b border-[#1F1F24] flex justify-between items-center">
-            <h2 className="font-bold text-lg">Gestión de Usuarios</h2>
-            <button 
-              onClick={() => { setEditingUser(null); setUserModalOpen(true); }}
-              className="bg-[#E31C25] text-white px-4 py-2 rounded text-sm font-bold flex items-center gap-2 hover:bg-red-700 transition"
-            >
-              <Plus size={16} /> Añadir Usuario
-            </button>
+        <div className="bg-[#18181C] border border-[#1F1F24] rounded-lg overflow-hidden flex flex-col min-h-[500px]">
+          <div className="p-4 border-b border-[#1F1F24] flex flex-col sm:flex-row justify-between items-center gap-4">
+            <h2 className="font-bold text-lg">{userFilter === 'customers' ? `Gestión de Clientes (${filteredUsers.length})` : `Gestión de Staff (${filteredUsers.length})`}</h2>
+            <div className="flex gap-4 w-full sm:w-auto">
+              <input 
+                type="text" 
+                placeholder="Buscar por nombre, email o ID..." 
+                className="bg-[#0A0A0C] border border-[#1F1F24] text-white text-sm rounded px-3 py-2 outline-none focus:border-[#E31C25] min-w-[250px]"
+                value={userSearchText}
+                onChange={e => { setUserSearchText(e.target.value); setUserPage(1); }}
+              />
+              <button 
+                onClick={() => { setEditingUser(null); setUserModalOpen(true); }}
+                className="bg-[#E31C25] text-white px-4 py-2 rounded text-sm font-bold flex items-center gap-2 hover:bg-red-700 transition"
+              >
+                <Plus size={16} /> Añadir {userFilter === 'customers' ? 'Cliente' : 'Usuario Staff'}
+              </button>
+            </div>
           </div>
-          <div className="p-4 bg-[#0A0A0C] border-b border-[#1F1F24]">
-             <div className="flex gap-2 text-sm font-bold">
-                <button
-                   onClick={() => setUserFilter('all')}
-                   className={`px-3 py-1 rounded transition-colors ${userFilter === 'all' ? 'bg-[#1F1F24] text-white' : 'text-gray-500 hover:text-white'}`}
-                >Todos</button>
-                <button
-                   onClick={() => setUserFilter('staff')}
-                   className={`px-3 py-1 rounded transition-colors ${userFilter === 'staff' ? 'bg-[#1F1F24] text-white' : 'text-gray-500 hover:text-white'}`}
-                >Staff (Admins/Ejecutivos)</button>
-                <button
-                   onClick={() => setUserFilter('customers')}
-                   className={`px-3 py-1 rounded transition-colors ${userFilter === 'customers' ? 'bg-[#1F1F24] text-white' : 'text-gray-500 hover:text-white'}`}
-                >Clientes</button>
-             </div>
-          </div>
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto flex-1">
             <table className="w-full text-left text-sm text-gray-400">
               <thead className="bg-[#0A0A0C] text-xs uppercase">
                 <tr>
@@ -334,37 +467,59 @@ export default function AdminDashboardPage() {
                 </tr>
               </thead>
               <tbody>
-                {users.filter(u => userFilter === 'all' || (userFilter === 'staff' && (u.role === 'admin' || u.role === 'ejecutivo')) || (userFilter === 'customers' && u.role === 'customer')).map(u => (
-                  <tr key={u.id} className="border-b border-[#1F1F24] hover:bg-[#1F1F24]/50">
-                    <td className="px-6 py-4 font-mono text-xs">{u.id}</td>
-                    <td className="px-6 py-4 text-white">
-                      <div className="flex items-center gap-2">
-                        <div className="w-6 h-6 rounded-full bg-gray-700 flex items-center justify-center text-xs font-bold text-white uppercase">{u.name.charAt(0)}</div>
-                        {u.name}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4">{u.email}</td>
-                    <td className="px-6 py-4">
-                      <span className={`px-2 py-1 rounded text-xs font-bold ${u.role === 'admin' ? 'bg-red-500/20 text-red-500' : u.role === 'ejecutivo' ? 'bg-purple-500/20 text-purple-500' : 'bg-gray-700 text-gray-300'}`}>
-                        {u.role.toUpperCase()}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 text-xs">{new Date(u.created_at).toLocaleDateString('es-CL')}</td>
-                    <td className="px-6 py-4 text-right flex justify-end gap-3">
-                      <button 
-                        onClick={() => { setEditingUser(u); setUserModalOpen(true); }}
-                        className="text-blue-400 hover:text-blue-300 transition"
-                      >
-                        <Edit size={18} />
-                      </button>
-                      <button onClick={() => handleDeleteUser(u.id)} className="text-[#E31C25] hover:text-red-400 transition">
-                        <Trash2 size={18} />
-                      </button>
-                    </td>
+                {paginatedUsers.length === 0 ? (
+                  <tr>
+                    <td colSpan={6} className="px-6 py-8 text-center text-gray-500">No se encontraron usuarios.</td>
                   </tr>
-                ))}
+                ) : (
+                  paginatedUsers.map((u: any) => (
+                    <tr key={u.id} className="border-b border-[#1F1F24] hover:bg-[#1F1F24]/50">
+                      <td className="px-6 py-4 font-mono text-xs">{u.id}</td>
+                      <td className="px-6 py-4 text-white">
+                        <div className="flex items-center gap-2">
+                          <div className="w-6 h-6 rounded-full bg-gray-700 flex items-center justify-center text-xs font-bold text-white uppercase">{u.name.charAt(0)}</div>
+                          {u.name}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4">{u.email}</td>
+                      <td className="px-6 py-4">
+                        <span className={`px-2 py-1 rounded text-xs font-bold ${u.role === 'admin' ? 'bg-red-500/20 text-red-500' : u.role === 'ejecutivo' ? 'bg-purple-500/20 text-purple-500' : 'bg-gray-700 text-gray-300'}`}>
+                          {u.role.toUpperCase()}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 text-xs">{new Date(u.created_at).toLocaleDateString('es-CL')}</td>
+                      <td className="px-6 py-4 text-right flex justify-end gap-3">
+                        <button 
+                          onClick={() => { setEditingUser(u); setUserModalOpen(true); }}
+                          className="text-blue-400 hover:text-blue-300 transition"
+                        >
+                          <Edit size={18} />
+                        </button>
+                        <button onClick={() => handleDeleteUser(u.id)} className="text-[#E31C25] hover:text-red-400 transition">
+                          <Trash2 size={18} />
+                        </button>
+                      </td>
+                    </tr>
+                  ))
+                )}
               </tbody>
             </table>
+          </div>
+          <div className="p-4 border-t border-[#1F1F24] flex justify-between items-center bg-[#0A0A0C]">
+            <span className="text-gray-500 text-sm">Mostrando {paginatedUsers.length} de {filteredUsers.length}</span>
+            <div className="flex gap-2">
+              <button 
+                onClick={() => setUserPage(Math.max(1, userPage - 1))}
+                disabled={userPage === 1}
+                className="px-3 py-1 bg-[#18181C] border border-[#1F1F24] rounded text-sm disabled:opacity-50"
+              >Anterior</button>
+              <span className="px-3 py-1 text-sm bg-[#1F1F24] rounded">{userPage} / {totalUserPages}</span>
+              <button 
+                onClick={() => setUserPage(Math.min(totalUserPages, userPage + 1))}
+                disabled={userPage === totalUserPages}
+                className="px-3 py-1 bg-[#18181C] border border-[#1F1F24] rounded text-sm disabled:opacity-50"
+              >Siguiente</button>
+            </div>
           </div>
         </div>
       )}
@@ -485,6 +640,10 @@ export default function AdminDashboardPage() {
                   <input name="sku" defaultValue={editingProduct?.sku} required className="w-full bg-[#0A0A0C] border border-[#1F1F24] p-2 rounded text-white outline-none focus:border-[#E31C25] font-mono" />
                 </div>
                 <div>
+                  <label className="block text-xs uppercase text-gray-500 font-bold mb-1">MPN (Número de Parte)</label>
+                  <input name="mpn" defaultValue={editingProduct?.mpn || ''} className="w-full bg-[#0A0A0C] border border-[#1F1F24] p-2 rounded text-white outline-none focus:border-[#E31C25] font-mono" placeholder="Opcional" />
+                </div>
+                <div>
                   <label className="block text-xs uppercase text-gray-500 font-bold mb-1">Precio</label>
                   <input name="price" type="number" defaultValue={editingProduct?.price || 0} required className="w-full bg-[#0A0A0C] border border-[#1F1F24] p-2 rounded text-white outline-none focus:border-[#E31C25]" />
                 </div>
@@ -499,6 +658,34 @@ export default function AdminDashboardPage() {
                 <div className="col-span-2">
                   <label className="block text-xs uppercase text-gray-500 font-bold mb-1">URL de Imagen</label>
                   <input name="image" defaultValue={editingProduct?.image || 'https://images.unsplash.com/photo-1599905973801-1b913e2fcece?auto=format&fit=crop&w=400&q=80'} className="w-full bg-[#0A0A0C] border border-[#1F1F24] p-2 rounded text-white outline-none focus:border-[#E31C25]" />
+                </div>
+
+                <div className="col-span-2">
+                  <label className="block text-xs uppercase text-gray-500 font-bold mb-1">Descripción Técnica</label>
+                  <textarea name="description" rows={3} defaultValue={editingProduct?.description || ''} className="w-full bg-[#0A0A0C] border border-[#1F1F24] p-2 rounded text-white outline-none focus:border-[#E31C25] resize-none" placeholder="Ingresa la descripción del producto..." />
+                </div>
+                
+                <div className="col-span-2 flex flex-wrap gap-6 items-center mt-2 p-4 bg-[#0A0A0C] border border-[#1F1F24] rounded-lg">
+                  <label className="flex items-center gap-2 text-sm text-gray-300 cursor-pointer">
+                    <input type="checkbox" name="is_featured" value="1" defaultChecked={editingProduct?.is_featured} className="accent-[#E31C25] w-4 h-4 cursor-pointer" />
+                    Destacado (Home)
+                  </label>
+                  <label className="flex items-center gap-2 text-sm text-gray-300 cursor-pointer">
+                    <input type="checkbox" name="is_offer" value="1" defaultChecked={editingProduct?.is_offer} className="accent-[#E31C25] w-4 h-4 cursor-pointer" onChange={(e) => {
+                      const offerInput = document.getElementById('offer_price_input');
+                      if (offerInput) offerInput.style.display = e.target.checked ? 'block' : 'none';
+                    }}/>
+                    En Oferta
+                  </label>
+                  <label className="flex items-center gap-2 text-sm text-gray-300 cursor-pointer">
+                    <input type="checkbox" name="is_new" value="1" defaultChecked={editingProduct?.is_new} className="accent-[#E31C25] w-4 h-4 cursor-pointer" />
+                    Recién Llegado
+                  </label>
+                  
+                  <div id="offer_price_input" style={{ display: editingProduct?.is_offer ? 'block' : 'none' }} className="w-full mt-2">
+                     <label className="block text-xs uppercase text-gray-500 font-bold mb-1">Precio de Oferta</label>
+                     <input name="offer_price" type="number" defaultValue={editingProduct?.offer_price || ''} className="w-full bg-[#18181C] border border-[#1F1F24] p-2 rounded text-white outline-none focus:border-[#E31C25]" placeholder="Ej: 15000" />
+                  </div>
                 </div>
                 {/* Normally we'd use select for categories/brands, keeping it simple as numbers for now or leaving blank will hit constraints maybe, let's omit unless strictly wanted */}
                 <input name="category_id" type="hidden" value="1" />

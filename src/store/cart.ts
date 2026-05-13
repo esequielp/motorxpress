@@ -2,13 +2,15 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
 export interface CartItem {
-  id:        string;
-  sku:       string;
-  name:      string;
-  price:     number;
-  quantity:  number;
-  image?:    string;
-  maxStock:  number;
+  id:          string;
+  sku:         string;
+  name:        string;
+  price:       number;
+  quantity:    number;
+  image?:      string;
+  maxStock:    number;
+  is_offer?:   number;
+  offer_price?: number;
 }
 
 interface CartStore {
@@ -61,7 +63,7 @@ export const useCart = create<CartStore>()(
       clearCart: () => set({ items: [] }),
 
       total: () => get().items.reduce(
-        (acc, i) => acc + i.price * i.quantity, 0
+        (acc, i) => acc + (i.is_offer === 1 && i.offer_price ? i.offer_price : i.price) * i.quantity, 0
       ),
 
       itemCount: () => get().items.reduce(

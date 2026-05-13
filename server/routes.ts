@@ -81,15 +81,33 @@ router.get('/products', (req, res) => {
   }
 });
 
+// Get single product
+router.get('/products/:id', (req, res) => {
+  try {
+    const product = db.prepare(`
+      SELECT p.*, c.name as category, b.name as brandName 
+      FROM products p
+      LEFT JOIN categories c ON p.category_id = c.id
+      LEFT JOIN brands b ON p.brand_id = b.id
+      WHERE p.id = ?
+    `).get(req.params.id);
+    if (!product) return res.status(404).json({ error: 'Product not found' });
+    res.json(product);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Failed to fetch product' });
+  }
+});
+
 // Admin: add product
 router.post('/products', (req, res) => {
-  const { sku, name, vehicle, price, stock, maxStock, image, category_id, brand_id } = req.body;
+  const { sku, mpn, name, vehicle, price, stock, maxStock, image, category_id, brand_id, is_featured, is_offer, is_new, offer_price, description } = req.body;
   try {
     const stmt = db.prepare(`
-      INSERT INTO products (sku, name, vehicle, price, stock, maxStock, image, category_id, brand_id)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+      INSERT INTO products (sku, mpn, name, vehicle, price, stock, maxStock, image, category_id, brand_id, is_featured, is_offer, is_new, offer_price, description)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `);
-    const info = stmt.run(sku, name, vehicle, price, stock, maxStock || stock, image, category_id, brand_id);
+    const info = stmt.run(sku, mpn || null, name, vehicle, price, stock, maxStock || stock, image, category_id, brand_id, is_featured ? 1 : 0, is_offer ? 1 : 0, is_new ? 1 : 0, offer_price || null, description || null);
     res.json({ success: true, id: info.lastInsertRowid });
   } catch (err) {
     console.error(err);
@@ -100,14 +118,14 @@ router.post('/products', (req, res) => {
 // Admin: update product
 router.put('/products/:id', (req, res) => {
   const { id } = req.params;
-  const { sku, name, vehicle, price, stock, maxStock, image, category_id, brand_id } = req.body;
+  const { sku, mpn, name, vehicle, price, stock, maxStock, image, category_id, brand_id, is_featured, is_offer, is_new, offer_price, description } = req.body;
   try {
     const stmt = db.prepare(`
       UPDATE products 
-      SET sku = ?, name = ?, vehicle = ?, price = ?, stock = ?, maxStock = ?, image = ?, category_id = ?, brand_id = ?, updated_at = CURRENT_TIMESTAMP
+      SET sku = ?, mpn = ?, name = ?, vehicle = ?, price = ?, stock = ?, maxStock = ?, image = ?, category_id = ?, brand_id = ?, is_featured = ?, is_offer = ?, is_new = ?, offer_price = ?, description = ?, updated_at = CURRENT_TIMESTAMP
       WHERE id = ?
     `);
-    stmt.run(sku, name, vehicle, price, stock, maxStock, image, category_id, brand_id, id);
+    stmt.run(sku, mpn || null, name, vehicle, price, stock, maxStock, image, category_id, brand_id, is_featured ? 1 : 0, is_offer ? 1 : 0, is_new ? 1 : 0, offer_price || null, description || null, id);
     res.json({ success: true });
   } catch (err) {
     console.error(err);
@@ -252,3 +270,22 @@ router.put('/settings', (req, res) => {
 });
 
 export default router;
+
+// =====================================
+// NEWSLETTER
+// =====================================
+
+router.post('/newsletter', (req, res) => {
+  const { email } = req.body;
+  if (!email) return res.status(400).json({ error: 'Email is required' });
+  try {
+    db.prepare('INSERT INTO newsletters (email) VALUES (?)').run(email);
+    res.json({ success: true, message: '¡Gracias por suscribirte a nuestro boletín!' });
+  } catch (err: any) {
+    if (err.code === 'SQLITE_CONSTRAINT_UNIQUE' || err.message.includes('UNIQUE')) {
+       return res.status(400).json({ error: 'Este correo ya está suscrito.' });
+    }
+    res.status(500).json({ error: 'Fallo al suscribir' });
+  }
+});
+
