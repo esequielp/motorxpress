@@ -3,6 +3,7 @@ import { useCart } from '../../store/cart';
 import { formatCLP } from '../../lib/utils/formatCLP';
 import { Link, useNavigate } from 'react-router-dom';
 import { cn } from '../../lib/utils/cn';
+import { getProductThumbnail } from '../../lib/utils/image';
 
 export default function CartDrawer() {
   const { items, isOpen, setIsOpen, updateQty, total, removeItem } = useCart();
@@ -46,7 +47,7 @@ export default function CartDrawer() {
             items.map(item => (
               <div key={item.sku} className="flex gap-4 p-3 bg-[#1F1F24] rounded-lg">
                 <div className="w-20 h-20 bg-black rounded overflow-hidden flex-shrink-0">
-                  <img src={item.image || 'https://images.unsplash.com/photo-1590748152599-2a2ec96a40a4?auto=format&fit=crop&w=400&q=80'} alt={item.name} className="w-full h-full object-cover" />
+                  <img src={getProductThumbnail(item.image)} alt={item.name} className="w-full h-full object-cover" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex justify-between items-start">

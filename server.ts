@@ -1,6 +1,8 @@
 import express from 'express';
 import { createServer as createViteServer } from 'vite';
 import path from 'path';
+import fs from 'fs';
+import multer from 'multer';
 import { GoogleGenAI } from '@google/genai';
 import cors from 'cors';
 import { initDb } from './server/db';
@@ -12,6 +14,26 @@ async function startServer() {
 
   app.use(cors());
   app.use(express.json());
+
+  // Set up uploads directory and multer
+  const uploadsDir = path.join(process.cwd(), 'uploads');
+  if (!fs.existsSync(uploadsDir)) {
+    fs.mkdirSync(uploadsDir);
+  }
+  
+  const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+      cb(null, uploadsDir)
+    },
+    filename: function (req, file, cb) {
+      const ext = path.extname(file.originalname);
+      const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+      cb(null, file.fieldname + '-' + uniqueSuffix + ext)
+    }
+  });
+  const upload = multer({ storage: storage });
+
+  app.use('/uploads', express.static(uploadsDir));
 
   // Initialize Database
   try {
@@ -25,6 +47,14 @@ async function startServer() {
   app.use('/api', apiRoutes);
 
   // Remaining specialized API Routes
+  app.post('/api/upload', upload.single('image'), (req, res) => {
+    if (!req.file) {
+      return res.status(400).json({ error: 'No file uploaded' });
+    }
+    const fileUrl = `/uploads/${req.file.filename}`;
+    res.json({ url: fileUrl });
+  });
+
   app.post('/api/chat', async (req, res) => {
     try {
       const { messages } = req.body;

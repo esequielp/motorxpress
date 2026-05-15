@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import ProductCard from '../components/product/ProductCard';
 import { ArrowRight, Mail } from 'lucide-react';
 import { Link } from 'react-router-dom';

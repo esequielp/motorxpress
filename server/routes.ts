@@ -174,7 +174,7 @@ router.get('/orders', (req, res) => {
 // Get single order with items
 router.get('/orders/:id', (req, res) => {
   try {
-    const order = db.prepare('SELECT * FROM orders WHERE id = ?').get(req.params.id);
+    const order = db.prepare('SELECT * FROM orders WHERE id = ?').get(req.params.id) as any;
     if (!order) return res.status(404).json({ error: 'Order not found' });
     const items = db.prepare('SELECT * FROM order_items WHERE order_id = ?').all(req.params.id);
     res.json({ ...order, items });

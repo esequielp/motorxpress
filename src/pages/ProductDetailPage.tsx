@@ -1,7 +1,8 @@
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useCart } from '../store/cart';
 import { formatCLP } from '../lib/utils/formatCLP';
+import { getProductImages, getProductThumbnail } from '../lib/utils/image';
 import { ShoppingCart, ShieldCheck, Zap, Truck, CheckCircle2, X, ChevronLeft, ChevronRight, Maximize2 } from 'lucide-react';
 
 export default function ProductDetailPage() {
@@ -13,12 +14,10 @@ export default function ProductDetailPage() {
   const [activeImage, setActiveImage] = useState(0);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const images = product ? [
-    product.image,
-    'https://images.unsplash.com/photo-1486262715619-67b85e0b08d3?auto=format&fit=crop&w=800&q=80',
-    'https://images.unsplash.com/photo-1619642751034-765df25f0e9b?auto=format&fit=crop&w=800&q=80',
-    'https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?auto=format&fit=crop&w=800&q=80'
-  ] : [];
+  const productImages = product ? getProductImages(product.image) : [];
+  const images = productImages.length > 0 ? productImages : [
+    'https://images.unsplash.com/photo-1590748152599-2a2ec96a40a4?auto=format&fit=crop&w=800&q=80'
+  ];
 
   useEffect(() => {
     fetch(`/api/products/${id}`)

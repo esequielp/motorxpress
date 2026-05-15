@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { MessageSquare, X, Send, User, Bot, Loader2 } from 'lucide-react';
 import { cn } from '../../lib/utils/cn';
+import { useLocation } from 'react-router-dom';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -15,6 +16,7 @@ export default function SupportChat() {
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const location = useLocation();
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -56,6 +58,10 @@ export default function SupportChat() {
       setIsLoading(false);
     }
   };
+
+  if (location.pathname.startsWith('/admin')) {
+    return null;
+  }
 
   return (
     <>

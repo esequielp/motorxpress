@@ -1,6 +1,6 @@
 import { ShoppingCart, Search, User, Menu, X, ArrowRight } from 'lucide-react';
 import { useCart } from '../../store/cart';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import CartDrawer from '../cart/CartDrawer';
 import { useState, useRef, useEffect } from 'react';
 
@@ -20,6 +20,9 @@ export default function Header() {
   const [showDropdown, setShowDropdown] = useState(false);
   const searchRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
+  const location = useLocation();
+
+  const isAdminRoute = location.pathname.startsWith('/admin');
 
   useEffect(() => {
     // Simulate API search
@@ -117,17 +120,19 @@ export default function Header() {
             <Link to="/cuenta" className="text-gray-300 hover:text-white transition-colors hidden md:block" title="Mi Cuenta">
               <User className="w-6 h-6" />
             </Link>
-            <button 
-              className="relative text-gray-300 hover:text-white transition-colors"
-              onClick={() => setIsOpen(true)}
-            >
-              <ShoppingCart className="w-6 h-6" />
-              {count > 0 && (
-                <span className="absolute -top-2 -right-2 bg-[#E31C25] text-white text-xs font-bold w-5 h-5 flex items-center justify-center rounded-full">
-                  {count}
-                </span>
-              )}
-            </button>
+            {!isAdminRoute && (
+              <button 
+                className="relative text-gray-300 hover:text-white transition-colors"
+                onClick={() => setIsOpen(true)}
+              >
+                <ShoppingCart className="w-6 h-6" />
+                {count > 0 && (
+                  <span className="absolute -top-2 -right-2 bg-[#E31C25] text-white text-xs font-bold w-5 h-5 flex items-center justify-center rounded-full">
+                    {count}
+                  </span>
+                )}
+              </button>
+            )}
           </div>
         </div>
 

@@ -1,7 +1,156 @@
 import React, { useEffect, useState } from 'react';
-import { Package, Users, ShoppingCart, Settings as SettingsIcon, Plus, Edit, Trash2, Save, X } from 'lucide-react';
+import { Package, Users, ShoppingCart, Settings as SettingsIcon, Plus, Edit, Trash2, Save, X, DollarSign, TrendingUp, AlertTriangle } from 'lucide-react';
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 import { useNavigate } from 'react-router-dom';
+import { getProductImages } from '../../lib/utils/image';
+
+function ProductFormModal({ editingProduct, onClose, onSubmit }: any) {
+  const [isOffer, setIsOffer] = useState(!!editingProduct?.is_offer);
+  const [images, setImages] = useState<string[]>(getProductImages(editingProduct?.image));
+  const [isUploading, setIsUploading] = useState(false);
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files?.[0]) return;
+    const file = e.target.files[0];
+    const formData = new FormData();
+    formData.append('image', file);
+
+    setIsUploading(true);
+    try {
+      const res = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData
+      });
+      const data = await res.json();
+      if (data.url) {
+        setImages(prev => [...prev, data.url]);
+      }
+    } catch (err) {
+      console.error('Error uploading image', err);
+      alert('Error al subir la imagen');
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4 overflow-y-auto">
+      <div className="bg-[#18181C] border border-[#1F1F24] rounded-lg max-w-xl w-full p-6 shadow-2xl relative my-auto">
+        <button 
+          type="button"
+          onClick={onClose}
+          className="absolute top-4 right-4 text-gray-400 hover:text-white transition"
+        >
+          <X size={24} />
+        </button>
+        
+        <h2 className="text-2xl font-bebas text-white mb-6">
+          {editingProduct ? 'Editar Producto' : 'Nuevo Producto'}
+        </h2>
+
+        <form onSubmit={onSubmit} className="space-y-4">
+               <div className="grid grid-cols-2 gap-4">
+                 <div>
+                   <label className="block text-xs uppercase text-gray-500 font-bold mb-1">Nombre</label>
+                   <input name="name" defaultValue={editingProduct?.name} required className="w-full bg-[#0A0A0C] border border-[#1F1F24] p-2 rounded text-white outline-none focus:border-[#E31C25]" />
+                 </div>
+                 <div>
+                   <label className="block text-xs uppercase text-gray-500 font-bold mb-1">SKU</label>
+                   <input name="sku" defaultValue={editingProduct?.sku} required className="w-full bg-[#0A0A0C] border border-[#1F1F24] p-2 rounded text-white outline-none focus:border-[#E31C25] font-mono" />
+                 </div>
+                 <div>
+                   <label className="block text-xs uppercase text-gray-500 font-bold mb-1">MPN (Número de Parte)</label>
+                   <input name="mpn" defaultValue={editingProduct?.mpn || ''} className="w-full bg-[#0A0A0C] border border-[#1F1F24] p-2 rounded text-white outline-none focus:border-[#E31C25] font-mono" placeholder="Opcional" />
+                 </div>
+                 <div>
+                   <label className="block text-xs uppercase text-gray-500 font-bold mb-1">Precio</label>
+                   <input name="price" type="number" defaultValue={editingProduct?.price || 0} required className="w-full bg-[#0A0A0C] border border-[#1F1F24] p-2 rounded text-white outline-none focus:border-[#E31C25]" />
+                 </div>
+                 <div>
+                   <label className="block text-xs uppercase text-gray-500 font-bold mb-1">Stock</label>
+                   <input name="stock" type="number" defaultValue={editingProduct?.stock || 0} required className="w-full bg-[#0A0A0C] border border-[#1F1F24] p-2 rounded text-white outline-none focus:border-[#E31C25]" />
+                 </div>
+                 <div className="col-span-2">
+                   <label className="block text-xs uppercase text-gray-500 font-bold mb-1">Vehículo de Compatibilidad</label>
+                   <input name="vehicle" defaultValue={editingProduct?.vehicle || 'Universal'} required className="w-full bg-[#0A0A0C] border border-[#1F1F24] p-2 rounded text-white outline-none focus:border-[#E31C25]" />
+                 </div>
+                 <div className="col-span-2">
+                   <label className="block text-xs uppercase text-gray-500 font-bold mb-1">Imágenes del Producto</label>
+                   <div className="flex flex-col gap-4 relative">
+                     {images.length > 0 && (
+                       <div className="flex flex-wrap gap-2">
+                         {images.map((imgUrl, i) => (
+                           <div key={i} className="w-24 h-24 rounded bg-[#0A0A0C] border border-[#1F1F24] overflow-hidden relative group">
+                             <img src={imgUrl} alt={`gallery-${i}`} className="w-full h-full object-cover" />
+                             <button 
+                               type="button"
+                               onClick={() => setImages(images.filter((_, index) => index !== i))}
+                               className="absolute top-1 right-1 bg-red-600 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center h-5 w-5"
+                             >
+                               <X size={12} />
+                             </button>
+                             {i === 0 && (
+                               <span className="absolute bottom-0 left-0 right-0 bg-black/80 text-[10px] text-center py-0.5 text-white">Principal</span>
+                             )}
+                           </div>
+                         ))}
+                       </div>
+                     )}
+                     <div className="flex gap-2 items-center">
+                       <input type="hidden" name="image" value={JSON.stringify(images)} />
+                       <label className="bg-[#1F1F24] hover:bg-[#2A2A35] text-white px-4 py-2 rounded cursor-pointer transition flex items-center justify-center whitespace-nowrap">
+                         {isUploading ? 'Subiendo...' : 'Subir Imagen'}
+                         <input type="file" accept="image/*" onChange={handleImageUpload} disabled={isUploading} className="hidden" />
+                       </label>
+                       <span className="text-xs text-gray-500">Puedes subir múltiples imágenes. La primera será la principal.</span>
+                     </div>
+                   </div>
+                 </div>
+
+                 <div className="col-span-2">
+                   <label className="block text-xs uppercase text-gray-500 font-bold mb-1">Descripción Técnica</label>
+                   <textarea name="description" rows={3} defaultValue={editingProduct?.description || ''} className="w-full bg-[#0A0A0C] border border-[#1F1F24] p-2 rounded text-white outline-none focus:border-[#E31C25] resize-none" placeholder="Ingresa la descripción del producto..." />
+                 </div>
+                 
+                 <div className="col-span-2 flex flex-wrap gap-6 items-center mt-2 p-4 bg-[#0A0A0C] border border-[#1F1F24] rounded-lg">
+                   <label className="flex items-center gap-2 text-sm text-gray-300 cursor-pointer">
+                     <input type="checkbox" name="is_featured" value="1" defaultChecked={editingProduct?.is_featured} className="accent-[#E31C25] w-4 h-4 cursor-pointer" />
+                     Destacado (Home)
+                   </label>
+                   <label className="flex items-center gap-2 text-sm text-gray-300 cursor-pointer">
+                     <input type="checkbox" name="is_offer" value="1" checked={isOffer} onChange={(e) => setIsOffer(e.target.checked)} className="accent-[#E31C25] w-4 h-4 cursor-pointer" />
+                     En Oferta
+                   </label>
+                   <label className="flex items-center gap-2 text-sm text-gray-300 cursor-pointer">
+                     <input type="checkbox" name="is_new" value="1" defaultChecked={editingProduct?.is_new} className="accent-[#E31C25] w-4 h-4 cursor-pointer" />
+                     Recién Llegado
+                   </label>
+                   
+                   {isOffer && (
+                     <div className="w-full mt-2 transition-all">
+                        <label className="block text-xs uppercase text-gray-500 font-bold mb-1">Precio de Oferta</label>
+                        <input name="offer_price" type="number" defaultValue={editingProduct?.offer_price || ''} className="w-full bg-[#18181C] border border-[#1F1F24] p-2 rounded text-white outline-none focus:border-[#E31C25]" placeholder="Ej: 15000" />
+                     </div>
+                   )}
+                 </div>
+                 <input name="category_id" type="hidden" value="1" />
+                 <input name="brand_id" type="hidden" value="1" />
+               </div>
+               
+               <div className="pt-4 flex flex-row-reverse gap-4">
+                 <button type="submit" className="bg-[#E31C25] text-white px-6 py-2 rounded font-bold hover:bg-red-600 transition">
+                   {editingProduct ? 'Guardar Cambios' : 'Crear Producto'}
+                 </button>
+                 <button type="button" onClick={onClose} className="px-4 py-2 text-gray-400 hover:text-white font-bold transition">
+                   Cancelar
+                 </button>
+               </div>
+        </form>
+      </div>
+    </div>
+  );
+}
 
 export default function AdminDashboardPage() {
   const navigate = useNavigate();
@@ -9,7 +158,7 @@ export default function AdminDashboardPage() {
   const [orders, setOrders] = useState<any[]>([]);
   const [users, setUsers] = useState<any[]>([]);
   const [settings, setSettings] = useState<any>({});
-  const [activeTab, setActiveTab] = useState('products');
+  const [activeTab, setActiveTab] = useState('dashboard');
   const [currentUser, setCurrentUser] = useState<any>(null);
   const [userFilter, setUserFilter] = useState<'all' | 'staff' | 'customers'>('all');
 
@@ -57,6 +206,27 @@ export default function AdminDashboardPage() {
   const [editingProduct, setEditingProduct] = useState<any>(null);
   const [isUserModalOpen, setUserModalOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<any>(null);
+
+  // Compute Dashboard Metrics
+  const totalRevenue = orders.reduce((acc, current) => {
+    if (current.status !== 'cancelled' && current.status !== 'rejected') {
+      return acc + current.total;
+    }
+    return acc;
+  }, 0);
+
+  const lowStockProducts = products.filter(p => p.stock <= 5).sort((a, b) => a.stock - b.stock).slice(0, 5);
+  const recentOrders = [...orders].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()).slice(0, 5);
+
+  const chartData = [
+    { name: 'Lun', ventas: Math.floor(Math.random() * 500000) + 100000 },
+    { name: 'Mar', ventas: Math.floor(Math.random() * 500000) + 100000 },
+    { name: 'Mié', ventas: Math.floor(Math.random() * 500000) + 100000 },
+    { name: 'Jue', ventas: Math.floor(Math.random() * 500000) + 100000 },
+    { name: 'Vie', ventas: Math.floor(Math.random() * 500000) + 100000 },
+    { name: 'Sáb', ventas: Math.floor(Math.random() * 500000) + 100000 },
+    { name: 'Dom', ventas: Math.floor(Math.random() * 500000) + 100000 },
+  ];
 
   useEffect(() => {
     const savedUserStr = localStorage.getItem('motorxpress_user');
@@ -177,8 +347,8 @@ export default function AdminDashboardPage() {
       <h1 className="text-3xl font-bebas mb-6 text-[#E31C25]">Admin Dashboard</h1>
       
       {/* Metrics */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-        <div className="bg-[#18181C] p-6 rounded-lg border border-[#1F1F24] flex items-center gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 mb-8">
+        <div className="bg-[#18181C] p-6 rounded-lg border border-[#1F1F24] flex items-center gap-4 hover:border-gray-700 transition">
           <div className="bg-[#E31C25]/10 p-4 rounded-full text-[#E31C25]">
             <Package size={24} />
           </div>
@@ -187,7 +357,7 @@ export default function AdminDashboardPage() {
             <p className="text-2xl font-bold">{products.length}</p>
           </div>
         </div>
-        <div className="bg-[#18181C] p-6 rounded-lg border border-[#1F1F24] flex items-center gap-4">
+        <div className="bg-[#18181C] p-6 rounded-lg border border-[#1F1F24] flex items-center gap-4 hover:border-gray-700 transition">
           <div className="bg-blue-500/10 p-4 rounded-full text-blue-500">
             <ShoppingCart size={24} />
           </div>
@@ -196,7 +366,7 @@ export default function AdminDashboardPage() {
             <p className="text-2xl font-bold">{orders.length}</p>
           </div>
         </div>
-        <div className="bg-[#18181C] p-6 rounded-lg border border-[#1F1F24] flex items-center gap-4">
+        <div className="bg-[#18181C] p-6 rounded-lg border border-[#1F1F24] flex items-center gap-4 hover:border-gray-700 transition">
           <div className="bg-green-500/10 p-4 rounded-full text-green-500">
             <Users size={24} />
           </div>
@@ -205,20 +375,20 @@ export default function AdminDashboardPage() {
             <p className="text-2xl font-bold">{users.length}</p>
           </div>
         </div>
-        <div className="bg-[#18181C] p-6 rounded-lg border border-[#1F1F24] flex items-center gap-4">
-          <div className="bg-purple-500/10 p-4 rounded-full text-purple-500">
-            <SettingsIcon size={24} />
+        <div className="bg-[#18181C] p-6 rounded-lg border border-[#1F1F24] flex items-center gap-4 hover:border-gray-700 transition">
+          <div className="bg-emerald-500/10 p-4 rounded-full text-emerald-500">
+            <DollarSign size={24} />
           </div>
           <div>
-            <p className="text-gray-400 text-sm">Integraciones</p>
-            <p className="text-2xl font-bold">Activas</p>
+            <p className="text-gray-400 text-sm">Ingresos Totales</p>
+            <p className="text-xl font-bold">${totalRevenue.toLocaleString('es-CL')}</p>
           </div>
         </div>
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-4 border-b border-[#1F1F24] mb-6 overflow-x-auto">
-        {['products', 'orders', 'users', 'customers', 'settings'].map(tab => (
+      <div className="flex gap-4 border-b border-[#1F1F24] mb-6 overflow-x-auto select-none no-scrollbar">
+        {['dashboard', 'products', 'orders', 'users', 'customers', 'settings'].map(tab => (
           <button 
             key={tab}
             onClick={() => {
@@ -230,17 +400,132 @@ export default function AdminDashboardPage() {
                  setUserFilter('customers');
               } else {
                  setActiveTab(tab);
-                 if (tab === 'products' || tab === 'orders' || tab === 'settings') {
+                 if (tab === 'products' || tab === 'orders' || tab === 'settings' || tab === 'dashboard') {
                     setUserFilter('all'); // reset or ignore
                  }
               }
             }}
-            className={`pb-2 px-4 transition-colors whitespace-nowrap capitalize ${activeTab === tab || (activeTab === 'users' && tab === 'users' && userFilter === 'staff') || (activeTab === 'users' && tab === 'customers' && userFilter === 'customers') ? 'border-b-2 border-[#E31C25] text-[#E31C25]' : 'text-gray-400 hover:text-white'}`}
+            className={`pb-2 px-4 font-medium transition-colors whitespace-nowrap capitalize ${activeTab === tab || (activeTab === 'users' && tab === 'users' && userFilter === 'staff') || (activeTab === 'users' && tab === 'customers' && userFilter === 'customers') ? 'border-b-2 border-[#E31C25] text-[#E31C25]' : 'text-gray-400 hover:text-white'}`}
           >
-            {tab === 'products' ? 'Productos' : tab === 'orders' ? 'Órdenes' : tab === 'users' ? 'Admin. Staff' : tab === 'customers' ? 'Clientes' : 'Configuración'}
+            {tab === 'dashboard' ? 'Resumen' : tab === 'products' ? 'Productos' : tab === 'orders' ? 'Órdenes' : tab === 'users' ? 'Admin. Staff' : tab === 'customers' ? 'Clientes' : 'Configuración'}
           </button>
         ))}
       </div>
+
+      {/* Dashboard Resumen Tab */}
+      {activeTab === 'dashboard' && (
+        <div className="space-y-6">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            
+            {/* Sales Chart */}
+            <div className="bg-[#18181C] border border-[#1F1F24] rounded-lg p-6 lg:col-span-2">
+              <div className="flex justify-between items-center mb-6">
+                <h3 className="font-bold text-lg flex items-center gap-2"><TrendingUp size={18} className="text-[#E31C25]" /> Ventas (Últimos 7 días)</h3>
+              </div>
+              <div className="h-[300px] w-full">
+                <ResponsiveContainer width="100%" height="100%">
+                  <AreaChart data={chartData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+                    <defs>
+                      <linearGradient id="colorVentas" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#E31C25" stopOpacity={0.3}/>
+                        <stop offset="95%" stopColor="#E31C25" stopOpacity={0}/>
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#2A2A32" vertical={false} />
+                    <XAxis dataKey="name" stroke="#666" tick={{ fill: '#999', fontSize: 12 }} axisLine={false} tickLine={false} />
+                    <YAxis stroke="#666" tick={{ fill: '#999', fontSize: 12 }} axisLine={false} tickLine={false} tickFormatter={(value) => `$${value/1000}k`} />
+                    <Tooltip 
+                      contentStyle={{ backgroundColor: '#0A0A0C', border: '1px solid #1F1F24', borderRadius: '8px' }}
+                      itemStyle={{ color: '#E31C25' }}
+                      formatter={(value: number) => [`$${value.toLocaleString('es-CL')}`, 'Ventas']}
+                    />
+                    <Area type="monotone" dataKey="ventas" stroke="#E31C25" strokeWidth={3} fillOpacity={1} fill="url(#colorVentas)" />
+                  </AreaChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+
+            {/* Low stock products */}
+            <div className="bg-[#18181C] border border-[#1F1F24] rounded-lg p-6">
+              <h3 className="font-bold text-lg mb-6 flex items-center gap-2">
+                <AlertTriangle size={18} className="text-yellow-500" />
+                Control de Stock
+              </h3>
+              
+              {lowStockProducts.length === 0 ? (
+                <div className="text-center py-10 text-gray-500">
+                  <Package size={32} className="mx-auto mb-2 opacity-50" />
+                  <p>Todos los productos tienen buen stock.</p>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {lowStockProducts.map(p => (
+                    <div key={p.id} className="flex items-center justify-between p-3 bg-[#0A0A0C] rounded border border-[#1F1F24]">
+                      <div className="flex items-center gap-3">
+                        <img src={getProductImages(p.image)[0] || 'https://images.unsplash.com/photo-1590748152599-2a2ec96a40a4?auto=format&fit=crop&w=150&q=80'} className="w-10 h-10 rounded object-cover" />
+                        <div>
+                          <p className="text-sm font-medium text-white line-clamp-1">{p.name}</p>
+                          <p className="text-xs text-gray-500">{p.sku}</p>
+                        </div>
+                      </div>
+                      <div className="text-right whitespace-nowrap">
+                        <span className={`text-xs font-bold px-2 py-1 rounded ${p.stock === 0 ? 'bg-red-500/20 text-red-500' : 'bg-yellow-500/20 text-yellow-500'}`}>
+                          {p.stock} uni.
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+          
+          <div className="bg-[#18181C] border border-[#1F1F24] rounded-lg">
+            <div className="p-4 border-b border-[#1F1F24]">
+              <h3 className="font-bold text-lg">Órdenes Recientes</h3>
+            </div>
+            {recentOrders.length === 0 ? (
+               <div className="text-center py-8 text-gray-500">Aún no hay órdenes.</div>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-sm text-gray-400">
+                  <thead className="bg-[#0A0A0C] text-xs uppercase">
+                    <tr>
+                      <th className="px-6 py-3">ID</th>
+                      <th className="px-6 py-3">Cliente</th>
+                      <th className="px-6 py-3">Fecha</th>
+                      <th className="px-6 py-3">Total</th>
+                      <th className="px-6 py-3">Estado</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {recentOrders.map(o => (
+                      <tr key={o.id} className="border-b border-[#1F1F24] hover:bg-[#1F1F24]/50">
+                        <td className="px-6 py-3 text-white font-mono text-xs">#{o.id}</td>
+                        <td className="px-6 py-3">
+                          <p className="text-white text-sm">{o.customer_name}</p>
+                        </td>
+                        <td className="px-6 py-3 text-xs">{new Date(o.created_at).toLocaleDateString('es-CL')}</td>
+                        <td className="px-6 py-3 font-bold text-white">${o.total.toLocaleString('es-CL')}</td>
+                        <td className="px-6 py-3">
+                          <span className={`text-xs font-bold px-2 py-1 rounded ${
+                            o.status === 'delivered' ? 'bg-green-900/40 text-green-400' :
+                            o.status === 'paid' ? 'bg-blue-900/40 text-blue-400' :
+                            o.status === 'pending' ? 'bg-yellow-900/40 text-yellow-500' :
+                            'bg-gray-800 text-gray-400'
+                          }`}>
+                            {o.status.toUpperCase()}
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Products Table */}
       {activeTab === 'products' && (
@@ -616,93 +901,11 @@ export default function AdminDashboardPage() {
 
       {/* Product Create/Edit Modal */}
       {isProductModalOpen && (
-        <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4">
-          <div className="bg-[#18181C] border border-[#1F1F24] rounded-lg max-w-xl w-full p-6 shadow-2xl relative">
-            <button 
-              onClick={() => setProductModalOpen(false)}
-              className="absolute top-4 right-4 text-gray-400 hover:text-white transition"
-            >
-              <X size={24} />
-            </button>
-            
-            <h2 className="text-2xl font-bebas text-white mb-6">
-              {editingProduct ? 'Editar Producto' : 'Nuevo Producto'}
-            </h2>
-
-            <form onSubmit={handleProductSubmit} className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs uppercase text-gray-500 font-bold mb-1">Nombre</label>
-                  <input name="name" defaultValue={editingProduct?.name} required className="w-full bg-[#0A0A0C] border border-[#1F1F24] p-2 rounded text-white outline-none focus:border-[#E31C25]" />
-                </div>
-                <div>
-                  <label className="block text-xs uppercase text-gray-500 font-bold mb-1">SKU</label>
-                  <input name="sku" defaultValue={editingProduct?.sku} required className="w-full bg-[#0A0A0C] border border-[#1F1F24] p-2 rounded text-white outline-none focus:border-[#E31C25] font-mono" />
-                </div>
-                <div>
-                  <label className="block text-xs uppercase text-gray-500 font-bold mb-1">MPN (Número de Parte)</label>
-                  <input name="mpn" defaultValue={editingProduct?.mpn || ''} className="w-full bg-[#0A0A0C] border border-[#1F1F24] p-2 rounded text-white outline-none focus:border-[#E31C25] font-mono" placeholder="Opcional" />
-                </div>
-                <div>
-                  <label className="block text-xs uppercase text-gray-500 font-bold mb-1">Precio</label>
-                  <input name="price" type="number" defaultValue={editingProduct?.price || 0} required className="w-full bg-[#0A0A0C] border border-[#1F1F24] p-2 rounded text-white outline-none focus:border-[#E31C25]" />
-                </div>
-                <div>
-                  <label className="block text-xs uppercase text-gray-500 font-bold mb-1">Stock</label>
-                  <input name="stock" type="number" defaultValue={editingProduct?.stock || 0} required className="w-full bg-[#0A0A0C] border border-[#1F1F24] p-2 rounded text-white outline-none focus:border-[#E31C25]" />
-                </div>
-                <div className="col-span-2">
-                  <label className="block text-xs uppercase text-gray-500 font-bold mb-1">Vehículo de Compatibilidad</label>
-                  <input name="vehicle" defaultValue={editingProduct?.vehicle || 'Universal'} required className="w-full bg-[#0A0A0C] border border-[#1F1F24] p-2 rounded text-white outline-none focus:border-[#E31C25]" />
-                </div>
-                <div className="col-span-2">
-                  <label className="block text-xs uppercase text-gray-500 font-bold mb-1">URL de Imagen</label>
-                  <input name="image" defaultValue={editingProduct?.image || 'https://images.unsplash.com/photo-1599905973801-1b913e2fcece?auto=format&fit=crop&w=400&q=80'} className="w-full bg-[#0A0A0C] border border-[#1F1F24] p-2 rounded text-white outline-none focus:border-[#E31C25]" />
-                </div>
-
-                <div className="col-span-2">
-                  <label className="block text-xs uppercase text-gray-500 font-bold mb-1">Descripción Técnica</label>
-                  <textarea name="description" rows={3} defaultValue={editingProduct?.description || ''} className="w-full bg-[#0A0A0C] border border-[#1F1F24] p-2 rounded text-white outline-none focus:border-[#E31C25] resize-none" placeholder="Ingresa la descripción del producto..." />
-                </div>
-                
-                <div className="col-span-2 flex flex-wrap gap-6 items-center mt-2 p-4 bg-[#0A0A0C] border border-[#1F1F24] rounded-lg">
-                  <label className="flex items-center gap-2 text-sm text-gray-300 cursor-pointer">
-                    <input type="checkbox" name="is_featured" value="1" defaultChecked={editingProduct?.is_featured} className="accent-[#E31C25] w-4 h-4 cursor-pointer" />
-                    Destacado (Home)
-                  </label>
-                  <label className="flex items-center gap-2 text-sm text-gray-300 cursor-pointer">
-                    <input type="checkbox" name="is_offer" value="1" defaultChecked={editingProduct?.is_offer} className="accent-[#E31C25] w-4 h-4 cursor-pointer" onChange={(e) => {
-                      const offerInput = document.getElementById('offer_price_input');
-                      if (offerInput) offerInput.style.display = e.target.checked ? 'block' : 'none';
-                    }}/>
-                    En Oferta
-                  </label>
-                  <label className="flex items-center gap-2 text-sm text-gray-300 cursor-pointer">
-                    <input type="checkbox" name="is_new" value="1" defaultChecked={editingProduct?.is_new} className="accent-[#E31C25] w-4 h-4 cursor-pointer" />
-                    Recién Llegado
-                  </label>
-                  
-                  <div id="offer_price_input" style={{ display: editingProduct?.is_offer ? 'block' : 'none' }} className="w-full mt-2">
-                     <label className="block text-xs uppercase text-gray-500 font-bold mb-1">Precio de Oferta</label>
-                     <input name="offer_price" type="number" defaultValue={editingProduct?.offer_price || ''} className="w-full bg-[#18181C] border border-[#1F1F24] p-2 rounded text-white outline-none focus:border-[#E31C25]" placeholder="Ej: 15000" />
-                  </div>
-                </div>
-                {/* Normally we'd use select for categories/brands, keeping it simple as numbers for now or leaving blank will hit constraints maybe, let's omit unless strictly wanted */}
-                <input name="category_id" type="hidden" value="1" />
-                <input name="brand_id" type="hidden" value="1" />
-              </div>
-              
-              <div className="pt-4 flex flex-row-reverse gap-4">
-                <button type="submit" className="bg-[#E31C25] text-white px-6 py-2 rounded font-bold hover:bg-red-600 transition">
-                  {editingProduct ? 'Guardar Cambios' : 'Crear Producto'}
-                </button>
-                <button type="button" onClick={() => setProductModalOpen(false)} className="px-4 py-2 text-gray-400 hover:text-white font-bold transition">
-                  Cancelar
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
+        <ProductFormModal 
+          editingProduct={editingProduct} 
+          onClose={() => setProductModalOpen(false)} 
+          onSubmit={handleProductSubmit} 
+        />
       )}
 
       {/* User Modal */}

@@ -5,6 +5,8 @@ import { useCart, CartItem } from '../../store/cart';
 import { formatCLP } from '../../lib/utils/formatCLP';
 import { cn } from '../../lib/utils/cn';
 
+import { getProductThumbnail } from '../../lib/utils/image';
+
 interface ProductCardProps {
   product: Omit<CartItem, 'quantity'> & { vehicle: string };
 }
@@ -25,7 +27,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
     <Link to={`/producto/${product.id}`} className="block bg-[#18181C] border border-[#1F1F24] rounded-lg overflow-hidden group hover:border-gray-700 transition-colors">
       <div className="aspect-square bg-[#0A0A0C] w-full flex items-center justify-center p-6 relative">
         <img 
-          src={product.image || 'https://images.unsplash.com/photo-1590748152599-2a2ec96a40a4?auto=format&fit=crop&w=400&q=80'} 
+          src={getProductThumbnail(product.image)} 
           alt={product.name}
           className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300"
         />
