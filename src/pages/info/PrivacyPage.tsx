@@ -5,7 +5,7 @@ export default function PrivacyPage() {
       
       <p className="text-sm text-gray-400 font-mono">Vigente a partir de: Noviembre 2024</p>
       
-      <div className="bg-[#18181C] border-l-4 border-[#E31C25] p-6 my-8 rounded-r-lg">
+      <div className="bg-theme-card border-l-4 border-theme-primary p-6 my-8 rounded-r-lg">
         <p className="text-white text-lg">
           En MotorXpress, la seguridad de tu información y tus datos técnicos de vehículos son sagrados. Nos tomamos sumamente en serio la confidencialidad de tus datos.
         </p>

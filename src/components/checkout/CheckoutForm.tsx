@@ -35,18 +35,18 @@ export default function CheckoutForm({ onComplete }: { onComplete: (data: Shippi
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 bg-[#18181C] p-6 rounded-lg border border-[#1F1F24]">
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 bg-theme-card p-6 rounded-lg border border-theme-border">
       <h2 className="text-xl font-bold text-white mb-4">1. Datos de envío</h2>
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
           <label className="block text-sm text-gray-400 mb-1">Nombre</label>
-          <input {...register('firstName')} className="w-full bg-[#0A0A0C] border border-[#1F1F24] rounded p-2 text-white" />
+          <input {...register('firstName')} className="w-full bg-theme-base border border-theme-border rounded p-2 text-white" />
           {errors.firstName && <span className="text-red-500 text-xs">{errors.firstName.message}</span>}
         </div>
         <div>
           <label className="block text-sm text-gray-400 mb-1">Apellido</label>
-          <input {...register('lastName')} className="w-full bg-[#0A0A0C] border border-[#1F1F24] rounded p-2 text-white" />
+          <input {...register('lastName')} className="w-full bg-theme-base border border-theme-border rounded p-2 text-white" />
           {errors.lastName && <span className="text-red-500 text-xs">{errors.lastName.message}</span>}
         </div>
       </div>
@@ -54,12 +54,12 @@ export default function CheckoutForm({ onComplete }: { onComplete: (data: Shippi
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
           <label className="block text-sm text-gray-400 mb-1">Email</label>
-          <input type="email" {...register('email')} className="w-full bg-[#0A0A0C] border border-[#1F1F24] rounded p-2 text-white" />
+          <input type="email" {...register('email')} className="w-full bg-theme-base border border-theme-border rounded p-2 text-white" />
           {errors.email && <span className="text-red-500 text-xs">{errors.email.message}</span>}
         </div>
         <div>
           <label className="block text-sm text-gray-400 mb-1">Teléfono</label>
-          <input {...register('phone')} placeholder="912345678" className="w-full bg-[#0A0A0C] border border-[#1F1F24] rounded p-2 text-white" />
+          <input {...register('phone')} placeholder="912345678" className="w-full bg-theme-base border border-theme-border rounded p-2 text-white" />
           {errors.phone && <span className="text-red-500 text-xs">{errors.phone.message}</span>}
         </div>
       </div>
@@ -70,7 +70,7 @@ export default function CheckoutForm({ onComplete }: { onComplete: (data: Shippi
           {...register('rut')} 
           onChange={handleRutChange}
           placeholder="12.345.678-9" 
-          className="w-full bg-[#0A0A0C] border border-[#1F1F24] rounded p-2 text-white" 
+          className="w-full bg-theme-base border border-theme-border rounded p-2 text-white" 
         />
         {errors.rut && <span className="text-red-500 text-xs">{errors.rut.message}</span>}
       </div>
@@ -78,12 +78,12 @@ export default function CheckoutForm({ onComplete }: { onComplete: (data: Shippi
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="md:col-span-2">
           <label className="block text-sm text-gray-400 mb-1">Calle</label>
-          <input {...register('street')} className="w-full bg-[#0A0A0C] border border-[#1F1F24] rounded p-2 text-white" />
+          <input {...register('street')} className="w-full bg-theme-base border border-theme-border rounded p-2 text-white" />
           {errors.street && <span className="text-red-500 text-xs">{errors.street.message}</span>}
         </div>
         <div>
           <label className="block text-sm text-gray-400 mb-1">Número</label>
-          <input {...register('number')} className="w-full bg-[#0A0A0C] border border-[#1F1F24] rounded p-2 text-white" />
+          <input {...register('number')} className="w-full bg-theme-base border border-theme-border rounded p-2 text-white" />
           {errors.number && <span className="text-red-500 text-xs">{errors.number.message}</span>}
         </div>
       </div>
@@ -91,16 +91,16 @@ export default function CheckoutForm({ onComplete }: { onComplete: (data: Shippi
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div>
           <label className="block text-sm text-gray-400 mb-1">Depto/Casa</label>
-          <input {...register('apartment')} className="w-full bg-[#0A0A0C] border border-[#1F1F24] rounded p-2 text-white" />
+          <input {...register('apartment')} className="w-full bg-theme-base border border-theme-border rounded p-2 text-white" />
         </div>
         <div>
           <label className="block text-sm text-gray-400 mb-1">Comuna</label>
-          <input {...register('commune')} className="w-full bg-[#0A0A0C] border border-[#1F1F24] rounded p-2 text-white" />
+          <input {...register('commune')} className="w-full bg-theme-base border border-theme-border rounded p-2 text-white" />
           {errors.commune && <span className="text-red-500 text-xs">{errors.commune.message}</span>}
         </div>
         <div>
           <label className="block text-sm text-gray-400 mb-1">Región</label>
-          <input {...register('region')} className="w-full bg-[#0A0A0C] border border-[#1F1F24] rounded p-2 text-white" />
+          <input {...register('region')} className="w-full bg-theme-base border border-theme-border rounded p-2 text-white" />
           {errors.region && <span className="text-red-500 text-xs">{errors.region.message}</span>}
         </div>
       </div>

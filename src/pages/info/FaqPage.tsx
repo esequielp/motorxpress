@@ -36,7 +36,7 @@ export default function FaqPage() {
         {FAQS.map((faq, index) => (
           <div 
             key={index} 
-            className="bg-[#18181C] border border-[#1F1F24] rounded-lg overflow-hidden transition-colors hover:border-gray-700"
+            className="bg-theme-card border border-theme-border rounded-lg overflow-hidden transition-colors hover:border-theme-border-hover"
           >
             <button
               className="w-full px-6 py-4 flex items-center justify-between text-left focus:outline-none"
@@ -44,14 +44,14 @@ export default function FaqPage() {
             >
               <span className="font-bold text-white pr-8">{faq.question}</span>
               {openIndex === index ? (
-                <ChevronUp className="w-5 h-5 text-[#E31C25] flex-shrink-0" />
+                <ChevronUp className="w-5 h-5 text-theme-primary flex-shrink-0" />
               ) : (
                 <ChevronDown className="w-5 h-5 text-gray-500 flex-shrink-0" />
               )}
             </button>
             
             {openIndex === index && (
-              <div className="px-6 pb-5 pt-2 text-gray-400 text-sm leading-relaxed border-t border-[#1F1F24] mt-2 bg-[#0A0A0C]/50">
+              <div className="px-6 pb-5 pt-2 text-gray-400 text-sm leading-relaxed border-t border-theme-border mt-2 bg-theme-base/50">
                 {faq.answer}
               </div>
             )}
@@ -61,7 +61,7 @@ export default function FaqPage() {
 
       <div className="mt-12 text-center">
         <p className="text-gray-400">¿No encontraste lo que buscabas?</p>
-        <button className="mt-4 border border-[#E31C25] text-[#E31C25] hover:bg-[#E31C25] hover:text-white px-8 py-3 rounded font-bold transition-colors">
+        <button className="mt-4 border border-theme-primary text-theme-primary hover:bg-theme-primary hover:text-white px-8 py-3 rounded font-bold transition-colors">
           Contactar a Soporte
         </button>
       </div>

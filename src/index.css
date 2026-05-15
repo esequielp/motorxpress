@@ -5,4 +5,62 @@
   --font-bebas: "Bebas Neue", display;
   --font-sans: "DM Sans", ui-sans-serif, system-ui, sans-serif;
   --color-red: #E31C25;
+
+  /* Registering them in Tailwind */
+  --color-theme-base: var(--theme-base);
+  --color-theme-card: var(--theme-card);
+  --color-theme-element: var(--theme-element);
+  --color-theme-element-hover: var(--theme-element-hover);
+  --color-theme-border: var(--theme-border);
+  --color-theme-border-hover: var(--theme-border-hover);
+  --color-theme-primary: var(--theme-primary);
+  --color-theme-primary-hover: var(--theme-primary-hover);
+}
+
+/* Default Racing Theme */
+:root {
+  --theme-base: #020617;
+  --theme-card: #0f172a;
+  --theme-element: #1e293b;
+  --theme-element-hover: #334155;
+  --theme-border: #1e293b;
+  --theme-border-hover: #334155;
+  --theme-primary: #E31C25;
+  --theme-primary-hover: #b91c1c;
+}
+
+/* Corporate Theme */
+:root[data-theme="corporate"] {
+  --theme-base: #0a1128;
+  --theme-card: #111d40;
+  --theme-element: #1a2a57;
+  --theme-element-hover: #263b73;
+  --theme-border: #1a2a57;
+  --theme-border-hover: #2b407a;
+  --theme-primary: #3b82f6;
+  --theme-primary-hover: #2563eb;
+}
+
+/* Modern Theme */
+:root[data-theme="modern"] {
+  --theme-base: #0f172a;
+  --theme-card: #1e293b;
+  --theme-element: #334155;
+  --theme-element-hover: #475569;
+  --theme-border: #334155;
+  --theme-border-hover: #475569;
+  --theme-primary: #10b981;
+  --theme-primary-hover: #059669;
+}
+
+/* Enterprise Theme */
+:root[data-theme="enterprise"] {
+  --theme-base: #17102e;
+  --theme-card: #251a4a;
+  --theme-element: #352668;
+  --theme-element-hover: #463385;
+  --theme-border: #352668;
+  --theme-border-hover: #4f3b95;
+  --theme-primary: #8b5cf6;
+  --theme-primary-hover: #7c3aed;
 }

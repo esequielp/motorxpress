@@ -57,14 +57,14 @@ export default function Header() {
 
   return (
     <>
-      <header className="sticky top-0 z-40 w-full bg-[#0A0A0C] border-b border-[#1F1F24]">
+      <header className="sticky top-0 z-40 w-full bg-theme-base border-b border-theme-border">
         <div className="container mx-auto px-4 h-16 flex items-center justify-between">
           <div className="flex items-center gap-4">
             <button className="md:hidden text-white" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
               <Menu className="w-6 h-6" />
             </button>
             <Link to="/" className="text-white font-bebas text-2xl tracking-wider">
-              MOTOR<span className="text-[#E31C25]">[X]</span>PRESS
+              MOTOR<span className="text-theme-primary">[X]</span>PRESS
             </Link>
           </div>
 
@@ -76,20 +76,20 @@ export default function Header() {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 onFocus={() => { if(searchQuery.length > 2) setShowDropdown(true); }}
-                className="w-full bg-[#18181C] border border-[#1F1F24] text-white rounded-md pl-4 pr-10 py-2 focus:outline-none focus:border-[#E31C25]"
+                className="w-full bg-theme-card border border-theme-border text-white rounded-md pl-4 pr-10 py-2 focus:outline-none focus:border-theme-primary"
               />
               <Search className="absolute right-3 top-2.5 w-5 h-5 text-gray-400" />
             </div>
             
             {showDropdown && (
-              <div className="absolute top-12 left-0 w-full bg-[#18181C] border border-[#1F1F24] rounded-md shadow-xl overflow-hidden z-50">
+              <div className="absolute top-12 left-0 w-full bg-theme-card border border-theme-border rounded-md shadow-xl overflow-hidden z-50">
                 {searchResults.length > 0 ? (
                   <div className="flex flex-col">
                      {searchResults.map(result => (
                        <button
                          key={result.id}
                          onClick={handleSelectResult}
-                         className="flex items-center gap-3 p-3 hover:bg-[#1F1F24] text-left border-b border-[#1F1F24] last:border-0 transition-colors"
+                         className="flex items-center gap-3 p-3 hover:bg-theme-element text-left border-b border-theme-border last:border-0 transition-colors"
                        >
                          <div>
                             <p className="text-white font-medium text-sm">{result.name}</p>
@@ -99,7 +99,7 @@ export default function Header() {
                      ))}
                      <button 
                        onClick={handleSelectResult}
-                       className="p-3 bg-[#0A0A0C] text-[#E31C25] text-sm font-bold flex items-center justify-center gap-1 hover:bg-[#1F1F24] transition-colors"
+                       className="p-3 bg-theme-base text-theme-primary text-sm font-bold flex items-center justify-center gap-1 hover:bg-theme-element transition-colors"
                      >
                        Ver todos los resultados <ArrowRight className="w-4 h-4" />
                      </button>
@@ -114,7 +114,7 @@ export default function Header() {
           </div>
 
           <div className="flex items-center gap-6">
-            <Link to="/admin" className="text-gray-400 hover:text-[#E31C25] font-bold transition-colors hidden md:block text-sm uppercase tracking-wider" title="Dashboard">
+            <Link to="/admin" className="text-gray-400 hover:text-theme-primary font-bold transition-colors hidden md:block text-sm uppercase tracking-wider" title="Dashboard">
               Admin
             </Link>
             <Link to="/cuenta" className="text-gray-300 hover:text-white transition-colors hidden md:block" title="Mi Cuenta">
@@ -127,7 +127,7 @@ export default function Header() {
               >
                 <ShoppingCart className="w-6 h-6" />
                 {count > 0 && (
-                  <span className="absolute -top-2 -right-2 bg-[#E31C25] text-white text-xs font-bold w-5 h-5 flex items-center justify-center rounded-full">
+                  <span className="absolute -top-2 -right-2 bg-theme-primary text-white text-xs font-bold w-5 h-5 flex items-center justify-center rounded-full">
                     {count}
                   </span>
                 )}
@@ -138,14 +138,14 @@ export default function Header() {
 
         {/* Mobile Search */}
         {mobileMenuOpen && (
-          <div className="md:hidden border-t border-[#1F1F24] p-4 bg-[#0A0A0C]">
+          <div className="md:hidden border-t border-theme-border p-4 bg-theme-base">
              <div className="relative w-full">
               <input
                 type="text"
                 placeholder="Busca por marca, modelo o SKU..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full bg-[#18181C] border border-[#1F1F24] text-white rounded-md pl-4 pr-10 py-2 focus:outline-none focus:border-[#E31C25]"
+                className="w-full bg-theme-card border border-theme-border text-white rounded-md pl-4 pr-10 py-2 focus:outline-none focus:border-theme-primary"
               />
               <Search className="absolute right-3 top-2.5 w-5 h-5 text-gray-400" />
             </div>

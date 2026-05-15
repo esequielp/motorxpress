@@ -71,7 +71,7 @@ export default function OrderDetailPage() {
         <button 
           onClick={handleDownload}
           disabled={isDownloading}
-          className="bg-[#1F1F24] hover:bg-gray-800 text-white px-4 py-2 border border-gray-700 rounded text-sm transition-colors flex items-center gap-2 font-medium disabled:opacity-50"
+          className="bg-theme-element hover:bg-gray-800 text-white px-4 py-2 border border-theme-border-hover rounded text-sm transition-colors flex items-center gap-2 font-medium disabled:opacity-50"
         >
           <Download className="w-4 h-4" />
           {isDownloading ? 'Generando PDF...' : 'Descargar Boleta'}
@@ -81,8 +81,8 @@ export default function OrderDetailPage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2 space-y-8">
           
-          <section className="bg-[#18181C] border border-[#1F1F24] rounded-lg p-6">
-            <h2 className="text-xl font-bold mb-6 flex items-center gap-2"><Truck className="w-5 h-5 text-[#E31C25]" /> Estado del Envío</h2>
+          <section className="bg-theme-card border border-theme-border rounded-lg p-6">
+            <h2 className="text-xl font-bold mb-6 flex items-center gap-2"><Truck className="w-5 h-5 text-theme-primary" /> Estado del Envío</h2>
             
             {order.status === 'cancelled' || order.status === 'rejected' ? (
               <div className="bg-red-900/20 border border-red-500/30 p-6 rounded-lg text-center">
@@ -98,11 +98,11 @@ export default function OrderDetailPage() {
               </div>
             ) : (
             <div className="relative">
-              <div className="absolute left-6 top-0 bottom-0 w-0.5 bg-[#1F1F24]"></div>
+              <div className="absolute left-6 top-0 bottom-0 w-0.5 bg-theme-element"></div>
               
               <div className="space-y-6 relative">
                 <div className="flex items-start gap-4">
-                  <div className={`w-12 h-12 rounded-full flex items-center justify-center relative z-10 transition-colors duration-500 ${order.status !== 'pending' ? 'bg-[#E31C25] text-white shadow-[0_0_15px_rgba(227,28,37,0.4)]' : 'bg-[#1F1F24] text-gray-500'}`}>
+                  <div className={`w-12 h-12 rounded-full flex items-center justify-center relative z-10 transition-colors duration-500 ${order.status !== 'pending' ? 'bg-theme-primary text-white shadow-[0_0_15px_rgba(227,28,37,0.4)]' : 'bg-theme-element text-gray-500'}`}>
                     <CheckCircle2 className="w-6 h-6" />
                   </div>
                   <div className="pt-2">
@@ -112,7 +112,7 @@ export default function OrderDetailPage() {
                 </div>
                 
                 <div className="flex items-start gap-4">
-                  <div className={`w-12 h-12 rounded-full flex items-center justify-center relative z-10 transition-colors duration-500 ${['preparing', 'shipped', 'delivered'].includes(order.status) ? 'bg-[#E31C25] text-white shadow-[0_0_15px_rgba(227,28,37,0.4)]' : 'bg-[#0A0A0C] border-2 border-[#1F1F24] text-gray-500'}`}>
+                  <div className={`w-12 h-12 rounded-full flex items-center justify-center relative z-10 transition-colors duration-500 ${['preparing', 'shipped', 'delivered'].includes(order.status) ? 'bg-theme-primary text-white shadow-[0_0_15px_rgba(227,28,37,0.4)]' : 'bg-theme-base border-2 border-theme-border text-gray-500'}`}>
                     <Clock className="w-6 h-6" />
                   </div>
                   <div className="pt-2">
@@ -122,17 +122,17 @@ export default function OrderDetailPage() {
                 </div>
 
                 <div className="flex items-start gap-4">
-                  <div className={`w-12 h-12 rounded-full flex items-center justify-center relative z-10 transition-colors duration-500 ${['shipped', 'delivered'].includes(order.status) ? 'bg-[#E31C25] text-white shadow-[0_0_15px_rgba(227,28,37,0.4)]' : 'bg-[#0A0A0C] border-2 border-[#1F1F24] text-gray-500'}`}>
+                  <div className={`w-12 h-12 rounded-full flex items-center justify-center relative z-10 transition-colors duration-500 ${['shipped', 'delivered'].includes(order.status) ? 'bg-theme-primary text-white shadow-[0_0_15px_rgba(227,28,37,0.4)]' : 'bg-theme-base border-2 border-theme-border text-gray-500'}`}>
                     <Truck className="w-6 h-6" />
                   </div>
                   <div className="pt-2">
                      <p className={`font-bold text-lg ${['shipped', 'delivered'].includes(order.status) ? 'text-white' : 'text-gray-400'}`}>En Camino</p>
                      <p className="text-gray-500 text-sm">Entregado al vehículo de reparto</p>
                      {order.trackingNumber && ['shipped', 'delivered'].includes(order.status) && (
-                        <div className="mt-3 text-sm text-gray-300 bg-[#0A0A0C] p-4 rounded border border-[#1F1F24] inline-block shadow-inner">
+                        <div className="mt-3 text-sm text-gray-300 bg-theme-base p-4 rounded border border-theme-border inline-block shadow-inner">
                           <span className="block text-gray-500 mb-1 text-xs uppercase tracking-wider">Orden de Transporte (Chilexpress)</span>
                           <span className="font-mono text-white font-bold text-base tracking-widest">{order.trackingNumber}</span>
-                          <button className="block mt-2 text-[#E31C25] hover:text-red-400 font-bold transition-colors flex items-center gap-1">
+                          <button className="block mt-2 text-theme-primary hover:text-red-400 font-bold transition-colors flex items-center gap-1">
                             Rastrear paquete <ArrowLeft className="w-4 h-4 rotate-135" />
                           </button>
                         </div>
@@ -141,7 +141,7 @@ export default function OrderDetailPage() {
                 </div>
 
                 <div className="flex items-start gap-4">
-                  <div className={`w-12 h-12 rounded-full flex items-center justify-center relative z-10 transition-colors duration-500 ${order.status === 'delivered' ? 'bg-green-500 text-white shadow-[0_0_15px_rgba(34,197,94,0.4)]' : 'bg-[#0A0A0C] border-2 border-[#1F1F24] text-gray-500'}`}>
+                  <div className={`w-12 h-12 rounded-full flex items-center justify-center relative z-10 transition-colors duration-500 ${order.status === 'delivered' ? 'bg-green-500 text-white shadow-[0_0_15px_rgba(34,197,94,0.4)]' : 'bg-theme-base border-2 border-theme-border text-gray-500'}`}>
                     <Package className="w-6 h-6" />
                   </div>
                   <div className="pt-2">
@@ -154,9 +154,9 @@ export default function OrderDetailPage() {
             )}
           </section>
 
-          <section className="bg-[#18181C] border border-[#1F1F24] rounded-lg p-6">
+          <section className="bg-theme-card border border-theme-border rounded-lg p-6">
             <h2 className="text-xl font-bold mb-4">Artículos del Pedido</h2>
-            <div className="space-y-4 divide-y divide-[#1F1F24]">
+            <div className="space-y-4 divide-y divide-[#1e293b]">
               {order.items.map((item: any) => (
                 <div key={item.sku} className="pt-4 first:pt-0 flex justify-between items-start gap-4">
                   <div className="flex-1">
@@ -174,9 +174,9 @@ export default function OrderDetailPage() {
         </div>
 
         <div className="space-y-8">
-           <section className="bg-[#18181C] border border-[#1F1F24] rounded-lg p-6">
+           <section className="bg-theme-card border border-theme-border rounded-lg p-6">
             <h2 className="text-lg font-bold mb-4">Resumen Financiero</h2>
-            <div className="space-y-3 text-sm mb-4 pb-4 border-b border-[#1F1F24]">
+            <div className="space-y-3 text-sm mb-4 pb-4 border-b border-theme-border">
               <div className="flex justify-between text-gray-300">
                 <span>Subtotal ({order.items.reduce((acc: number, item: any) => acc + item.qty, 0)} items)</span>
                 <span className="font-medium text-white">{formatCLP(order.subtotal)}</span>
@@ -188,15 +188,15 @@ export default function OrderDetailPage() {
             </div>
             <div className="flex justify-between text-xl font-bold text-white">
               <span>Total pagado</span>
-              <span className="text-[#E31C25]">{formatCLP(order.total)}</span>
+              <span className="text-theme-primary">{formatCLP(order.total)}</span>
             </div>
-            <div className="mt-4 pt-4 border-t border-[#1F1F24]">
+            <div className="mt-4 pt-4 border-t border-theme-border">
               <span className="text-xs text-gray-500 block">Método de pago</span>
               <span className="text-sm text-gray-300 font-medium">Flow (Webpay Plus)</span>
             </div>
           </section>
 
-          <section className="bg-[#18181C] border border-[#1F1F24] rounded-lg p-6">
+          <section className="bg-theme-card border border-theme-border rounded-lg p-6">
             <h2 className="text-lg font-bold mb-4">Dirección de Envío</h2>
             <div className="flex gap-3">
               <Truck className="w-5 h-5 text-gray-500 flex-shrink-0 mt-0.5" />
@@ -204,10 +204,10 @@ export default function OrderDetailPage() {
             </div>
           </section>
 
-          <section className="bg-[#18181C] border border-[#1F1F24] rounded-lg p-6">
+          <section className="bg-theme-card border border-theme-border rounded-lg p-6">
             <h2 className="text-lg font-bold mb-4">¿Necesitas ayuda?</h2>
             <p className="text-sm text-gray-400 mb-4">Si tienes problemas con tu pedido, puedes contactar a nuestro soporte técnico para más información.</p>
-            <button className="w-full bg-[#1F1F24] hover:bg-gray-800 border border-gray-700 text-white font-medium py-2 rounded transition-colors">
+            <button className="w-full bg-theme-element hover:bg-gray-800 border border-theme-border-hover text-white font-medium py-2 rounded transition-colors">
               Contactar Soporte
             </button>
           </section>

@@ -3,6 +3,28 @@ import ProductCard from '../components/product/ProductCard';
 import { ArrowRight, Mail } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
+const RenderProductSection = ({ title, filteredProducts, limit = 4 }: { title: string, filteredProducts: any[], limit?: number }) => {
+  if (filteredProducts.length === 0) return null;
+  return (
+    <section className="py-12 container mx-auto px-4">
+      <div className="flex justify-between items-end mb-8">
+        <div>
+          <h2 className="text-4xl font-bebas tracking-wide uppercase">{title}</h2>
+          <div className="h-1 w-20 bg-theme-primary mt-2"></div>
+        </div>
+        <Link to="/catalogo" className="text-gray-400 hover:text-white flex items-center gap-1 group">
+          Ver todos <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+        </Link>
+      </div>
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+        {filteredProducts.slice(0, limit).map((p: any) => (
+          <ProductCard key={p.id} product={p} />
+        ))}
+      </div>
+    </section>
+  );
+};
+
 export default function HomePage() {
   const [products, setProducts] = useState([]);
   const [newsletterEmail, setNewsletterEmail] = useState('');
@@ -36,28 +58,6 @@ export default function HomePage() {
     }
   };
 
-  const RenderProductSection = ({ title, filteredProducts, limit = 4 }: { title: string, filteredProducts: any[], limit?: number }) => {
-    if (filteredProducts.length === 0) return null;
-    return (
-      <section className="py-12 container mx-auto px-4">
-        <div className="flex justify-between items-end mb-8">
-          <div>
-            <h2 className="text-4xl font-bebas tracking-wide uppercase">{title}</h2>
-            <div className="h-1 w-20 bg-[#E31C25] mt-2"></div>
-          </div>
-          <Link to="/catalogo" className="text-gray-400 hover:text-white flex items-center gap-1 group">
-            Ver todos <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-          </Link>
-        </div>
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
-          {filteredProducts.slice(0, limit).map((p: any) => (
-            <ProductCard key={p.id} product={p} />
-          ))}
-        </div>
-      </section>
-    );
-  };
-
   const featured = products.filter((p: any) => p.is_featured === 1);
   const offers = products.filter((p: any) => p.is_offer === 1);
   const newArrivals = products.filter((p: any) => p.is_new === 1);
@@ -66,7 +66,7 @@ export default function HomePage() {
   const displayFeatured = featured.length > 0 ? featured : products.slice(0, 4);
 
   return (
-    <div className="flex flex-col min-h-screen bg-[#0A0A0C] text-white selection:bg-[#E31C25] selection:text-white">
+    <div className="flex flex-col min-h-screen bg-theme-base text-white selection:bg-theme-primary selection:text-white">
       {/* Hero */}
       <section className="relative w-full h-[60vh] min-h-[500px] flex items-center">
         <div className="absolute inset-0 bg-gradient-to-r from-black via-black/80 to-transparent z-10" />
@@ -80,13 +80,13 @@ export default function HomePage() {
           <div className="max-w-2xl">
             <h1 className="text-6xl md:text-8xl font-bebas tracking-wide mb-4 leading-none">
               POTENCIA TU<br />
-              <span className="text-[#E31C25]">MÁQUINA</span>
+              <span className="text-theme-primary">MÁQUINA</span>
             </h1>
             <p className="text-gray-300 text-lg md:text-xl mb-8 font-light max-w-lg">
               Cotiza y compra repuestos premium para tu vehículo. Envío express a todo Chile.
             </p>
             <div className="flex gap-4">
-               <Link to="/catalogo" className="bg-[#E31C25] hover:bg-red-700 text-white font-bold py-4 px-8 rounded flex items-center gap-2 transition-transform hover:scale-105">
+               <Link to="/catalogo" className="bg-theme-primary hover:bg-theme-primary-hover text-white font-bold py-4 px-8 rounded flex items-center gap-2 transition-transform hover:scale-105">
                  Ver Catálogo <ArrowRight className="w-5 h-5" />
                </Link>
             </div>
@@ -98,7 +98,7 @@ export default function HomePage() {
         <section className="py-20 container mx-auto px-4">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 animate-pulse">
             {[...Array(4)].map((_, i) => (
-              <div key={i} className="bg-[#18181C] h-80 rounded-lg"></div>
+              <div key={i} className="bg-theme-card h-80 rounded-lg"></div>
             ))}
           </div>
         </section>
@@ -111,11 +111,11 @@ export default function HomePage() {
       )}
 
       {/* Newsletter Section */}
-      <section className="py-20 bg-gradient-to-t from-[#18181C] to-[#0A0A0C]">
+      <section className="py-20 bg-gradient-to-t from-[#0f172a] to-[#020617]">
         <div className="container mx-auto px-4">
-          <div className="max-w-3xl mx-auto text-center border border-[#1F1F24] p-10 rounded-2xl bg-[#0A0A0C] relative overflow-hidden">
-             <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-[#E31C25] to-transparent opacity-50"></div>
-             <Mail className="w-12 h-12 mx-auto text-[#E31C25] mb-6" />
+          <div className="max-w-3xl mx-auto text-center border border-theme-border p-10 rounded-2xl bg-theme-base relative overflow-hidden">
+             <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-[var(--theme-primary)] to-transparent opacity-50"></div>
+             <Mail className="w-12 h-12 mx-auto text-theme-primary mb-6" />
              <h2 className="text-4xl font-bebas mb-4">ÚNETE A LA REVOLUCIÓN MOTORXPRESS</h2>
              <p className="text-gray-400 mb-8 max-w-lg mx-auto">Suscríbete para recibir ofertas exclusivas, novedades de repuestos y tips de expertos directamente en tu correo.</p>
              
@@ -126,11 +126,11 @@ export default function HomePage() {
                  value={newsletterEmail}
                  onChange={(e) => setNewsletterEmail(e.target.value)}
                  placeholder="Tu correo electrónico"
-                 className="flex-1 bg-[#18181C] border border-[#1F1F24] text-white px-4 py-3 rounded outline-none focus:border-[#E31C25]"
+                 className="flex-1 bg-theme-card border border-theme-border text-white px-4 py-3 rounded outline-none focus:border-theme-primary"
                />
                <button 
                  type="submit"
-                 className="bg-[#E31C25] hover:bg-red-600 text-white font-bold px-6 py-3 rounded transition-colors"
+                 className="bg-theme-primary hover:bg-theme-primary-hover text-white font-bold px-6 py-3 rounded transition-colors"
                >
                  Suscribirme
                </button>
@@ -143,8 +143,8 @@ export default function HomePage() {
       </section>
 
       {/* Trust Badges */}
-      <section className="bg-[#18181C] py-12 border-y border-[#1F1F24]">
-        <div className="container mx-auto px-4 grid grid-cols-2 md:grid-cols-4 gap-8 text-center divide-x divide-[#1F1F24]">
+      <section className="bg-theme-card py-12 border-y border-theme-border">
+        <div className="container mx-auto px-4 grid grid-cols-2 md:grid-cols-4 gap-8 text-center divide-x divide-[#1e293b]">
           <div className="px-4">
             <h4 className="font-bebas text-2xl text-white mb-2">ENVÍOS EXPRESS</h4>
             <p className="text-gray-400 text-sm">A todo Chile vía Chilexpress</p>

@@ -7,7 +7,7 @@ export default function ReturnsPage() {
         En MotorXpress, nos comprometemos con tu completa satisfacción. Si no estás conforme con tu compra o te equivocaste de repuesto, ofrecemos una garantía de devolución de 30 días bajo las siguientes condiciones.
       </p>
 
-      <div className="bg-[#18181C] border border-[#1F1F24] rounded-lg p-6 space-y-4">
+      <div className="bg-theme-card border border-theme-border rounded-lg p-6 space-y-4">
         <h2 className="text-xl font-bold text-white">1. Condiciones Generales</h2>
         <ul className="list-disc list-inside space-y-2 text-sm text-gray-400">
           <li>El artículo debe estar 100% nuevo, sin uso y en su embalaje original intacto.</li>
@@ -17,7 +17,7 @@ export default function ReturnsPage() {
         </ul>
       </div>
 
-      <div className="bg-[#18181C] border border-[#1F1F24] rounded-lg p-6 space-y-4">
+      <div className="bg-theme-card border border-theme-border rounded-lg p-6 space-y-4">
         <h2 className="text-xl font-bold text-white">2. Proceso de Devolución</h2>
         <p className="text-sm text-gray-400 leading-relaxed">
           Para iniciar una devolución, por favor contacta a nuestro equipo de soporte utilizando el chat integrado o escribiendo a <span className="font-mono text-white">soporte@motorxpress.cl</span> con tu número de pedido (#MX-XXXX) y el motivo de la devolución.
@@ -25,7 +25,7 @@ export default function ReturnsPage() {
         </p>
       </div>
 
-      <div className="bg-[#18181C] border border-[#1F1F24] rounded-lg p-6 space-y-4">
+      <div className="bg-theme-card border border-theme-border rounded-lg p-6 space-y-4">
         <h2 className="text-xl font-bold text-white">3. Reembolsos</h2>
         <p className="text-sm text-gray-400 leading-relaxed">
           Una vez recibido e inspeccionado el producto por nuestros mecánicos, te notificaremos la resolución. Si cumple las condiciones, el reembolso se procesará automáticamente al método de pago original (Tarjeta de Crédito, Débito vía Flow) en un plazo aproximado de 5 a 10 días hábiles, dependiendo de la entidad bancaria.

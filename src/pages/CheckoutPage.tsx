@@ -25,7 +25,7 @@ export default function CheckoutPage() {
       <div className="container mx-auto px-4 py-20 text-center min-h-[50vh]">
         <h1 className="text-3xl font-bebas mb-4">CARRITO VACÍO</h1>
         <p className="text-gray-400 mb-8">Agrega algunos productos antes de proceder al pago.</p>
-        <button onClick={() => navigate('/catalogo')} className="bg-[#E31C25] text-white px-8 py-3 rounded font-bold">
+        <button onClick={() => navigate('/catalogo')} className="bg-theme-primary text-white px-8 py-3 rounded font-bold">
           Ir al catálogo
         </button>
       </div>
@@ -92,18 +92,18 @@ export default function CheckoutPage() {
           {step === 1 ? (
             <CheckoutForm onComplete={handleShippingSubmit} />
           ) : (
-             <div className="bg-[#18181C] p-6 rounded-lg border border-[#1F1F24]">
+             <div className="bg-theme-card p-6 rounded-lg border border-theme-border">
                 <div className="flex justify-between items-center mb-4">
                   <h2 className="text-xl font-bold text-white">2. Opciones de Envío</h2>
-                  <button onClick={() => setStep(1)} className="text-[#E31C25] text-sm hover:underline">
+                  <button onClick={() => setStep(1)} className="text-theme-primary text-sm hover:underline">
                     Editar Datos
                   </button>
                 </div>
                 
                 {isLoadingRates ? (
                   <div className="animate-pulse space-y-4">
-                    <div className="h-20 bg-[#1F1F24] rounded"></div>
-                    <div className="h-20 bg-[#1F1F24] rounded"></div>
+                    <div className="h-20 bg-theme-element rounded"></div>
+                    <div className="h-20 bg-theme-element rounded"></div>
                   </div>
                 ) : shippingOptions.length > 0 ? (
                   <div className="space-y-4">
@@ -112,8 +112,8 @@ export default function CheckoutPage() {
                         key={opt.serviceType}
                         className={`flex justify-between items-center p-4 border rounded cursor-pointer transition-colors ${
                           shippingOption?.serviceType === opt.serviceType 
-                            ? 'border-[#E31C25] bg-[#E31C25]/10' 
-                            : 'border-[#1F1F24] hover:bg-[#1F1F24]'
+                            ? 'border-theme-primary bg-theme-primary/10' 
+                            : 'border-theme-border hover:bg-theme-element'
                         }`}
                       >
                         <div className="flex items-center gap-3">
@@ -122,7 +122,7 @@ export default function CheckoutPage() {
                             name="shipping" 
                             checked={shippingOption?.serviceType === opt.serviceType}
                             onChange={() => setShippingOption(opt)}
-                            className="accent-[#E31C25] w-5 h-5"
+                            className="accent-theme-primary w-5 h-5"
                           />
                           <div>
                             <p className="font-bold text-white">{opt.serviceDescription}</p>
@@ -134,7 +134,7 @@ export default function CheckoutPage() {
                     ))}
                   </div>
                 ) : (
-                  <div className="text-gray-400 p-4 bg-[#1F1F24] rounded text-center">
+                  <div className="text-gray-400 p-4 bg-theme-element rounded text-center">
                     No pudimos obtener tarifas. Usaremos un costo base de {formatCLP(5990)}.
                     <button 
                       onClick={() => setShippingOption({ serviceDescription: 'Envío Base', totalPrice: 5990, serviceType: 'BASE' })}
@@ -149,7 +149,7 @@ export default function CheckoutPage() {
         </div>
 
         <div>
-          <div className="bg-[#18181C] p-6 rounded-lg border border-[#1F1F24] sticky top-24">
+          <div className="bg-theme-card p-6 rounded-lg border border-theme-border sticky top-24">
             <h2 className="text-xl font-bold text-white mb-4">Resumen del Pedido</h2>
             <div className="space-y-4 mb-6 max-h-[40vh] overflow-y-auto pr-2">
               {items.map(item => (
@@ -163,7 +163,7 @@ export default function CheckoutPage() {
               ))}
             </div>
             
-            <div className="space-y-2 border-t border-[#1F1F24] pt-4 mb-4 text-sm">
+            <div className="space-y-2 border-t border-theme-border pt-4 mb-4 text-sm">
               <div className="flex justify-between text-gray-300">
                 <span>Subtotal</span>
                 <span>{formatCLP(subtotal)}</span>
@@ -174,15 +174,15 @@ export default function CheckoutPage() {
               </div>
             </div>
 
-            <div className="flex justify-between text-lg font-bold text-white border-t border-[#1F1F24] pt-4 mb-6">
+            <div className="flex justify-between text-lg font-bold text-white border-t border-theme-border pt-4 mb-6">
               <span>TOTAL</span>
-              <span className="text-[#E31C25]">{formatCLP(finalTotal)}</span>
+              <span className="text-theme-primary">{formatCLP(finalTotal)}</span>
             </div>
 
             <button 
               disabled={step === 1 || !shippingOption || isProcessingPayment}
               onClick={handlePayment}
-              className="w-full bg-[#E31C25] hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-4 rounded-md transition-colors flex justify-center items-center gap-2"
+              className="w-full bg-theme-primary hover:bg-theme-primary-hover disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-4 rounded-md transition-colors flex justify-center items-center gap-2"
             >
               {isProcessingPayment ? <Loader2 className="w-5 h-5 animate-spin" /> : '🔒 PAGAR CON FLOW'}
             </button>

@@ -47,7 +47,7 @@ export default function CatalogPage() {
 
   return (
     <div className="container mx-auto px-4 py-8 min-h-screen">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4 border-b border-[#1F1F24] pb-4">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4 border-b border-theme-border pb-4">
         <div>
           <h1 className="text-3xl font-bebas">CATÁLOGO</h1>
           <p className="text-gray-400 text-sm font-mono mt-1">{filteredProducts.length} productos encontrados</p>
@@ -55,7 +55,7 @@ export default function CatalogPage() {
         
         <button 
           onClick={() => setShowFilters(!showFilters)}
-          className="sm:hidden flex items-center gap-2 bg-[#1F1F24] text-white px-4 py-2 rounded font-bold"
+          className="sm:hidden flex items-center gap-2 bg-theme-element text-white px-4 py-2 rounded font-bold"
         >
           <Filter size={18} /> Filtros
         </button>
@@ -64,7 +64,7 @@ export default function CatalogPage() {
           <select 
             value={category} 
             onChange={e => setCategory(e.target.value)}
-            className="bg-[#18181C] border border-[#1F1F24] text-white text-sm rounded-lg block p-2.5 outline-none focus:border-[#E31C25] min-w-[200px] shadow-sm appearance-none"
+            className="bg-theme-card border border-theme-border text-white text-sm rounded-lg block p-2.5 outline-none focus:border-theme-primary min-w-[200px] shadow-sm appearance-none"
           >
             <option value="">Todas las Categorías</option>
             {dbCategories.map(cat => (
@@ -75,7 +75,7 @@ export default function CatalogPage() {
           <select 
             value={brand} 
             onChange={e => setBrand(e.target.value)}
-            className="bg-[#18181C] border border-[#1F1F24] text-white text-sm rounded-lg block p-2.5 outline-none focus:border-[#E31C25] min-w-[200px] shadow-sm appearance-none"
+            className="bg-theme-card border border-theme-border text-white text-sm rounded-lg block p-2.5 outline-none focus:border-theme-primary min-w-[200px] shadow-sm appearance-none"
           >
             <option value="">Todas las Marcas</option>
             {dbBrands.map(b => (
@@ -86,7 +86,7 @@ export default function CatalogPage() {
           {(category || brand) && (
             <button 
               onClick={() => { setCategory(''); setBrand(''); }}
-              className="text-gray-400 hover:text-white p-2 rounded flex items-center justify-center bg-[#1F1F24] sm:bg-transparent"
+              className="text-gray-400 hover:text-white p-2 rounded flex items-center justify-center bg-theme-element sm:bg-transparent"
               title="Limpiar filtros"
             >
               <X size={20} />
@@ -98,15 +98,15 @@ export default function CatalogPage() {
       <div className="flex flex-col gap-6">
         <main className="flex-1 w-full">
           {filteredProducts.length === 0 ? (
-             <div className="bg-[#18181C] border border-[#1F1F24] p-12 text-center rounded-lg flex flex-col items-center justify-center">
-               <div className="w-16 h-16 bg-[#1F1F24] rounded-full mx-auto flex items-center justify-center mb-4">
+             <div className="bg-theme-card border border-theme-border p-12 text-center rounded-lg flex flex-col items-center justify-center">
+               <div className="w-16 h-16 bg-theme-element rounded-full mx-auto flex items-center justify-center mb-4">
                   <span className="text-2xl">🔍</span>
                </div>
                <h3 className="text-xl font-bold text-white mb-2">No se encontraron productos</h3>
                <p className="text-gray-400">Intenta modificando los filtros para ver más resultados.</p>
                <button 
                  onClick={() => { setCategory(''); setBrand(''); }}
-                 className="mt-6 border border-[#E31C25] text-[#E31C25] px-6 py-2 rounded font-bold hover:bg-[#E31C25] hover:text-white transition-colors"
+                 className="mt-6 border border-theme-primary text-theme-primary px-6 py-2 rounded font-bold hover:bg-theme-primary hover:text-white transition-colors"
                >
                  Limpiar Filtros
                </button>

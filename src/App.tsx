@@ -4,6 +4,7 @@
  */
 
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { useEffect } from 'react';
 import Header from './components/layout/Header';
 import Footer from './components/layout/Footer';
 import HomePage from './pages/HomePage';
@@ -16,6 +17,7 @@ import OrderDetailPage from './pages/OrderDetailPage';
 import SupportChat from './components/chat/SupportChat';
 import ScrollToTop from './components/layout/ScrollToTop';
 import AdminDashboardPage from './pages/admin/AdminDashboardPage';
+import { useThemeStore } from './store/theme';
 
 // Information pages
 import ReturnsPage from './pages/info/ReturnsPage';
@@ -25,10 +27,20 @@ import TermsPage from './pages/info/TermsPage';
 import PrivacyPage from './pages/info/PrivacyPage';
 
 export default function App() {
+  const theme = useThemeStore((state) => state.theme);
+
+  useEffect(() => {
+    if (theme === 'racing') {
+      document.documentElement.removeAttribute('data-theme');
+    } else {
+      document.documentElement.setAttribute('data-theme', theme);
+    }
+  }, [theme]);
+
   return (
     <Router>
       <ScrollToTop />
-      <div className="min-h-screen bg-[#0A0A0C] font-sans text-white flex flex-col">
+      <div className="min-h-screen bg-theme-base font-sans text-white flex flex-col">
         <Header />
         <main className="flex-1">
           <Routes>

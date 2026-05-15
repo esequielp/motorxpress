@@ -87,8 +87,8 @@ export default function AccountPage() {
   if (!currentUser) {
     return (
       <div className="container mx-auto px-4 py-16 min-h-screen flex items-center justify-center">
-        <div className="bg-[#18181C] border border-[#1F1F24] rounded-lg p-8 max-w-md w-full">
-          <h2 className="text-3xl font-bebas text-center text-[#E31C25] mb-6">
+        <div className="bg-theme-card border border-theme-border rounded-lg p-8 max-w-md w-full">
+          <h2 className="text-3xl font-bebas text-center text-theme-primary mb-6">
             {authMode === 'login' ? 'INICIAR SESIÓN' : 'CREAR CUENTA'}
           </h2>
           
@@ -102,7 +102,7 @@ export default function AccountPage() {
                   type="text" 
                   value={authName}
                   onChange={e => setAuthName(e.target.value)}
-                  className="w-full bg-[#0A0A0C] border border-[#1F1F24] rounded p-3 text-white outline-none focus:border-[#E31C25]" 
+                  className="w-full bg-theme-base border border-theme-border rounded p-3 text-white outline-none focus:border-theme-primary" 
                   required
                 />
               </div>
@@ -113,7 +113,7 @@ export default function AccountPage() {
                 type="email" 
                 value={authEmail}
                 onChange={e => setAuthEmail(e.target.value)}
-                className="w-full bg-[#0A0A0C] border border-[#1F1F24] rounded p-3 text-white outline-none focus:border-[#E31C25]" 
+                className="w-full bg-theme-base border border-theme-border rounded p-3 text-white outline-none focus:border-theme-primary" 
                 required
               />
             </div>
@@ -123,13 +123,13 @@ export default function AccountPage() {
                 type="password" 
                 value={authPassword}
                 onChange={e => setAuthPassword(e.target.value)}
-                className="w-full bg-[#0A0A0C] border border-[#1F1F24] rounded p-3 text-white outline-none focus:border-[#E31C25]" 
+                className="w-full bg-theme-base border border-theme-border rounded p-3 text-white outline-none focus:border-theme-primary" 
                 required
               />
             </div>
             <button 
               type="submit"
-              className="w-full bg-[#E31C25] hover:bg-red-700 text-white font-bold py-3 rounded transition-colors flex justify-center items-center gap-2"
+              className="w-full bg-theme-primary hover:bg-theme-primary-hover text-white font-bold py-3 rounded transition-colors flex justify-center items-center gap-2"
             >
               {authMode === 'login' ? <><LogIn size={18} /> Entrar</> : <><UserPlus size={18} /> Registrarse</>}
             </button>
@@ -183,13 +183,13 @@ export default function AccountPage() {
         <aside className="space-y-2">
           <button 
             onClick={() => setActiveTab('perfil')}
-            className={`w-full flex items-center gap-3 px-4 py-3 rounded font-bold transition-colors ${activeTab === 'perfil' ? 'bg-[#E31C25] text-white' : 'text-gray-300 hover:bg-[#18181C]'}`}
+            className={`w-full flex items-center gap-3 px-4 py-3 rounded font-bold transition-colors ${activeTab === 'perfil' ? 'bg-theme-primary text-white' : 'text-gray-300 hover:bg-theme-card'}`}
           >
             <User className="w-5 h-5" /> Mi Perfil
           </button>
           <button 
             onClick={() => setActiveTab('pedidos')}
-            className={`w-full flex items-center gap-3 px-4 py-3 rounded font-bold transition-colors ${activeTab === 'pedidos' ? 'bg-[#E31C25] text-white' : 'text-gray-300 hover:bg-[#18181C]'}`}
+            className={`w-full flex items-center gap-3 px-4 py-3 rounded font-bold transition-colors ${activeTab === 'pedidos' ? 'bg-theme-primary text-white' : 'text-gray-300 hover:bg-theme-card'}`}
           >
             <Package className="w-5 h-5" /> Mis Pedidos
           </button>
@@ -203,7 +203,7 @@ export default function AccountPage() {
           )}
           <button 
             onClick={handleLogout}
-            className="w-full flex items-center gap-3 px-4 py-3 text-gray-300 hover:bg-[#18181C] rounded transition-colors"
+            className="w-full flex items-center gap-3 px-4 py-3 text-gray-300 hover:bg-theme-card rounded transition-colors"
           >
             <LogOut className="w-5 h-5" /> Cerrar Sesión
           </button>
@@ -211,13 +211,13 @@ export default function AccountPage() {
 
         <main className="md:col-span-3 space-y-8">
           {activeTab === 'perfil' && (
-             <section className="bg-[#18181C] border border-[#1F1F24] rounded-lg p-6">
+             <section className="bg-theme-card border border-theme-border rounded-lg p-6">
                <div className="flex justify-between items-center mb-6">
                  <h2 className="text-2xl font-bebas">DATOS PERSONALES</h2>
                  {!isEditing && (
                    <button 
                      onClick={() => setIsEditing(true)}
-                     className="text-[#E31C25] hover:underline text-sm font-bold"
+                     className="text-theme-primary hover:underline text-sm font-bold"
                    >
                      Editar Datos
                    </button>
@@ -233,7 +233,7 @@ export default function AccountPage() {
                           type="text" 
                           value={currentUser.name}
                           onChange={e => setCurrentUser({...currentUser, name: e.target.value})}
-                          className="w-full bg-[#0A0A0C] border border-[#1F1F24] rounded p-2 text-white outline-none focus:border-[#E31C25]" 
+                          className="w-full bg-theme-base border border-theme-border rounded p-2 text-white outline-none focus:border-theme-primary" 
                           required
                         />
                       </div>
@@ -243,7 +243,7 @@ export default function AccountPage() {
                           type="email" 
                           value={currentUser.email}
                           onChange={e => setCurrentUser({...currentUser, email: e.target.value})}
-                          className="w-full bg-[#0A0A0C] border border-[#1F1F24] rounded p-2 text-white outline-none focus:border-[#E31C25]" 
+                          className="w-full bg-theme-base border border-theme-border rounded p-2 text-white outline-none focus:border-theme-primary" 
                           required
                         />
                       </div>
@@ -258,7 +258,7 @@ export default function AccountPage() {
                       </button>
                       <button 
                         type="submit"
-                        className="px-4 py-2 bg-[#E31C25] text-white rounded font-bold hover:bg-red-700 transition-colors"
+                        className="px-4 py-2 bg-theme-primary text-white rounded font-bold hover:bg-theme-primary-hover transition-colors"
                       >
                         Guardar Cambios
                       </button>
@@ -266,11 +266,11 @@ export default function AccountPage() {
                  </form>
                ) : (
                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm text-gray-300">
-                   <div className="bg-[#0A0A0C] p-4 rounded border border-[#1F1F24]">
+                   <div className="bg-theme-base p-4 rounded border border-theme-border">
                      <span className="block text-gray-500 mb-1 uppercase text-xs font-bold tracking-wider">Nombre</span>
                      <span className="text-white text-lg">{currentUser.name}</span>
                    </div>
-                   <div className="bg-[#0A0A0C] p-4 rounded border border-[#1F1F24]">
+                   <div className="bg-theme-base p-4 rounded border border-theme-border">
                      <span className="block text-gray-500 mb-1 uppercase text-xs font-bold tracking-wider">Email</span>
                      <span className="text-white text-lg">{currentUser.email}</span>
                    </div>
@@ -284,15 +284,15 @@ export default function AccountPage() {
               <h2 className="text-2xl font-bebas mb-6">HISTORIAL DE PEDIDOS</h2>
               <div className="space-y-4">
                 {orders.length === 0 ? (
-                  <div className="text-center py-8 text-gray-500 bg-[#18181C] border border-[#1F1F24] rounded-lg">
+                  <div className="text-center py-8 text-gray-500 bg-theme-card border border-theme-border rounded-lg">
                     No has realizado ningún pedido aún.
                   </div>
                 ) : orders.map(order => {
                   const statusInfo = statusMap[order.status] || statusMap.pending;
                   const Icon = statusInfo.icon;
                   return (
-                    <div key={order.id} className="bg-[#18181C] border border-[#1F1F24] rounded-lg p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 transition-colors hover:border-gray-700">
-                      <div className="flex items-center gap-4 border-b sm:border-b-0 sm:border-r border-[#1F1F24] pb-4 sm:pb-0 sm:pr-8 w-full sm:w-auto">
+                    <div key={order.id} className="bg-theme-card border border-theme-border rounded-lg p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 transition-colors hover:border-theme-border-hover">
+                      <div className="flex items-center gap-4 border-b sm:border-b-0 sm:border-r border-theme-border pb-4 sm:pb-0 sm:pr-8 w-full sm:w-auto">
                         <div className={`w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0 ${statusInfo.color}`}>
                             <Icon className="w-6 h-6" />
                         </div>
@@ -311,7 +311,7 @@ export default function AccountPage() {
                           <span className={`px-3 py-1 text-xs font-bold rounded-full ${statusInfo.color}`}>
                             {statusInfo.label}
                           </span>
-                          <Link to={`/cuenta/pedidos/${order.id}`} className="text-sm text-gray-300 underline hover:text-[#E31C25] transition-colors">
+                          <Link to={`/cuenta/pedidos/${order.id}`} className="text-sm text-gray-300 underline hover:text-theme-primary transition-colors">
                             Ver Detalles
                           </Link>
                         </div>

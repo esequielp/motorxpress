@@ -19,7 +19,7 @@ export default function CheckoutConfirmationPage() {
   if (!token || token.includes('error')) {
      return (
       <div className="container mx-auto px-4 py-20 text-center min-h-[60vh] flex flex-col items-center justify-center">
-        <AlertCircle className="w-20 h-20 text-[#E31C25] mb-6" />
+        <AlertCircle className="w-20 h-20 text-theme-primary mb-6" />
         <h1 className="text-4xl font-bebas tracking-wide mb-4 text-white">ERROR EN EL PAGO</h1>
         <p className="text-gray-400 mb-8 max-w-md mx-auto">
           Hubo un problema al procesar tu pago. Tu tarjeta no ha sido cargada. Por favor, intenta nuevamente.
@@ -41,10 +41,10 @@ export default function CheckoutConfirmationPage() {
       </p>
       
       <div className="flex gap-4">
-        <Link to="/cuenta" className="bg-[#1F1F24] text-white hover:bg-[#333] transition-colors border border-gray-700 px-6 py-3 rounded font-medium">
+        <Link to="/cuenta" className="bg-theme-element text-white hover:bg-[#333] transition-colors border border-theme-border-hover px-6 py-3 rounded font-medium">
           Ver estado del pedido
         </Link>
-        <Link to="/" className="bg-[#E31C25] hover:bg-red-700 text-white transition-colors px-6 py-3 rounded font-bold">
+        <Link to="/" className="bg-theme-primary hover:bg-theme-primary-hover text-white transition-colors px-6 py-3 rounded font-bold">
           Seguir comprando
         </Link>
       </div>

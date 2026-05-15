@@ -69,7 +69,7 @@ export default function SupportChat() {
       <button
         onClick={() => setIsOpen(!isOpen)}
         className={cn(
-          "fixed bottom-6 right-6 p-4 rounded-full bg-[#E31C25] text-white shadow-lg hover:bg-red-700 hover:scale-105 transition-all z-50",
+          "fixed bottom-6 right-6 p-4 rounded-full bg-theme-primary text-white shadow-lg hover:bg-theme-primary-hover hover:scale-105 transition-all z-50",
           isOpen && "hidden"
         )}
       >
@@ -79,14 +79,14 @@ export default function SupportChat() {
       {/* Chat Window */}
       <div
         className={cn(
-          "fixed bottom-6 right-6 w-80 sm:w-96 bg-[#18181C] border border-[#1F1F24] rounded-lg shadow-2xl flex flex-col z-50 transform transition-all origin-bottom-right duration-300",
+          "fixed bottom-6 right-6 w-80 sm:w-96 bg-theme-card border border-theme-border rounded-lg shadow-2xl flex flex-col z-50 transform transition-all origin-bottom-right duration-300",
           isOpen ? "scale-100 opacity-100" : "scale-0 opacity-0 pointer-events-none"
         )}
         style={{ height: '500px', maxHeight: 'calc(100vh - 48px)' }}
       >
-        <div className="flex items-center justify-between p-4 bg-[#0A0A0C] border-b border-[#1F1F24] rounded-t-lg">
+        <div className="flex items-center justify-between p-4 bg-theme-base border-b border-theme-border rounded-t-lg">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-[#E31C25] rounded-full flex items-center justify-center">
+            <div className="w-8 h-8 bg-theme-primary rounded-full flex items-center justify-center">
               <Bot className="w-5 h-5 text-white" />
             </div>
             <div>
@@ -99,7 +99,7 @@ export default function SupportChat() {
           </button>
         </div>
 
-        <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gradient-to-b from-[#18181C] to-[#0A0A0C]">
+        <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gradient-to-b from-[#0f172a] to-[#020617]">
           {messages.map((msg, idx) => (
             <div
               key={idx}
@@ -110,15 +110,15 @@ export default function SupportChat() {
             >
               <div className={cn(
                 "w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0",
-                msg.role === 'user' ? "bg-gray-700" : "bg-[#E31C25]"
+                msg.role === 'user' ? "bg-gray-700" : "bg-theme-primary"
               )}>
                 {msg.role === 'user' ? <User className="w-4 h-4 text-white" /> : <Bot className="w-4 h-4 text-white" />}
               </div>
               <div className={cn(
                 "p-3 rounded-lg text-sm",
                 msg.role === 'user'
-                  ? "bg-[#1F1F24] text-white rounded-tr-none"
-                  : "bg-[#2A2A32] text-white rounded-tl-none border border-[#333]"
+                  ? "bg-theme-element text-white rounded-tr-none"
+                  : "bg-theme-element-hover text-white rounded-tl-none border border-[#333]"
               )}>
                 {msg.content}
               </div>
@@ -126,10 +126,10 @@ export default function SupportChat() {
           ))}
           {isLoading && (
             <div className="flex gap-3 max-w-[85%] mr-auto">
-              <div className="w-8 h-8 rounded-full bg-[#E31C25] flex items-center justify-center flex-shrink-0">
+              <div className="w-8 h-8 rounded-full bg-theme-primary flex items-center justify-center flex-shrink-0">
                 <Bot className="w-4 h-4 text-white" />
               </div>
-              <div className="p-3 rounded-lg bg-[#2A2A32] text-white rounded-tl-none border border-[#333]">
+              <div className="p-3 rounded-lg bg-theme-element-hover text-white rounded-tl-none border border-[#333]">
                 <Loader2 className="w-4 h-4 animate-spin text-gray-400" />
               </div>
             </div>
@@ -137,7 +137,7 @@ export default function SupportChat() {
           <div ref={messagesEndRef} />
         </div>
 
-        <div className="p-4 border-t border-[#1F1F24] bg-[#18181C] rounded-b-lg">
+        <div className="p-4 border-t border-theme-border bg-theme-card rounded-b-lg">
           <div className="flex gap-2">
             <input
               type="text"
@@ -145,13 +145,13 @@ export default function SupportChat() {
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && handleSend()}
               placeholder="Escribe tu consulta..."
-              className="flex-1 bg-[#0A0A0C] border border-[#1F1F24] text-white text-sm rounded-lg px-3 py-2 focuse:outline-none focus:border-[#E31C25]"
+              className="flex-1 bg-theme-base border border-theme-border text-white text-sm rounded-lg px-3 py-2 focuse:outline-none focus:border-theme-primary"
               disabled={isLoading}
             />
             <button
               onClick={handleSend}
               disabled={isLoading || !input.trim()}
-              className="bg-[#E31C25] hover:bg-red-700 disabled:bg-gray-600 disabled:cursor-not-allowed text-white p-2 rounded-lg transition-colors flex items-center justify-center"
+              className="bg-theme-primary hover:bg-theme-primary-hover disabled:bg-gray-600 disabled:cursor-not-allowed text-white p-2 rounded-lg transition-colors flex items-center justify-center"
             >
               <Send className="w-5 h-5" />
             </button>
