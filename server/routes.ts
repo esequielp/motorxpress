@@ -101,13 +101,13 @@ router.get('/products/:id', (req, res) => {
 
 // Admin: add product
 router.post('/products', (req, res) => {
-  const { sku, mpn, name, vehicle, price, stock, maxStock, image, category_id, brand_id, is_featured, is_offer, is_new, offer_price, description } = req.body;
+  const { sku, mpn, name, vehicle, price, cost, stock, maxStock, image, category_id, brand_id, cross_sell_ids, is_featured, is_offer, is_new, offer_price, description } = req.body;
   try {
     const stmt = db.prepare(`
-      INSERT INTO products (sku, mpn, name, vehicle, price, stock, maxStock, image, category_id, brand_id, is_featured, is_offer, is_new, offer_price, description)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      INSERT INTO products (sku, mpn, name, vehicle, price, cost, stock, maxStock, image, category_id, brand_id, cross_sell_ids, is_featured, is_offer, is_new, offer_price, description)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `);
-    const info = stmt.run(sku, mpn || null, name, vehicle, price, stock, maxStock || stock, image, category_id, brand_id, is_featured ? 1 : 0, is_offer ? 1 : 0, is_new ? 1 : 0, offer_price || null, description || null);
+    const info = stmt.run(sku, mpn || null, name, vehicle, price, cost || 0, stock, maxStock || stock, image, category_id, brand_id, cross_sell_ids || null, is_featured ? 1 : 0, is_offer ? 1 : 0, is_new ? 1 : 0, offer_price || null, description || null);
     res.json({ success: true, id: info.lastInsertRowid });
   } catch (err) {
     console.error(err);
@@ -118,14 +118,14 @@ router.post('/products', (req, res) => {
 // Admin: update product
 router.put('/products/:id', (req, res) => {
   const { id } = req.params;
-  const { sku, mpn, name, vehicle, price, stock, maxStock, image, category_id, brand_id, is_featured, is_offer, is_new, offer_price, description } = req.body;
+  const { sku, mpn, name, vehicle, price, cost, stock, maxStock, image, category_id, brand_id, cross_sell_ids, is_featured, is_offer, is_new, offer_price, description } = req.body;
   try {
     const stmt = db.prepare(`
       UPDATE products 
-      SET sku = ?, mpn = ?, name = ?, vehicle = ?, price = ?, stock = ?, maxStock = ?, image = ?, category_id = ?, brand_id = ?, is_featured = ?, is_offer = ?, is_new = ?, offer_price = ?, description = ?, updated_at = CURRENT_TIMESTAMP
+      SET sku = ?, mpn = ?, name = ?, vehicle = ?, price = ?, cost = ?, stock = ?, maxStock = ?, image = ?, category_id = ?, brand_id = ?, cross_sell_ids = ?, is_featured = ?, is_offer = ?, is_new = ?, offer_price = ?, description = ?, updated_at = CURRENT_TIMESTAMP
       WHERE id = ?
     `);
-    stmt.run(sku, mpn || null, name, vehicle, price, stock, maxStock, image, category_id, brand_id, is_featured ? 1 : 0, is_offer ? 1 : 0, is_new ? 1 : 0, offer_price || null, description || null, id);
+    stmt.run(sku, mpn || null, name, vehicle, price, cost || 0, stock, maxStock, image, category_id, brand_id, cross_sell_ids || null, is_featured ? 1 : 0, is_offer ? 1 : 0, is_new ? 1 : 0, offer_price || null, description || null, id);
     res.json({ success: true });
   } catch (err) {
     console.error(err);

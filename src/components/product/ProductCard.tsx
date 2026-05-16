@@ -25,16 +25,16 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
 
   return (
     <Link to={`/producto/${product.id}`} className="block bg-theme-card border border-theme-border rounded-lg overflow-hidden group hover:border-theme-border-hover transition-colors">
-      <div className="aspect-square bg-theme-base w-full flex items-center justify-center p-6 relative">
+      <div className="aspect-square bg-transparent w-full flex items-center justify-center p-6 relative">
         <img 
           src={getProductThumbnail(product.image)} 
           alt={product.name}
-          className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300"
+          className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300 drop-shadow-sm"
         />
-        <div className="absolute top-2 right-2 flex flex-col gap-1 text-xs font-medium backdrop-blur-sm">
-           <span className="bg-black/60 px-2 py-1 rounded text-green-400">✓ En stock</span>
-           {(product as any).is_offer === 1 && <span className="bg-theme-primary/80 px-2 py-1 rounded text-white shadow">OFERTA</span>}
-           {(product as any).is_new === 1 && <span className="bg-blue-600/80 px-2 py-1 rounded text-white shadow">NUEVO</span>}
+        <div className="absolute top-2 right-2 flex flex-col gap-1 text-[10px] font-bold uppercase tracking-wider backdrop-blur-sm">
+           <span className="bg-[#e6fcf5] px-2 py-1 rounded text-[#0ca678] border border-[#0ca678]/20">✓ En stock</span>
+           {(product as any).is_offer === 1 && <span className="bg-[#ffe600] px-2 py-1 rounded text-[#333333] shadow border border-[#fce100]">OFERTA</span>}
+           {(product as any).is_new === 1 && <span className="bg-[#e7f5ff] px-2 py-1 rounded text-[#1971c2] shadow border border-[#1971c2]/20">NUEVO</span>}
         </div>
       </div>
       <div className="p-4 flex flex-col h-[180px]">

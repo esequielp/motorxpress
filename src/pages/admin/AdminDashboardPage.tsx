@@ -69,6 +69,10 @@ function ProductFormModal({ editingProduct, onClose, onSubmit }: any) {
                    <input name="price" type="number" defaultValue={editingProduct?.price || 0} required className="w-full bg-theme-base border border-theme-border p-2 rounded text-white outline-none focus:border-theme-primary" />
                  </div>
                  <div>
+                   <label className="block text-xs uppercase text-gray-500 font-bold mb-1">Costo</label>
+                   <input name="cost" type="number" defaultValue={editingProduct?.cost || 0} required className="w-full bg-theme-base border border-theme-border p-2 rounded text-white outline-none focus:border-theme-primary" />
+                 </div>
+                 <div>
                    <label className="block text-xs uppercase text-gray-500 font-bold mb-1">Stock</label>
                    <input name="stock" type="number" defaultValue={editingProduct?.stock || 0} required className="w-full bg-theme-base border border-theme-border p-2 rounded text-white outline-none focus:border-theme-primary" />
                  </div>
@@ -112,6 +116,11 @@ function ProductFormModal({ editingProduct, onClose, onSubmit }: any) {
                  <div className="col-span-2">
                    <label className="block text-xs uppercase text-gray-500 font-bold mb-1">Descripción Técnica</label>
                    <textarea name="description" rows={3} defaultValue={editingProduct?.description || ''} className="w-full bg-theme-base border border-theme-border p-2 rounded text-white outline-none focus:border-theme-primary resize-none" placeholder="Ingresa la descripción del producto..." />
+                 </div>
+                 
+                 <div className="col-span-2">
+                   <label className="block text-xs uppercase text-gray-500 font-bold mb-1">Venta Cruzada Manual (SKU o MPN separados por comas)</label>
+                   <input name="cross_sell_ids" defaultValue={editingProduct?.cross_sell_ids || ''} className="w-full bg-theme-base border border-theme-border p-2 rounded text-white outline-none focus:border-theme-primary font-mono" placeholder="Ej: MX-FLT-001, FLT-TOY-002" />
                  </div>
                  
                  <div className="col-span-2 flex flex-wrap gap-6 items-center mt-2 p-4 bg-theme-base border border-theme-border rounded-lg">
@@ -176,6 +185,9 @@ export default function AdminDashboardPage() {
   const [userSearchText, setUserSearchText] = useState('');
   const [userPage, setUserPage] = useState(1);
 
+  const [newsletterSearch, setNewsletterSearch] = useState('');
+  const [newsletterPage, setNewsletterPage] = useState(1);
+
   // Computed state
   const filteredProducts = products.filter(p => 
     p.name.toLowerCase().includes(productSearch.toLowerCase()) || 
@@ -201,6 +213,22 @@ export default function AdminDashboardPage() {
   );
   const paginatedUsers = filteredUsers.slice((userPage - 1) * itemsPerPage, userPage * itemsPerPage);
   const totalUserPages = Math.ceil(filteredUsers.length / itemsPerPage) || 1;
+
+  const mockNewsletters = [
+    { email: 'juan.perez@example.com', date: '10 May 2026', status: 'Activo' },
+    { email: 'maria_c89@gmail.com', date: '11 May 2026', status: 'Activo' },
+    { email: 'luis.mecanica@taller.cl', date: '12 May 2026', status: 'Activo' },
+    { email: 'carlos123@hotmail.com', date: '13 May 2026', status: 'Desuscrito' },
+    { email: 'ana.silva@empresa.com', date: '14 May 2026', status: 'Activo' },
+    { email: 'roberto_xd@live.com', date: '14 May 2026', status: 'Activo' },
+    { email: 'sofia.taller3x@gmail.com', date: '15 May 2026', status: 'Activo' },
+    { email: 'miguel.lopez99@yahoo.com', date: '15 May 2026', status: 'Desuscrito' },
+    { email: 'valeria_motors@gmail.com', date: '15 May 2026', status: 'Activo' },
+  ];
+  
+  const filteredNewsletters = mockNewsletters.filter(n => n.email.toLowerCase().includes(newsletterSearch.toLowerCase()) || n.status.toLowerCase().includes(newsletterSearch.toLowerCase()));
+  const paginatedNewsletters = filteredNewsletters.slice((newsletterPage - 1) * itemsPerPage, newsletterPage * itemsPerPage);
+  const totalNewsletterPages = Math.ceil(filteredNewsletters.length / itemsPerPage) || 1;
 
 
   // Modals state
@@ -243,10 +271,10 @@ export default function AdminDashboardPage() {
       navigate('/');
     }
 
-    fetch('/api/products').then(r => r.json()).then(setProducts);
-    fetch('/api/orders').then(r => r.json()).then(setOrders);
-    fetch('/api/users').then(r => r.json()).then(setUsers);
-    fetch('/api/settings').then(r => r.json()).then(setSettings);
+    fetch('/api/products').then(r => r.json()).then(d => setProducts(Array.isArray(d) ? d : []));
+    fetch('/api/orders').then(r => r.json()).then(d => setOrders(Array.isArray(d) ? d : []));
+    fetch('/api/users').then(r => r.json()).then(d => setUsers(Array.isArray(d) ? d : []));
+    fetch('/api/settings').then(r => r.json()).then(d => setSettings(d || {}));
   }, []);
 
   const handleDeleteProduct = async (id: number) => {
@@ -327,6 +355,7 @@ export default function AdminDashboardPage() {
     
     // cast numbers
     data.price = Number(data.price);
+    data.cost = Number(data.cost) || 0;
     data.stock = Number(data.stock);
     if (data.offer_price) {
       data.offer_price = Number(data.offer_price);
@@ -404,7 +433,7 @@ export default function AdminDashboardPage() {
 
       {/* Tabs */}
       <div className="flex gap-4 border-b border-theme-border mb-6 overflow-x-auto select-none no-scrollbar">
-        {['dashboard', 'products', 'orders', 'users', 'customers', 'settings'].map(tab => (
+        {['dashboard', 'products', 'orders', 'users', 'customers', 'newsletter', 'settings'].map(tab => (
           <button 
             key={tab}
             onClick={() => {
@@ -416,14 +445,20 @@ export default function AdminDashboardPage() {
                  setUserFilter('customers');
               } else {
                  setActiveTab(tab);
-                 if (tab === 'products' || tab === 'orders' || tab === 'settings' || tab === 'dashboard') {
+                 if (tab === 'products' || tab === 'orders' || tab === 'settings' || tab === 'dashboard' || tab === 'newsletter') {
                     setUserFilter('all'); // reset or ignore
                  }
               }
             }}
-            className={`pb-2 px-4 font-medium transition-colors whitespace-nowrap capitalize ${activeTab === tab || (activeTab === 'users' && tab === 'users' && userFilter === 'staff') || (activeTab === 'users' && tab === 'customers' && userFilter === 'customers') ? 'border-b-2 border-theme-primary text-theme-primary' : 'text-gray-400 hover:text-white'}`}
+            className={`pb-2 px-4 font-medium transition-colors whitespace-nowrap capitalize ${
+              (tab === 'users' && activeTab === 'users' && userFilter === 'staff') ||
+              (tab === 'customers' && activeTab === 'users' && userFilter === 'customers') ||
+              (tab !== 'users' && tab !== 'customers' && activeTab === tab)
+                ? 'border-b-2 border-theme-primary text-theme-primary'
+                : 'text-gray-400 hover:text-white'
+            }`}
           >
-            {tab === 'dashboard' ? 'Resumen' : tab === 'products' ? 'Productos' : tab === 'orders' ? 'Órdenes' : tab === 'users' ? 'Admin. Staff' : tab === 'customers' ? 'Clientes' : 'Configuración'}
+            {tab === 'dashboard' ? 'Resumen' : tab === 'products' ? 'Productos' : tab === 'orders' ? 'Órdenes' : tab === 'users' ? 'Admin. Staff' : tab === 'customers' ? 'Clientes' : tab === 'newsletter' ? 'Suscriptores Boletín' : 'Configuración'}
           </button>
         ))}
       </div>
@@ -547,7 +582,9 @@ export default function AdminDashboardPage() {
       {activeTab === 'products' && (
         <div className="bg-theme-card border border-theme-border rounded-lg overflow-hidden flex flex-col min-h-[500px]">
           <div className="p-4 border-b border-theme-border flex flex-col sm:flex-row justify-between items-center gap-4">
-            <h2 className="font-bold text-lg">Catálogo (<span className="text-theme-primary">{filteredProducts.length}</span>)</h2>
+            <h2 className="font-bold text-lg flex items-center gap-2 text-white">
+              Catálogo <span className="text-sm font-normal text-gray-500 bg-theme-base px-2 py-0.5 rounded-full">{filteredProducts.length}</span>
+            </h2>
             <div className="flex gap-4 w-full sm:w-auto">
               <input 
                 type="text" 
@@ -570,6 +607,7 @@ export default function AdminDashboardPage() {
                 <tr>
                   <th className="px-6 py-3">SKU / MPN</th>
                   <th className="px-6 py-3">Nombre</th>
+                  <th className="px-6 py-3">Costo</th>
                   <th className="px-6 py-3">Precio</th>
                   <th className="px-6 py-3">Precio Oferta</th>
                   <th className="px-6 py-3">Stock</th>
@@ -579,7 +617,7 @@ export default function AdminDashboardPage() {
               <tbody>
                 {paginatedProducts.length === 0 ? (
                   <tr>
-                    <td colSpan={6} className="px-6 py-8 text-center text-gray-500">No se encontraron productos.</td>
+                    <td colSpan={7} className="px-6 py-8 text-center text-gray-500">No se encontraron productos.</td>
                   </tr>
                 ) : (
                   paginatedProducts.map(p => (
@@ -589,6 +627,9 @@ export default function AdminDashboardPage() {
                         {p.mpn && <div className="text-gray-500 mt-1">{p.mpn}</div>}
                       </td>
                       <td className="px-6 py-4 text-white font-medium">{p.name}</td>
+                      <td className="px-6 py-4 text-gray-400">
+                        ${(p.cost || 0).toLocaleString('es-CL')}
+                      </td>
                       <td className="px-6 py-4">
                         <span className={p.is_offer ? "line-through text-gray-500" : ""}>
                           ${p.price.toLocaleString('es-CL')}
@@ -638,7 +679,9 @@ export default function AdminDashboardPage() {
       {activeTab === 'orders' && (
         <div className="bg-theme-card border border-theme-border rounded-lg overflow-hidden flex flex-col min-h-[500px]">
           <div className="p-4 border-b border-theme-border flex flex-col sm:flex-row justify-between items-center gap-4">
-            <h2 className="font-bold text-lg">Órdenes (<span className="text-theme-primary">{filteredOrders.length}</span>)</h2>
+            <h2 className="font-bold text-lg flex items-center gap-2 text-white">
+              Órdenes <span className="text-sm font-normal text-gray-500 bg-theme-base px-2 py-0.5 rounded-full">{filteredOrders.length}</span>
+            </h2>
             <div className="flex gap-4 w-full sm:w-auto">
               <input 
                 type="text" 
@@ -738,7 +781,9 @@ export default function AdminDashboardPage() {
       {activeTab === 'users' && (
         <div className="bg-theme-card border border-theme-border rounded-lg overflow-hidden flex flex-col min-h-[500px]">
           <div className="p-4 border-b border-theme-border flex flex-col sm:flex-row justify-between items-center gap-4">
-            <h2 className="font-bold text-lg">{userFilter === 'customers' ? `Gestión de Clientes (${filteredUsers.length})` : `Gestión de Staff (${filteredUsers.length})`}</h2>
+            <h2 className="font-bold text-lg flex items-center gap-2 text-white">
+              {userFilter === 'customers' ? 'Gestión de Clientes' : 'Gestión de Staff'} <span className="text-sm font-normal text-gray-500 bg-theme-base px-2 py-0.5 rounded-full">{filteredUsers.length}</span>
+            </h2>
             <div className="flex gap-4 w-full sm:w-auto">
               <input 
                 type="text" 
@@ -775,16 +820,16 @@ export default function AdminDashboardPage() {
                 ) : (
                   paginatedUsers.map((u: any) => (
                     <tr key={u.id} className="border-b border-theme-border hover:bg-theme-element/50">
-                      <td className="px-6 py-4 font-mono text-xs">{u.id}</td>
+                      <td className="px-6 py-4 font-mono text-xs text-white">#{u.id}</td>
                       <td className="px-6 py-4 text-white">
                         <div className="flex items-center gap-2">
                           <div className="w-6 h-6 rounded-full bg-gray-700 flex items-center justify-center text-xs font-bold text-white uppercase">{u.name.charAt(0)}</div>
                           {u.name}
                         </div>
                       </td>
-                      <td className="px-6 py-4">{u.email}</td>
+                      <td className="px-6 py-4 text-gray-300">{u.email}</td>
                       <td className="px-6 py-4">
-                        <span className={`px-2 py-1 rounded text-xs font-bold ${u.role === 'admin' ? 'bg-red-500/20 text-red-500' : u.role === 'ejecutivo' ? 'bg-purple-500/20 text-purple-500' : 'bg-gray-700 text-gray-300'}`}>
+                        <span className={`px-2 py-1 rounded text-xs font-bold ${u.role === 'admin' ? 'bg-red-500/20 text-red-500' : u.role === 'ejecutivo' ? 'bg-purple-500/20 text-purple-500' : 'bg-blue-500/20 text-blue-500'}`}>
                           {u.role.toUpperCase()}
                         </span>
                       </td>
@@ -825,6 +870,76 @@ export default function AdminDashboardPage() {
         </div>
       )}
 
+      {/* Newsletter Panel */}
+      {activeTab === 'newsletter' && (
+        <div className="bg-theme-card border border-theme-border rounded-lg overflow-hidden flex flex-col min-h-[500px]">
+          <div className="p-4 border-b border-theme-border flex flex-col sm:flex-row justify-between items-center gap-4">
+            <h2 className="font-bold text-lg flex items-center gap-2 text-white">
+              Suscriptores al Boletín (Mock) <span className="text-sm font-normal text-gray-500 bg-theme-base px-2 py-0.5 rounded-full">{filteredNewsletters.length}</span>
+            </h2>
+            <div className="flex gap-4 w-full sm:w-auto">
+              <input 
+                type="text" 
+                placeholder="Buscar por email..." 
+                className="bg-theme-base border border-theme-border text-white text-sm rounded px-3 py-2 outline-none focus:border-theme-primary min-w-[250px]"
+                value={newsletterSearch}
+                onChange={e => { setNewsletterSearch(e.target.value); setNewsletterPage(1); }}
+              />
+              <button className="bg-theme-primary text-white px-4 py-2 rounded text-sm font-bold flex items-center gap-2 hover:bg-theme-primary-hover transition">
+                Exportar CSV
+              </button>
+            </div>
+          </div>
+          
+          <div className="overflow-x-auto flex-1">
+            <table className="w-full text-left text-sm text-gray-400">
+              <thead className="bg-theme-base text-xs uppercase">
+                <tr>
+                  <th className="px-6 py-3">Email</th>
+                  <th className="px-6 py-3">Fecha de Suscripción</th>
+                  <th className="px-6 py-3">Estado</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-theme-border">
+                {paginatedNewsletters.length === 0 ? (
+                  <tr>
+                    <td colSpan={3} className="py-8 text-center text-gray-500">No se encontraron suscriptores</td>
+                  </tr>
+                ) : (
+                  paginatedNewsletters.map((sub, idx) => (
+                    <tr key={idx} className="hover:bg-theme-element transition">
+                      <td className="px-6 py-4 font-medium text-white">{sub.email}</td>
+                      <td className="px-6 py-4">{sub.date}</td>
+                      <td className="px-6 py-4">
+                        <span className={`px-2 py-1 rounded text-xs ${sub.status === 'Activo' ? 'bg-green-500/20 text-green-500' : 'bg-red-500/20 text-red-500'}`}>
+                          {sub.status}
+                        </span>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+          <div className="p-4 border-t border-theme-border flex justify-between items-center bg-theme-base">
+            <span className="text-gray-500 text-sm">Mostrando {paginatedNewsletters.length} de {filteredNewsletters.length}</span>
+            <div className="flex gap-2">
+              <button 
+                onClick={() => setNewsletterPage(Math.max(1, newsletterPage - 1))}
+                disabled={newsletterPage === 1}
+                className="px-3 py-1 bg-theme-card border border-theme-border rounded text-sm disabled:opacity-50"
+              >Anterior</button>
+              <span className="px-3 py-1 text-sm bg-theme-element rounded">{newsletterPage} / {totalNewsletterPages}</span>
+              <button 
+                onClick={() => setNewsletterPage(Math.min(totalNewsletterPages, newsletterPage + 1))}
+                disabled={newsletterPage === totalNewsletterPages}
+                className="px-3 py-1 bg-theme-card border border-theme-border rounded text-sm disabled:opacity-50"
+              >Siguiente</button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Settings Panel */}
       {activeTab === 'settings' && (
         <div className="bg-theme-card border border-theme-border rounded-lg p-6 max-w-2xl">
@@ -855,6 +970,8 @@ export default function AdminDashboardPage() {
                     <option value="corporate">Corporativo (Azul Marino / Azul Vivo)</option>
                     <option value="modern">Moderno Eco (Gris Oscuro / Esmeralda)</option>
                     <option value="enterprise">Empresarial (Púrpura / Violeta)</option>
+                    <option value="marketplace">Marketplace (Claro / Amarillo y Rojo)</option>
+                    <option value="minimal">Minimalista (Oscuro / Platinado)</option>
                   </select>
                 </div>
               </div>

@@ -4,10 +4,12 @@ import { useCart } from '../store/cart';
 import { formatCLP } from '../lib/utils/formatCLP';
 import { getProductImages, getProductThumbnail } from '../lib/utils/image';
 import { ShoppingCart, ShieldCheck, Zap, Truck, CheckCircle2, X, ChevronLeft, ChevronRight, Maximize2 } from 'lucide-react';
+import ProductCard from '../components/product/ProductCard';
 
 export default function ProductDetailPage() {
   const { id } = useParams();
   const [product, setProduct] = useState<any>(null);
+  const [relatedProducts, setRelatedProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const { addItem } = useCart();
   const [added, setAdded] = useState(false);
@@ -20,6 +22,7 @@ export default function ProductDetailPage() {
   ];
 
   useEffect(() => {
+    setLoading(true);
     fetch(`/api/products/${id}`)
       .then(r => {
         if (!r.ok) throw new Error('Not found');
@@ -27,7 +30,36 @@ export default function ProductDetailPage() {
       })
       .then(data => {
         setProduct(data);
-        setLoading(false);
+        setActiveImage(0); // reset image index on product change
+        
+        // Fetch related products
+        fetch('/api/products')
+          .then(r => r.json())
+          .then(allProducts => {
+            if (Array.isArray(allProducts)) {
+              let manualCrossSells: any[] = [];
+              if (data.cross_sell_ids) {
+                const terms = data.cross_sell_ids.split(',').map((t: string) => t.trim().toLowerCase()).filter((t: string) => t.length > 0);
+                manualCrossSells = allProducts.filter(p => (terms.includes(p.sku?.toLowerCase()) || terms.includes(p.mpn?.toLowerCase())) && p.id !== data.id);
+              }
+              
+              let automaticRelated = allProducts.filter(p => p.category_id === data.category_id && p.id !== data.id && !manualCrossSells.find(m => m.id === p.id));
+              
+              let related = [...manualCrossSells, ...automaticRelated];
+              
+              if (related.length === 0) {
+                 // Fallback to random products
+                 related = allProducts.filter(p => p.id !== data.id && !manualCrossSells.find(m => m.id === p.id));
+                 related = [...manualCrossSells, ...related];
+              }
+              setRelatedProducts(related.slice(0, 4));
+            }
+            setLoading(false);
+          })
+          .catch((err) => {
+            console.error('Failed to fetch related products:', err);
+            setLoading(false);
+          });
       })
       .catch((err) => {
         console.error(err);
@@ -200,6 +232,18 @@ export default function ProductDetailPage() {
           </div>
         </div>
       </div>
+
+      {/* RELATED PRODUCTS */}
+      {relatedProducts.length > 0 && (
+        <div className="mt-20">
+          <h2 className="text-3xl font-bebas text-white mb-6 border-b border-theme-border pb-4 uppercase">Productos Compatibles Recomendados</h2>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
+            {relatedProducts.map(p => (
+              <ProductCard key={p.id} product={p} />
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* LIGHTBOX MODAL */}
       {isModalOpen && (

@@ -6,6 +6,7 @@ import { CheckCircle2, AlertCircle } from 'lucide-react';
 export default function CheckoutConfirmationPage() {
   const [searchParams] = useSearchParams();
   const token = searchParams.get('token');
+  const orderId = searchParams.get('orderId') || Math.floor(Math.random() * 100000).toString();
   const { clearCart } = useCart();
 
   useEffect(() => {
@@ -35,7 +36,7 @@ export default function CheckoutConfirmationPage() {
     <div className="container mx-auto px-4 py-20 text-center min-h-[60vh] flex flex-col items-center justify-center">
       <CheckCircle2 className="w-20 h-20 text-green-500 mb-6" />
       <h1 className="text-4xl font-bebas tracking-wide mb-4 text-white">¡PAGO CONFIRMADO!</h1>
-      <p className="text-xl font-mono text-gray-300 mb-6">Pedido <span className="text-white font-bold">#MX-{Math.floor(Math.random() * 100000).toString().padStart(5, '0')}</span></p>
+      <p className="text-xl font-mono text-gray-300 mb-6">Pedido <span className="text-white font-bold">#MX-{orderId.toString().padStart(5, '0')}</span></p>
       <p className="text-gray-400 mb-8 max-w-md mx-auto">
         Te enviaremos un correo electrónico cuando tu pedido sea despachado con la información de seguimiento.
       </p>

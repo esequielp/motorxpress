@@ -21,9 +21,10 @@ const shippingSchema = z.object({
 
 type ShippingForm = z.infer<typeof shippingSchema>;
 
-export default function CheckoutForm({ onComplete }: { onComplete: (data: ShippingForm) => void }) {
+export default function CheckoutForm({ onComplete, initialData }: { onComplete: (data: ShippingForm) => void, initialData?: any }) {
   const { register, handleSubmit, formState: { errors }, setValue } = useForm<ShippingForm>({
-    resolver: zodResolver(shippingSchema)
+    resolver: zodResolver(shippingSchema),
+    defaultValues: initialData || {}
   });
 
   const onSubmit = (data: ShippingForm) => {

@@ -22,10 +22,11 @@ export default function CatalogPage() {
       fetch('/api/categories').then(res => res.json()),
       fetch('/api/brands').then(res => res.json())
     ]).then(([productsData, categoriesData, brandsData]) => {
-      setProducts(productsData);
-      setFilteredProducts(productsData);
-      setDbCategories(categoriesData);
-      setDbBrands(brandsData);
+      const p = Array.isArray(productsData) ? productsData : [];
+      setProducts(p);
+      setFilteredProducts(p);
+      setDbCategories(Array.isArray(categoriesData) ? categoriesData : []);
+      setDbBrands(Array.isArray(brandsData) ? brandsData : []);
     }).catch(console.error);
   }, []);
 

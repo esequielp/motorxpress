@@ -252,7 +252,7 @@ export default function AccountPage() {
                       <button 
                         type="button"
                         onClick={() => setIsEditing(false)}
-                        className="px-4 py-2 bg-transparent text-white border border-gray-600 rounded hover:bg-gray-800 transition-colors"
+                        className="px-4 py-2 bg-theme-element text-white border-0 rounded hover:bg-theme-primary transition-colors"
                       >
                         Cancelar
                       </button>

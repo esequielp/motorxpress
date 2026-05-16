@@ -33,7 +33,7 @@ export default function HomePage() {
   useEffect(() => {
     fetch('/api/products')
       .then(res => res.json())
-      .then(data => setProducts(data))
+      .then(data => setProducts(Array.isArray(data) ? data : []))
       .catch(console.error);
   }, []);
 
@@ -76,13 +76,13 @@ export default function HomePage() {
           className="absolute inset-0 w-full h-full object-cover"
         />
         
-        <div className="container mx-auto px-4 relative z-20">
+        <div className="container mx-auto px-4 relative z-20 text-[#ffffff]">
           <div className="max-w-2xl">
-            <h1 className="text-6xl md:text-8xl font-bebas tracking-wide mb-4 leading-none">
+            <h1 className="text-6xl md:text-8xl font-bebas tracking-wide mb-4 leading-none" style={{ color: '#ffffff' }}>
               POTENCIA TU<br />
               <span className="text-theme-primary">MÁQUINA</span>
             </h1>
-            <p className="text-gray-300 text-lg md:text-xl mb-8 font-light max-w-lg">
+            <p className="text-lg md:text-xl mb-8 font-light max-w-lg" style={{ color: '#e5e5e5' }}>
               Cotiza y compra repuestos premium para tu vehículo. Envío express a todo Chile.
             </p>
             <div className="flex gap-4">
@@ -111,13 +111,13 @@ export default function HomePage() {
       )}
 
       {/* Newsletter Section */}
-      <section className="py-20 bg-gradient-to-t from-[#0f172a] to-[#020617]">
+      <section className="py-20 bg-theme-base border-t border-theme-border">
         <div className="container mx-auto px-4">
-          <div className="max-w-3xl mx-auto text-center border border-theme-border p-10 rounded-2xl bg-theme-base relative overflow-hidden">
-             <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-[var(--theme-primary)] to-transparent opacity-50"></div>
+          <div className="max-w-3xl mx-auto text-center border border-theme-border p-10 rounded-2xl bg-theme-card relative overflow-hidden shadow-sm">
+             <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-theme-primary to-transparent opacity-50"></div>
              <Mail className="w-12 h-12 mx-auto text-theme-primary mb-6" />
-             <h2 className="text-4xl font-bebas mb-4">ÚNETE A LA REVOLUCIÓN MOTORXPRESS</h2>
-             <p className="text-gray-400 mb-8 max-w-lg mx-auto">Suscríbete para recibir ofertas exclusivas, novedades de repuestos y tips de expertos directamente en tu correo.</p>
+             <h2 className="text-4xl font-bebas mb-4 text-theme-primary">ÚNETE A LA REVOLUCIÓN MOTORXPRESS</h2>
+             <p className="text-gray-500 mb-8 max-w-lg mx-auto">Suscríbete para recibir ofertas exclusivas, novedades de repuestos y tips de expertos directamente en tu correo.</p>
              
              <form onSubmit={handleNewsletterSubmit} className="flex flex-col sm:flex-row max-w-md mx-auto gap-2">
                <input 
@@ -126,7 +126,7 @@ export default function HomePage() {
                  value={newsletterEmail}
                  onChange={(e) => setNewsletterEmail(e.target.value)}
                  placeholder="Tu correo electrónico"
-                 className="flex-1 bg-theme-card border border-theme-border text-white px-4 py-3 rounded outline-none focus:border-theme-primary"
+                 className="flex-1 bg-theme-base border border-theme-border focus:border-theme-primary px-4 py-3 rounded outline-none"
                />
                <button 
                  type="submit"
@@ -136,30 +136,30 @@ export default function HomePage() {
                </button>
              </form>
              {newsletterStatus && (
-               <p className="mt-4 text-sm text-gray-300 font-medium">{newsletterStatus}</p>
+               <p className="mt-4 text-sm font-medium text-green-600">{newsletterStatus}</p>
              )}
           </div>
         </div>
       </section>
 
       {/* Trust Badges */}
-      <section className="bg-theme-card py-12 border-y border-theme-border">
-        <div className="container mx-auto px-4 grid grid-cols-2 md:grid-cols-4 gap-8 text-center divide-x divide-[#1e293b]">
+      <section className="bg-theme-card py-12 border-b border-theme-border">
+        <div className="container mx-auto px-4 grid grid-cols-2 md:grid-cols-4 gap-8 text-center divide-x divide-theme-border">
           <div className="px-4">
             <h4 className="font-bebas text-2xl text-white mb-2">ENVÍOS EXPRESS</h4>
-            <p className="text-gray-400 text-sm">A todo Chile vía Chilexpress</p>
+            <p className="text-gray-500 text-sm">A todo Chile vía Chilexpress</p>
           </div>
           <div className="px-4">
             <h4 className="font-bebas text-2xl text-white mb-2">PAGO SEGURO</h4>
-            <p className="text-gray-400 text-sm">Tarjetas y debito vía Flow</p>
+            <p className="text-gray-500 text-sm">Tarjetas y debito vía Flow</p>
           </div>
           <div className="px-4">
             <h4 className="font-bebas text-2xl text-white mb-2">SOPORTE EXPERTO</h4>
-            <p className="text-gray-400 text-sm">Asesoría mecánica en línea</p>
+            <p className="text-gray-500 text-sm">Asesoría mecánica en línea</p>
           </div>
           <div className="px-4">
             <h4 className="font-bebas text-2xl text-white mb-2">DEVOLUCIONES</h4>
-            <p className="text-gray-400 text-sm">Garantía de 30 días</p>
+            <p className="text-gray-500 text-sm">Garantía de 30 días</p>
           </div>
         </div>
       </section>

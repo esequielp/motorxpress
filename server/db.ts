@@ -38,11 +38,13 @@ export function initDb() {
       name TEXT NOT NULL,
       vehicle TEXT NOT NULL,
       price INTEGER NOT NULL,
+      cost INTEGER DEFAULT 0,
       stock INTEGER NOT NULL,
       maxStock INTEGER DEFAULT 0,
       image TEXT,
       category_id INTEGER REFERENCES categories(id) ON DELETE SET NULL,
       brand_id INTEGER REFERENCES brands(id) ON DELETE SET NULL,
+      cross_sell_ids TEXT,
       is_featured BOOLEAN DEFAULT 0,
       is_offer BOOLEAN DEFAULT 0,
       is_new BOOLEAN DEFAULT 0,
@@ -84,6 +86,18 @@ export function initDb() {
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP
     );
   `);
+
+  // Migrate existing tables
+  try {
+    db.exec(`ALTER TABLE products ADD COLUMN cost INTEGER DEFAULT 0;`);
+  } catch (err: any) {
+    // Ignore error if column already exists
+  }
+  try {
+    db.exec(`ALTER TABLE products ADD COLUMN cross_sell_ids TEXT;`);
+  } catch (err: any) {
+    // Ignore error if column already exists
+  }
 
   // Seed data if empty
   const countStmt = db.prepare('SELECT COUNT(*) as count FROM products').get() as { count: number };

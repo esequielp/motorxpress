@@ -1,24 +1,55 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useCart } from '../store/cart';
 import { formatCLP } from '../lib/utils/formatCLP';
 import CheckoutForm from '../components/checkout/CheckoutForm';
 import { useNavigate } from 'react-router-dom';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Plus } from 'lucide-react';
 
 export default function CheckoutPage() {
-  const { items, total } = useCart();
+  const { items, total, addItem } = useCart();
   const [step, setStep] = useState<1 | 2>(1);
   const [shippingOption, setShippingOption] = useState<any>(null);
   const [shippingOptions, setShippingOptions] = useState<any[]>([]);
   const [isLoadingRates, setIsLoadingRates] = useState(false);
   const [isProcessingPayment, setIsProcessingPayment] = useState(false);
   const [shippingData, setShippingData] = useState<any>(null);
+  const [checkoutCrossSells, setCheckoutCrossSells] = useState<any[]>([]);
   
   const subtotal = total();
   const shippingCost = shippingOption ? shippingOption.totalPrice : 0;
   const finalTotal = subtotal + shippingCost;
 
   const navigate = useNavigate();
+
+  useEffect(() => {
+    fetch('/api/products')
+      .then(r => r.json())
+      .then(allProducts => {
+         if(Array.isArray(allProducts)){
+            const allTerms = new Set<string>();
+            items.forEach(cartItem => {
+               const fullProduct = allProducts.find(p => p.id === cartItem.id);
+               if(fullProduct && fullProduct.cross_sell_ids) {
+                  const terms = fullProduct.cross_sell_ids.split(',').map((t: string) => t.trim().toLowerCase()).filter((t: string) => t.length > 0);
+                  terms.forEach((t: string) => allTerms.add(t));
+               }
+            });
+            
+            let crossSells: any[] = [];
+            if(allTerms.size > 0) {
+                crossSells = allProducts.filter(p => (allTerms.has(p.sku?.toLowerCase()) || allTerms.has(p.mpn?.toLowerCase())) && !items.find((i: any) => i.id === p.id));
+            }
+            
+            // Fallback to random popular/available products if cross sells list is empty
+            if (crossSells.length === 0) {
+                crossSells = allProducts.filter(p => !items.find((i: any) => i.id === p.id));
+            }
+            
+            setCheckoutCrossSells(crossSells.slice(0, 2));
+         }
+      })
+      .catch(console.error);
+  }, [items]);
 
   if (items.length === 0) {
     return (
@@ -75,7 +106,7 @@ export default function CheckoutPage() {
       
       if (data.orderId) {
         // We do a mock flow page or just go to confirmation directly since real Flow needs API keys
-        navigate('/checkout/confirmacion', { state: { orderId: data.orderId, isSuccess: true } });
+        navigate(`/checkout/confirmacion?token=success&orderId=${data.orderId}`, { state: { orderId: data.orderId, isSuccess: true } });
       }
     } catch (err) {
       console.error(err);
@@ -90,7 +121,7 @@ export default function CheckoutPage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2 space-y-8">
           {step === 1 ? (
-            <CheckoutForm onComplete={handleShippingSubmit} />
+            <CheckoutForm onComplete={handleShippingSubmit} initialData={shippingData} />
           ) : (
              <div className="bg-theme-card p-6 rounded-lg border border-theme-border">
                 <div className="flex justify-between items-center mb-4">
@@ -186,10 +217,44 @@ export default function CheckoutPage() {
             >
               {isProcessingPayment ? <Loader2 className="w-5 h-5 animate-spin" /> : '🔒 PAGAR CON FLOW'}
             </button>
-            <p className="text-center text-xs text-gray-500 mt-4">
+            <p className="text-center text-xs text-gray-500 mt-4 mb-4">
               Acepta: débito, crédito, transferencia, RedCompra
             </p>
+            
+            <button 
+              onClick={() => setStep(1)}
+              className="w-full bg-theme-element hover:bg-theme-element-hover text-white font-medium py-3 rounded-md transition-colors text-sm"
+              disabled={isProcessingPayment}
+            >
+              Volver a Datos de Envío
+            </button>
           </div>
+          
+          {checkoutCrossSells.length > 0 && (
+            <div className="mt-6">
+              <h3 className="font-bold text-lg mb-3 text-theme-primary flex items-center gap-2">
+                <span className="text-xl">🔥</span> Agrega a tu pedido
+              </h3>
+              <div className="space-y-3">
+                {checkoutCrossSells.map(product => (
+                  <div key={product.id} className="flex gap-3 p-3 border border-theme-border rounded-lg bg-theme-card group hover:border-theme-primary transition-colors items-center">
+                    <img src={product.image.split(',')[0]} alt={product.name} className="w-16 h-16 object-cover rounded bg-theme-base" />
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium text-sm text-white line-clamp-2 leading-tight mb-1">{product.name}</p>
+                      <p className="text-theme-primary font-bold">{formatCLP(product.is_offer ? product.offer_price : product.price)}</p>
+                    </div>
+                    <button 
+                      onClick={() => addItem(product)}
+                      className="flex-shrink-0 bg-theme-element hover:bg-theme-primary hover:text-white text-gray-400 p-2.5 rounded-md transition-colors"
+                      title="Agregar al carrito"
+                    >
+                      <Plus className="w-5 h-5" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>

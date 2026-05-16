@@ -71,7 +71,7 @@ export default function OrderDetailPage() {
         <button 
           onClick={handleDownload}
           disabled={isDownloading}
-          className="bg-theme-element hover:bg-gray-800 text-white px-4 py-2 border border-theme-border-hover rounded text-sm transition-colors flex items-center gap-2 font-medium disabled:opacity-50"
+          className="bg-theme-element hover:bg-theme-primary text-white border-0 px-4 py-2 rounded text-sm transition-colors flex items-center gap-2 font-medium disabled:opacity-50"
         >
           <Download className="w-4 h-4" />
           {isDownloading ? 'Generando PDF...' : 'Descargar Boleta'}
@@ -207,7 +207,7 @@ export default function OrderDetailPage() {
           <section className="bg-theme-card border border-theme-border rounded-lg p-6">
             <h2 className="text-lg font-bold mb-4">¿Necesitas ayuda?</h2>
             <p className="text-sm text-gray-400 mb-4">Si tienes problemas con tu pedido, puedes contactar a nuestro soporte técnico para más información.</p>
-            <button className="w-full bg-theme-element hover:bg-gray-800 border border-theme-border-hover text-white font-medium py-2 rounded transition-colors">
+            <button className="w-full bg-theme-element hover:bg-theme-primary text-white font-medium py-2 rounded transition-colors">
               Contactar Soporte
             </button>
           </section>
