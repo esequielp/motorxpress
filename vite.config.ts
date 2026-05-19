@@ -5,7 +5,7 @@ import path from 'path';
 import {defineConfig, loadEnv} from 'vite';
 
 export default defineConfig(({mode}) => {
-  const env = loadEnv(mode, '.', '');
+  const env = loadEnv(mode, process.cwd(), '');
   return {
     plugins: [
       react(), 
@@ -16,10 +16,10 @@ export default defineConfig(({mode}) => {
           enabled: true
         },
         manifest: {
-          name: 'MotorXpress',
-          short_name: 'MotorXpress',
-          description: 'E-commerce de repuestos y accesorios para vehículos',
-          theme_color: '#FDE047',
+          name: env.VITE_APP_NAME || 'MotorXpress',
+          short_name: env.VITE_APP_NAME || 'MotorXpress',
+          description: env.VITE_APP_DESC || 'E-commerce white-label platform',
+          theme_color: env.VITE_THEME_COLOR || '#FDE047',
           background_color: '#000000',
           display: 'standalone',
           icons: [
