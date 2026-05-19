@@ -88,8 +88,16 @@ export default function ProductDetailPage() {
     setActiveImage((p) => (p - 1 + images.length) % images.length);
   };
 
-  const handleAdd = () => {
-    if (!product) return;
+  const handleAdd = (e?: React.MouseEvent) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    if (!product) {
+      console.error('Product is not loaded');
+      return;
+    }
+    console.log('Adding product to cart:', product);
     addItem({ ...product, quantity: 1 });
     setAdded(true);
     setTimeout(() => setAdded(false), 2000);
@@ -209,10 +217,12 @@ export default function ProductDetailPage() {
           <button 
             onClick={handleAdd}
             disabled={product.stock === 0}
-            className={`w-full py-5 rounded-lg flex items-center justify-center gap-3 text-xl font-bold uppercase transition-all transform ${added ? 'bg-green-600 text-white cursor-default' : product.stock === 0 ? 'bg-gray-800 text-gray-500 cursor-not-allowed' : 'bg-theme-primary hover:bg-theme-primary-hover hover:scale-[1.02] active:scale-95 shadow-[0_0_40px_rgba(227,28,37,0.3)]'}`}
+            className={`w-full py-4 rounded-lg flex items-center justify-center gap-3 text-lg font-bebas tracking-wide uppercase transition-all transform ${added ? 'bg-green-600 text-white cursor-default' : product.stock === 0 ? 'bg-theme-card border border-theme-border text-gray-500 cursor-not-allowed' : 'bg-theme-primary text-black hover:bg-theme-primary-hover active:scale-95 shadow-lg'}`}
           >
-            <ShoppingCart className="w-6 h-6" />
-            {added ? '¡AÑADIDO AL CARRITO!' : product.stock === 0 ? 'AGOTADO' : 'AGREGAR AL CARRITO AHORA'}
+            <ShoppingCart className="w-5 h-5 shrink-0" />
+            <span className="leading-none pt-1">
+              {added ? '¡AÑADIDO AL CARRITO!' : product.stock === 0 ? 'AGOTADO' : 'AGREGAR AL CARRITO'}
+            </span>
           </button>
 
           {/* Guarantees */}
@@ -237,9 +247,11 @@ export default function ProductDetailPage() {
       {relatedProducts.length > 0 && (
         <div className="mt-20">
           <h2 className="text-3xl font-bebas text-white mb-6 border-b border-theme-border pb-4 uppercase">Productos Compatibles Recomendados</h2>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
+          <div className="flex overflow-x-auto snap-x snap-mandatory pb-6 gap-4 sm:gap-6 hide-scrollbar md:grid md:grid-cols-4 md:overflow-visible md:snap-none">
             {relatedProducts.map(p => (
-              <ProductCard key={p.id} product={p} />
+              <div key={p.id} className="w-[75vw] max-w-[280px] sm:w-[300px] md:w-auto flex-shrink-0 snap-start snap-always">
+                <ProductCard product={p} />
+              </div>
             ))}
           </div>
         </div>

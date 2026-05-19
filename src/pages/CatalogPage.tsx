@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react';
 import ProductCard from '../components/product/ProductCard';
 import { Filter, X } from 'lucide-react';
+import { useSearchParams } from 'react-router-dom';
 
 export default function CatalogPage() {
+  const [searchParams] = useSearchParams();
   const [products, setProducts] = useState<any[]>([]);
   const [filteredProducts, setFilteredProducts] = useState<any[]>([]);
   const [isClient, setIsClient] = useState(false);
@@ -12,7 +14,12 @@ export default function CatalogPage() {
 
   const [category, setCategory] = useState<string>('');
   const [brand, setBrand] = useState<string>('');
+  const [sortBy, setSortBy] = useState<string>('featured');
   const [showFilters, setShowFilters] = useState(false);
+
+  const [vehicleMake, setVehicleMake] = useState<string>(searchParams.get('make') || '');
+  const [vehicleModel, setVehicleModel] = useState<string>(searchParams.get('model') || '');
+  const [vehicleYear, setVehicleYear] = useState<string>(searchParams.get('year') || '');
 
   useEffect(() => {
     setIsClient(true);
@@ -41,10 +48,46 @@ export default function CatalogPage() {
       result = result.filter(p => p.brand_id === Number(brand));
     }
 
+    if (vehicleMake) {
+      result = result.filter(p => p.vehicle?.toLowerCase().includes(vehicleMake.toLowerCase()));
+    }
+    if (vehicleModel) {
+      result = result.filter(p => p.vehicle?.toLowerCase().includes(vehicleModel.toLowerCase()));
+    }
+    if (vehicleYear) {
+      result = result.filter(p => p.vehicle?.includes(vehicleYear) || p.vehicle?.includes('Universal'));
+    }
+
+    if (sortBy === 'price-asc') {
+      result.sort((a, b) => {
+        const priceA = a.is_offer ? (a.offer_price || a.price) : a.price;
+        const priceB = b.is_offer ? (b.offer_price || b.price) : b.price;
+        return priceA - priceB;
+      });
+    } else if (sortBy === 'price-desc') {
+      result.sort((a, b) => {
+        const priceA = a.is_offer ? (a.offer_price || a.price) : a.price;
+        const priceB = b.is_offer ? (b.offer_price || b.price) : b.price;
+        return priceB - priceA;
+      });
+    } else if (sortBy === 'name-asc') {
+      result.sort((a, b) => a.name.localeCompare(b.name));
+    } else if (sortBy === 'name-desc') {
+      result.sort((a, b) => b.name.localeCompare(a.name));
+    }
+
     setFilteredProducts(result);
-  }, [category, brand, products]);
+  }, [category, brand, vehicleMake, vehicleModel, vehicleYear, sortBy, products]);
 
   if (!isClient) return null;
+
+  const mockMakes = ['Toyota', 'Nissan', 'Universal'];
+  const mockModels: Record<string, string[]> = {
+    'Toyota': ['Corolla', 'Yaris', 'Hilux'],
+    'Nissan': ['Versa', 'Sentra', 'Navara'],
+    'Universal': ['Universal']
+  };
+  const mockYears = Array.from({length: 25}, (_, i) => String(new Date().getFullYear() - i));
 
   return (
     <div className="container mx-auto px-4 py-8 min-h-screen">
@@ -61,11 +104,23 @@ export default function CatalogPage() {
           <Filter size={18} /> Filtros
         </button>
 
-        <div className={`sm:flex flex-col sm:flex-row gap-3 w-full sm:w-auto ${showFilters ? 'flex' : 'hidden'}`}>
+        <div className={`sm:flex flex-col sm:flex-row gap-3 w-full sm:w-auto overflow-x-auto ${showFilters ? 'flex' : 'hidden'}`}>
+          <select 
+            value={sortBy} 
+            onChange={e => setSortBy(e.target.value)}
+            className="bg-theme-card border border-theme-border text-white text-sm rounded-lg block p-2.5 outline-none focus:border-theme-primary min-w-[180px] shadow-sm appearance-none"
+          >
+            <option value="featured">Relevancia</option>
+            <option value="price-asc">Precio: Menor a Mayor</option>
+            <option value="price-desc">Precio: Mayor a Menor</option>
+            <option value="name-asc">Nombre: A - Z</option>
+            <option value="name-desc">Nombre: Z - A</option>
+          </select>
+
           <select 
             value={category} 
             onChange={e => setCategory(e.target.value)}
-            className="bg-theme-card border border-theme-border text-white text-sm rounded-lg block p-2.5 outline-none focus:border-theme-primary min-w-[200px] shadow-sm appearance-none"
+            className="bg-theme-card border border-theme-border text-white text-sm rounded-lg block p-2.5 outline-none focus:border-theme-primary min-w-[180px] shadow-sm appearance-none"
           >
             <option value="">Todas las Categorías</option>
             {dbCategories.map(cat => (
@@ -76,7 +131,7 @@ export default function CatalogPage() {
           <select 
             value={brand} 
             onChange={e => setBrand(e.target.value)}
-            className="bg-theme-card border border-theme-border text-white text-sm rounded-lg block p-2.5 outline-none focus:border-theme-primary min-w-[200px] shadow-sm appearance-none"
+            className="bg-theme-card border border-theme-border text-white text-sm rounded-lg block p-2.5 outline-none focus:border-theme-primary min-w-[180px] shadow-sm appearance-none"
           >
             <option value="">Todas las Marcas</option>
             {dbBrands.map(b => (
@@ -84,15 +139,49 @@ export default function CatalogPage() {
             ))}
           </select>
 
-          {(category || brand) && (
+          {(category || brand || sortBy !== 'featured' || vehicleMake || vehicleModel || vehicleYear) && (
             <button 
-              onClick={() => { setCategory(''); setBrand(''); }}
+              onClick={() => { setCategory(''); setBrand(''); setSortBy('featured'); setVehicleMake(''); setVehicleModel(''); setVehicleYear(''); }}
               className="text-gray-400 hover:text-white p-2 rounded flex items-center justify-center bg-theme-element sm:bg-transparent"
               title="Limpiar filtros"
             >
               <X size={20} />
             </button>
           )}
+        </div>
+      </div>
+
+      {/* Vehicle Selector */}
+      <div className="bg-theme-card border border-theme-border rounded-lg p-4 mb-6">
+        <h2 className="text-white font-bold mb-3 flex items-center gap-2">
+          <span className="text-theme-primary">🚘</span> Filtra por tu vehículo
+        </h2>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <select 
+            value={vehicleMake} 
+            onChange={e => { setVehicleMake(e.target.value); setVehicleModel(''); }}
+            className="bg-theme-element border border-theme-border text-white text-sm rounded-lg block w-full p-2.5 outline-none focus:border-theme-primary"
+          >
+            <option value="">Marca...</option>
+            {mockMakes.map(m => <option key={m} value={m}>{m}</option>)}
+          </select>
+          <select 
+            value={vehicleModel} 
+            onChange={e => setVehicleModel(e.target.value)}
+            disabled={!vehicleMake || !mockModels[vehicleMake]}
+            className="bg-theme-element border border-theme-border text-white text-sm rounded-lg block w-full p-2.5 outline-none focus:border-theme-primary disabled:opacity-50"
+          >
+            <option value="">Modelo...</option>
+            {vehicleMake && mockModels[vehicleMake]?.map(m => <option key={m} value={m}>{m}</option>)}
+          </select>
+          <select 
+            value={vehicleYear} 
+            onChange={e => setVehicleYear(e.target.value)}
+            className="bg-theme-element border border-theme-border text-white text-sm rounded-lg block w-full p-2.5 outline-none focus:border-theme-primary"
+          >
+            <option value="">Año...</option>
+            {mockYears.map(y => <option key={y} value={y}>{y}</option>)}
+          </select>
         </div>
       </div>
 
@@ -106,7 +195,7 @@ export default function CatalogPage() {
                <h3 className="text-xl font-bold text-white mb-2">No se encontraron productos</h3>
                <p className="text-gray-400">Intenta modificando los filtros para ver más resultados.</p>
                <button 
-                 onClick={() => { setCategory(''); setBrand(''); }}
+                 onClick={() => { setCategory(''); setBrand(''); setSortBy('featured'); setVehicleMake(''); setVehicleModel(''); setVehicleYear(''); }}
                  className="mt-6 border border-theme-primary text-theme-primary px-6 py-2 rounded font-bold hover:bg-theme-primary hover:text-white transition-colors"
                >
                  Limpiar Filtros

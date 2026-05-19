@@ -37,7 +37,7 @@ export const useCart = create<CartStore>()(
           return {
             items: state.items.map(i =>
               i.sku === item.sku
-                ? { ...i, quantity: Math.min(i.quantity + 1, i.maxStock) }
+                ? { ...i, quantity: Math.min(i.quantity + 1, i.maxStock || 99) }
                 : i
             ),
             isOpen: true
@@ -55,7 +55,7 @@ export const useCart = create<CartStore>()(
           ? state.items.filter(i => i.sku !== sku)
           : state.items.map(i =>
               i.sku === sku
-                ? { ...i, quantity: Math.min(qty, i.maxStock) }
+                ? { ...i, quantity: Math.min(qty, i.maxStock || 99) }
                 : i
             ),
       })),

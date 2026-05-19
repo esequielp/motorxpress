@@ -1,6 +1,6 @@
 import { useState, FormEvent, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Package, User, LogOut, CheckCircle2, Truck, Clock, LogIn, UserPlus } from 'lucide-react';
+import { Package, User, LogOut, CheckCircle2, Truck, Clock, LogIn, UserPlus, MapPin, Plus, Trash2, Edit2 } from 'lucide-react';
 import { formatCLP } from '../lib/utils/formatCLP';
 
 export default function AccountPage() {
@@ -154,7 +154,15 @@ export default function AccountPage() {
       const res = await fetch(`/api/users/${currentUser.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: currentUser.name, email: currentUser.email, role: currentUser.role })
+        body: JSON.stringify({ 
+          name: currentUser.name, 
+          email: currentUser.email, 
+          role: currentUser.role,
+          phone: currentUser.phone,
+          address: currentUser.address,
+          addresses: currentUser.addresses,
+          birthdate: currentUser.birthdate
+        })
       });
       if (res.ok) {
         setIsEditing(false);
@@ -211,7 +219,8 @@ export default function AccountPage() {
 
         <main className="md:col-span-3 space-y-8">
           {activeTab === 'perfil' && (
-             <section className="bg-theme-card border border-theme-border rounded-lg p-6">
+            <>
+             <section className="bg-theme-card border border-theme-border rounded-lg p-6 mb-8">
                <div className="flex justify-between items-center mb-6">
                  <h2 className="text-2xl font-bebas">DATOS PERSONALES</h2>
                  {!isEditing && (
@@ -247,6 +256,25 @@ export default function AccountPage() {
                           required
                         />
                       </div>
+                      <div>
+                        <label className="block text-sm text-gray-400 mb-1">Teléfono</label>
+                        <input 
+                          type="tel" 
+                          value={currentUser.phone || ''}
+                          onChange={e => setCurrentUser({...currentUser, phone: e.target.value})}
+                          placeholder="+56 9 1234 5678"
+                          className="w-full bg-theme-base border border-theme-border rounded p-2 text-white outline-none focus:border-theme-primary" 
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm text-gray-400 mb-1">Fecha de Nacimiento (Regalos 🎁)</label>
+                        <input 
+                          type="date" 
+                          value={currentUser.birthdate || ''}
+                          onChange={e => setCurrentUser({...currentUser, birthdate: e.target.value})}
+                          className="w-full bg-theme-base border border-theme-border rounded p-2 text-white outline-none focus:border-theme-primary" 
+                        />
+                      </div>
                     </div>
                     <div className="flex justify-end gap-4 mt-6">
                       <button 
@@ -274,9 +302,21 @@ export default function AccountPage() {
                      <span className="block text-gray-500 mb-1 uppercase text-xs font-bold tracking-wider">Email</span>
                      <span className="text-white text-lg">{currentUser.email}</span>
                    </div>
+                   <div className="bg-theme-base p-4 rounded border border-theme-border">
+                     <span className="block text-gray-500 mb-1 uppercase text-xs font-bold tracking-wider">Teléfono</span>
+                     <span className="text-white text-lg">{currentUser.phone || '-'}</span>
+                   </div>
+                   <div className="bg-theme-base p-4 rounded border border-theme-border">
+                     <span className="block text-gray-500 mb-1 uppercase text-xs font-bold tracking-wider">Fecha Nacimiento</span>
+                     <span className="text-white text-lg">{currentUser.birthdate || '-'}</span>
+                   </div>
                  </div>
                )}
              </section>
+             
+             {/* Libreta de Direcciones */}
+             <AddressManager currentUser={currentUser} setCurrentUser={setCurrentUser} />
+            </>
           )}
 
           {activeTab === 'pedidos' && (
@@ -325,5 +365,136 @@ export default function AccountPage() {
         </main>
       </div>
     </div>
+  );
+}
+
+function AddressManager({ currentUser, setCurrentUser }: { currentUser: any, setCurrentUser: (user: any) => void }) {
+  const [isAdding, setIsAdding] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [newAddress, setNewAddress] = useState({ label: '', street: '', number: '', commune: '', region: '' });
+  
+  const addresses = currentUser.addresses ? JSON.parse(currentUser.addresses) : [];
+
+  const handleSave = async (e: FormEvent) => {
+    e.preventDefault();
+    setIsSaving(true);
+    const updatedAddresses = [...addresses, { id: Date.now().toString(), ...newAddress }];
+    
+    try {
+      const res = await fetch(`/api/users/${currentUser.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          ...currentUser,
+          addresses: JSON.stringify(updatedAddresses)
+        })
+      });
+      if (res.ok) {
+        const u = { ...currentUser, addresses: JSON.stringify(updatedAddresses) };
+        setCurrentUser(u);
+        localStorage.setItem('motorxpress_user', JSON.stringify(u));
+        setIsAdding(false);
+        setNewAddress({ label: '', street: '', number: '', commune: '', region: '' });
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    if (!confirm('¿Eliminar esta dirección?')) return;
+    const updatedAddresses = addresses.filter((a: any) => a.id !== id);
+    try {
+      const res = await fetch(`/api/users/${currentUser.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          ...currentUser,
+          addresses: JSON.stringify(updatedAddresses)
+        })
+      });
+      if (res.ok) {
+        const u = { ...currentUser, addresses: JSON.stringify(updatedAddresses) };
+        setCurrentUser(u);
+        localStorage.setItem('motorxpress_user', JSON.stringify(u));
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  return (
+    <section className="bg-theme-card border border-theme-border rounded-lg p-6 mb-8 shadow-sm">
+      <div className="flex justify-between items-center mb-6 pb-4 border-b border-theme-border">
+        <h3 className="text-xl font-bold text-white flex items-center gap-2">
+          <MapPin size={20} className="text-theme-primary" /> Mis Direcciones de Envío
+        </h3>
+        {!isAdding && (
+          <button 
+            onClick={() => setIsAdding(true)}
+            className="flex items-center gap-1 text-sm bg-theme-primary text-white px-3 py-1.5 rounded hover:bg-theme-primary-hover transition-colors"
+          >
+            <Plus size={16} /> Añadir Dirección
+          </button>
+        )}
+      </div>
+
+      {isAdding && (
+        <form onSubmit={handleSave} className="bg-theme-base p-4 rounded border border-theme-border mb-6">
+          <h4 className="font-bold text-white mb-4">Nueva Dirección</h4>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm text-gray-400 mb-1">Nombre (ej. Casa, Oficina)</label>
+              <input required value={newAddress.label} onChange={e => setNewAddress({...newAddress, label: e.target.value})} className="w-full bg-theme-element border border-theme-border rounded p-2 text-white" />
+            </div>
+            <div>
+              <label className="block text-sm text-gray-400 mb-1">Calle</label>
+              <input required value={newAddress.street} onChange={e => setNewAddress({...newAddress, street: e.target.value})} className="w-full bg-theme-element border border-theme-border rounded p-2 text-white" />
+            </div>
+            <div>
+              <label className="block text-sm text-gray-400 mb-1">Número</label>
+              <input required value={newAddress.number} onChange={e => setNewAddress({...newAddress, number: e.target.value})} className="w-full bg-theme-element border border-theme-border rounded p-2 text-white" />
+            </div>
+            <div>
+              <label className="block text-sm text-gray-400 mb-1">Comuna</label>
+              <input required value={newAddress.commune} onChange={e => setNewAddress({...newAddress, commune: e.target.value})} className="w-full bg-theme-element border border-theme-border rounded p-2 text-white" />
+            </div>
+            <div>
+              <label className="block text-sm text-gray-400 mb-1">Región</label>
+              <input required value={newAddress.region} onChange={e => setNewAddress({...newAddress, region: e.target.value})} className="w-full bg-theme-element border border-theme-border rounded p-2 text-white" />
+            </div>
+          </div>
+          <div className="flex justify-end gap-2 mt-4">
+            <button type="button" onClick={() => setIsAdding(false)} className="px-4 py-2 text-sm bg-theme-element text-white rounded hover:bg-gray-600 transition-colors">Cancelar</button>
+            <button type="submit" disabled={isSaving} className="px-4 py-2 text-sm bg-theme-primary text-white rounded hover:bg-theme-primary-hover transition-colors font-bold disabled:opacity-50">Guardar Dirección</button>
+          </div>
+        </form>
+      )}
+
+      {addresses.length === 0 ? (
+        <p className="text-gray-500 text-center py-4">No tienes direcciones guardadas aún.</p>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {addresses.map((addr: any) => (
+            <div key={addr.id} className="bg-theme-base border border-theme-border rounded-lg p-4 group relative">
+              <button 
+                onClick={() => handleDelete(addr.id)}
+                className="absolute top-4 right-4 text-gray-500 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
+                title="Eliminar"
+              >
+                <Trash2 size={18} />
+              </button>
+              <h4 className="font-bold text-white mb-2 flex items-center gap-2">
+                <Truck size={16} className="text-theme-primary" /> {addr.label}
+              </h4>
+              <p className="text-sm text-gray-400">{addr.street} {addr.number}</p>
+              <p className="text-sm text-gray-400">{addr.commune}, {addr.region}</p>
+            </div>
+          ))}
+        </div>
+      )}
+    </section>
   );
 }

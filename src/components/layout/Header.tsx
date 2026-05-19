@@ -3,45 +3,56 @@ import { useCart } from '../../store/cart';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import CartDrawer from '../cart/CartDrawer';
 import { useState, useRef, useEffect } from 'react';
-
-const MOCK_RESULTS = [
-  { id: '1', sku: 'MX-FLT-001', name: 'KIT FILTROS TOYOTA COROLLA 1.6' },
-  { id: '2', sku: 'MX-BUJ-002', name: 'BUJIAS IRIDIUM TOYOTA COROLLA' },
-  { id: '3', sku: 'MX-PST-003', name: 'PASTILLAS DE FRENO CERÁMICAS' },
-  { id: '4', sku: 'MX-ACE-004', name: 'ACEITE SINTÉTICO 5W30 4L' }
-];
+import { getProductThumbnail } from '../../lib/utils/image';
 
 export default function Header() {
-  const { itemCount, setIsOpen } = useCart();
-  const count = itemCount();
+  const { items, setIsOpen } = useCart();
+  const count = items.reduce((acc, item) => acc + item.quantity, 0);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const [searchResults, setSearchResults] = useState<{id: string, sku: string, name: string}[]>([]);
+  const [searchResults, setSearchResults] = useState<any[]>([]);
+  const [allProducts, setAllProducts] = useState<any[]>([]);
   const [showDropdown, setShowDropdown] = useState(false);
-  const searchRef = useRef<HTMLDivElement>(null);
+  const desktopSearchRef = useRef<HTMLDivElement>(null);
+  const mobileSearchRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
   const location = useLocation();
 
   const isAdminRoute = location.pathname.startsWith('/admin');
 
   useEffect(() => {
-    // Simulate API search
+    fetch('/api/products')
+      .then(res => res.json())
+      .then(data => {
+        if (Array.isArray(data)) {
+          setAllProducts(data);
+        }
+      })
+      .catch(err => console.error(err));
+  }, []);
+
+  useEffect(() => {
+    // API search
     if (searchQuery.length > 2) {
-      const results = MOCK_RESULTS.filter(item => 
+      const results = allProducts.filter(item => 
         item.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
         item.sku.toLowerCase().includes(searchQuery.toLowerCase())
-      );
+      ).slice(0, 5); // Limit to 5 results
       setSearchResults(results);
       setShowDropdown(true);
     } else {
       setSearchResults([]);
       setShowDropdown(false);
     }
-  }, [searchQuery]);
+  }, [searchQuery, allProducts]);
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
-      if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
+      const target = event.target as Node;
+      const isOutsideDesktop = desktopSearchRef.current && !desktopSearchRef.current.contains(target);
+      const isOutsideMobile = mobileSearchRef.current && !mobileSearchRef.current.contains(target);
+      
+      if (isOutsideDesktop && isOutsideMobile) {
         setShowDropdown(false);
       }
     }
@@ -49,10 +60,14 @@ export default function Header() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const handleSelectResult = () => {
+  const handleSelectResult = (productId?: string) => {
     setShowDropdown(false);
     setSearchQuery('');
-    navigate('/catalogo');
+    if (productId) {
+      navigate(`/producto/${productId}`);
+    } else {
+      navigate('/catalogo');
+    }
   };
 
   return (
@@ -68,7 +83,7 @@ export default function Header() {
             </Link>
           </div>
 
-          <div className="hidden md:flex flex-1 max-w-xl mx-8 relative" ref={searchRef}>
+          <div className="hidden md:flex flex-1 max-w-xl mx-8 relative" ref={desktopSearchRef}>
             <div className="relative w-full">
               <input
                 type="text"
@@ -88,9 +103,14 @@ export default function Header() {
                      {searchResults.map(result => (
                        <button
                          key={result.id}
-                         onClick={handleSelectResult}
-                         className="flex items-center gap-3 p-3 hover:bg-theme-element text-left border-b border-theme-border last:border-0 transition-colors"
+                         onClick={() => handleSelectResult(result.id)}
+                         className="flex items-center gap-3 p-3 hover:bg-theme-element text-left border-b border-theme-border last:border-0 transition-colors w-full"
                        >
+                         {result.image ? (
+                           <img src={getProductThumbnail(result.image)} alt={result.name} className="w-10 h-10 object-cover rounded" />
+                         ) : (
+                           <div className="w-10 h-10 bg-theme-base rounded flex-shrink-0" />
+                         )}
                          <div>
                             <p className="text-white font-medium text-sm">{result.name}</p>
                             <p className="text-xs text-gray-400 font-mono">{result.sku}</p>
@@ -98,8 +118,8 @@ export default function Header() {
                        </button>
                      ))}
                      <button 
-                       onClick={handleSelectResult}
-                       className="p-3 bg-theme-base text-theme-primary text-sm font-bold flex items-center justify-center gap-1 hover:bg-theme-element transition-colors"
+                       onClick={() => handleSelectResult()}
+                       className="p-3 bg-theme-base text-theme-primary text-sm font-bold flex items-center justify-center gap-1 hover:bg-theme-element transition-colors w-full"
                      >
                        Ver todos los resultados <ArrowRight className="w-4 h-4" />
                      </button>
@@ -136,26 +156,71 @@ export default function Header() {
           </div>
         </div>
 
-        {/* Mobile Search */}
+        {/* Mobile Search & Menu */}
         {mobileMenuOpen && (
-          <div className="md:hidden border-t border-theme-border p-4 bg-theme-base">
+          <div className="md:hidden border-t border-theme-border p-4 bg-theme-base relative shadow-xl z-50 flex flex-col gap-4" ref={mobileSearchRef}>
              <div className="relative w-full">
               <input
                 type="text"
                 placeholder="Busca por marca, modelo o SKU..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full bg-theme-card border border-theme-border text-white rounded-md pl-4 pr-10 py-2 focus:outline-none focus:border-theme-primary"
+                onFocus={() => { if(searchQuery.length > 2) setShowDropdown(true); }}
+                className="w-full bg-theme-card border border-theme-border text-white rounded-md pl-4 pr-10 py-3 focus:outline-none focus:border-theme-primary text-base"
               />
-              <Search className="absolute right-3 top-2.5 w-5 h-5 text-gray-400" />
+              <Search className="absolute right-3 top-3 w-5 h-5 text-gray-400" />
             </div>
-             <Link 
-               to="/cuenta" 
-               className="mt-4 flex items-center gap-2 text-gray-300 transition-colors"
-               onClick={() => setMobileMenuOpen(false)}
-             >
-                <User className="w-5 h-5" /> Mi Cuenta
-             </Link>
+
+            {showDropdown && (
+              <div className="absolute top-[76px] left-4 right-4 bg-theme-card border border-theme-border rounded-md shadow-xl overflow-hidden z-[60]">
+                {searchResults.length > 0 ? (
+                  <div className="flex flex-col">
+                     {searchResults.map(result => (
+                       <button
+                         key={result.id}
+                         onClick={() => { setMobileMenuOpen(false); handleSelectResult(result.id); }}
+                         className="flex items-center gap-3 p-3 hover:bg-theme-element text-left border-b border-theme-border last:border-0 transition-colors w-full"
+                       >
+                         {result.image ? (
+                           <img src={getProductThumbnail(result.image)} alt={result.name} className="w-10 h-10 object-cover rounded" />
+                         ) : (
+                           <div className="w-10 h-10 bg-theme-base rounded flex-shrink-0" />
+                         )}
+                         <div>
+                            <p className="text-white font-medium text-sm line-clamp-1">{result.name}</p>
+                            <p className="text-xs text-gray-400 font-mono">{result.sku}</p>
+                         </div>
+                       </button>
+                     ))}
+                     <button 
+                       onClick={() => { setMobileMenuOpen(false); handleSelectResult(); }}
+                       className="p-3 bg-theme-base text-theme-primary text-sm font-bold flex items-center justify-center gap-1 hover:bg-theme-element transition-colors w-full"
+                     >
+                       Ver todos los resultados <ArrowRight className="w-4 h-4" />
+                     </button>
+                  </div>
+                ) : (
+                  <div className="p-4 text-center text-gray-400 text-sm">
+                    No se encontraron resultados para "{searchQuery}"
+                  </div>
+                )}
+              </div>
+            )}
+
+            <nav className="flex flex-col gap-2 mt-2">
+              <Link to="/" onClick={() => setMobileMenuOpen(false)} className="px-4 py-3 text-white font-medium hover:bg-theme-card border-b border-theme-border/50 flex items-center justify-between">
+                Inicio <ArrowRight className="w-4 h-4 text-gray-500" />
+              </Link>
+              <Link to="/catalogo" onClick={() => setMobileMenuOpen(false)} className="px-4 py-3 text-white font-medium hover:bg-theme-card border-b border-theme-border/50 flex items-center justify-between">
+                Ver Catálogo Completo <ArrowRight className="w-4 h-4 text-gray-500" />
+              </Link>
+              <Link to="/cuenta" onClick={() => setMobileMenuOpen(false)} className="px-4 py-3 text-white font-medium hover:bg-theme-card flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <User className="w-5 h-5" /> Mi Cuenta
+                </div>
+                <ArrowRight className="w-4 h-4 text-gray-500" />
+              </Link>
+            </nav>
           </div>
         )}
       </header>

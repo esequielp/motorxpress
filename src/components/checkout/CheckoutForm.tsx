@@ -17,14 +17,33 @@ const shippingSchema = z.object({
   apartment:  z.string().optional(),
   commune:    z.string().min(2, "Requerido"),
   region:     z.string().min(2, "Requerido"),
+  saveAddress: z.boolean().optional(),
+  saveAddressLabel: z.string().optional(),
 });
 
 type ShippingForm = z.infer<typeof shippingSchema>;
 
 export default function CheckoutForm({ onComplete, initialData }: { onComplete: (data: ShippingForm) => void, initialData?: any }) {
+  const [savedUserStr] = useState(() => localStorage.getItem('motorxpress_user'));
+  const currentUser = savedUserStr ? JSON.parse(savedUserStr) : null;
+  
+  let addresses = [];
+  try {
+    if (currentUser?.addresses) {
+      addresses = typeof currentUser.addresses === 'string' ? JSON.parse(currentUser.addresses) : currentUser.addresses;
+    }
+  } catch (e) {
+    console.error("Failed to parse addresses", e);
+  }
+
   const { register, handleSubmit, formState: { errors }, setValue } = useForm<ShippingForm>({
     resolver: zodResolver(shippingSchema),
-    defaultValues: initialData || {}
+    defaultValues: initialData || {
+      firstName: currentUser?.name?.split(' ')[0] || '',
+      lastName: currentUser?.name?.split(' ').slice(1).join(' ') || '',
+      email: currentUser?.email || '',
+      phone: currentUser?.phone || '',
+    }
   });
 
   const onSubmit = (data: ShippingForm) => {
@@ -35,9 +54,36 @@ export default function CheckoutForm({ onComplete, initialData }: { onComplete: 
     setValue('rut', formatRut(e.target.value), { shouldValidate: true });
   };
 
+  const applyAddress = (addr: any) => {
+    setValue('street', addr.street);
+    setValue('number', addr.number);
+    setValue('commune', addr.commune);
+    setValue('region', addr.region);
+    // If you saved apartment, you'd apply it here
+  };
+
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 bg-theme-card p-6 rounded-lg border border-theme-border">
       <h2 className="text-xl font-bold text-white mb-4">1. Datos de envío</h2>
+
+      {addresses.length > 0 && (
+        <div className="mb-6 p-4 rounded bg-theme-element/50 border border-theme-border">
+          <p className="text-sm font-bold text-white mb-3">Mis Direcciones Guardadas:</p>
+          <div className="flex gap-2 flex-wrap">
+             {addresses.map((addr: any) => (
+                <button
+                  key={addr.id}
+                  type="button"
+                  onClick={() => applyAddress(addr)}
+                  className="px-3 py-1.5 text-xs bg-theme-base border border-theme-border rounded hover:border-theme-primary transition-colors text-left"
+                >
+                  <span className="font-bold text-theme-primary block">{addr.label}</span>
+                  <span className="text-gray-400 block">{addr.street} {addr.number}</span>
+                </button>
+             ))}
+          </div>
+        </div>
+      )}
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
@@ -105,6 +151,19 @@ export default function CheckoutForm({ onComplete, initialData }: { onComplete: 
           {errors.region && <span className="text-red-500 text-xs">{errors.region.message}</span>}
         </div>
       </div>
+
+      {currentUser && (
+        <div className="pt-4 border-t border-theme-border flex flex-col gap-3">
+          <label className="flex items-center gap-2 cursor-pointer w-max">
+            <input type="checkbox" {...register('saveAddress')} className="accent-theme-primary w-4 h-4 cursor-pointer" />
+            <span className="text-sm text-white font-bold select-none">Guardar esta dirección en mi cuenta para futuras compras</span>
+          </label>
+          <div className="pl-6">
+            <label className="block text-sm text-gray-400 mb-1">Nombre para esta dirección (ej. Mi Casa, Oficina)</label>
+            <input {...register('saveAddressLabel')} className="w-full max-w-sm bg-theme-base border border-theme-border rounded p-2 text-white placeholder:text-gray-600" placeholder="Ej. Casa de mi mamá" />
+          </div>
+        </div>
+      )}
 
       <button type="submit" className="w-full bg-white text-black font-bold py-3 rounded hover:bg-gray-200 transition-colors">
         Continuar a Opciones de Envío

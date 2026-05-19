@@ -69,7 +69,7 @@ export default function SupportChat() {
       <button
         onClick={() => setIsOpen(!isOpen)}
         className={cn(
-          "fixed bottom-6 right-6 p-4 rounded-full bg-theme-primary text-white shadow-lg hover:bg-theme-primary-hover hover:scale-105 transition-all z-50",
+          "fixed bottom-4 right-4 sm:bottom-6 sm:right-6 p-4 rounded-full bg-theme-primary text-white shadow-lg hover:bg-theme-primary-hover hover:scale-105 transition-all z-50",
           isOpen && "hidden"
         )}
       >
@@ -79,7 +79,7 @@ export default function SupportChat() {
       {/* Chat Window */}
       <div
         className={cn(
-          "fixed bottom-6 right-6 w-80 sm:w-96 bg-theme-card border border-theme-border rounded-lg shadow-2xl flex flex-col z-50 transform transition-all origin-bottom-right duration-300",
+          "fixed bottom-4 right-4 sm:bottom-6 sm:right-6 w-[calc(100vw-2rem)] sm:w-96 bg-theme-card border border-theme-border rounded-lg shadow-2xl flex flex-col z-50 transform transition-all origin-bottom-right duration-300",
           isOpen ? "scale-100 opacity-100" : "scale-0 opacity-0 pointer-events-none"
         )}
         style={{ height: '500px', maxHeight: 'calc(100vh - 48px)' }}
@@ -99,7 +99,7 @@ export default function SupportChat() {
           </button>
         </div>
 
-        <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gradient-to-b from-[#0f172a] to-[#020617]">
+        <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-theme-base">
           {messages.map((msg, idx) => (
             <div
               key={idx}
@@ -110,7 +110,7 @@ export default function SupportChat() {
             >
               <div className={cn(
                 "w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0",
-                msg.role === 'user' ? "bg-gray-700" : "bg-theme-primary"
+                msg.role === 'user' ? "bg-theme-border" : "bg-theme-primary"
               )}>
                 {msg.role === 'user' ? <User className="w-4 h-4 text-white" /> : <Bot className="w-4 h-4 text-white" />}
               </div>
@@ -118,7 +118,7 @@ export default function SupportChat() {
                 "p-3 rounded-lg text-sm",
                 msg.role === 'user'
                   ? "bg-theme-element text-white rounded-tr-none"
-                  : "bg-theme-element-hover text-white rounded-tl-none border border-[#333]"
+                  : "bg-theme-element-hover text-white rounded-tl-none border border-theme-border shadow-sm"
               )}>
                 {msg.content}
               </div>
@@ -129,7 +129,7 @@ export default function SupportChat() {
               <div className="w-8 h-8 rounded-full bg-theme-primary flex items-center justify-center flex-shrink-0">
                 <Bot className="w-4 h-4 text-white" />
               </div>
-              <div className="p-3 rounded-lg bg-theme-element-hover text-white rounded-tl-none border border-[#333]">
+              <div className="p-3 rounded-lg bg-theme-element-hover text-white rounded-tl-none border border-theme-border shadow-sm">
                 <Loader2 className="w-4 h-4 animate-spin text-gray-400" />
               </div>
             </div>

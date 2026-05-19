@@ -234,6 +234,7 @@ export default function AdminDashboardPage() {
   // Modals state
   const [isProductModalOpen, setProductModalOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<any>(null);
+  const [productToDelete, setProductToDelete] = useState<any>(null);
   const [isUserModalOpen, setUserModalOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<any>(null);
 
@@ -277,10 +278,11 @@ export default function AdminDashboardPage() {
     fetch('/api/settings').then(r => r.json()).then(d => setSettings(d || {}));
   }, []);
 
-  const handleDeleteProduct = async (id: number) => {
-    if (!confirm('¿Estás seguro de eliminar este producto?')) return;
-    await fetch(`/api/products/${id}`, { method: 'DELETE' });
-    setProducts(products.filter(p => p.id !== id));
+  const confirmDeleteProduct = async () => {
+    if (!productToDelete) return;
+    await fetch(`/api/products/${productToDelete.id}`, { method: 'DELETE' });
+    setProducts(products.filter(p => p.id !== productToDelete.id));
+    setProductToDelete(null);
   };
 
   const handleDeleteUser = async (id: number) => {
@@ -646,7 +648,7 @@ export default function AdminDashboardPage() {
                         >
                           <Edit size={18} />
                         </button>
-                        <button onClick={() => handleDeleteProduct(p.id)} className="text-theme-primary hover:text-red-400 transition">
+                        <button onClick={() => setProductToDelete(p)} className="text-theme-primary hover:text-red-400 transition">
                           <Trash2 size={18} />
                         </button>
                       </td>
@@ -807,6 +809,7 @@ export default function AdminDashboardPage() {
                   <th className="px-6 py-3">ID</th>
                   <th className="px-6 py-3">Nombre</th>
                   <th className="px-6 py-3">Email</th>
+                  <th className="px-6 py-3">Teléfono</th>
                   <th className="px-6 py-3">Rol</th>
                   <th className="px-6 py-3">Registro</th>
                   <th className="px-6 py-3 text-right">Acciones</th>
@@ -815,7 +818,7 @@ export default function AdminDashboardPage() {
               <tbody>
                 {paginatedUsers.length === 0 ? (
                   <tr>
-                    <td colSpan={6} className="px-6 py-8 text-center text-gray-500">No se encontraron usuarios.</td>
+                    <td colSpan={7} className="px-6 py-8 text-center text-gray-500">No se encontraron usuarios.</td>
                   </tr>
                 ) : (
                   paginatedUsers.map((u: any) => (
@@ -828,6 +831,7 @@ export default function AdminDashboardPage() {
                         </div>
                       </td>
                       <td className="px-6 py-4 text-gray-300">{u.email}</td>
+                      <td className="px-6 py-4 text-gray-300 text-xs">{u.phone || '-'}</td>
                       <td className="px-6 py-4">
                         <span className={`px-2 py-1 rounded text-xs font-bold ${u.role === 'admin' ? 'bg-red-500/20 text-red-500' : u.role === 'ejecutivo' ? 'bg-purple-500/20 text-purple-500' : 'bg-blue-500/20 text-blue-500'}`}>
                           {u.role.toUpperCase()}
@@ -1068,6 +1072,35 @@ export default function AdminDashboardPage() {
         />
       )}
 
+      {/* Delete Product Confirmation Modal */}
+      {productToDelete && (
+        <div className="fixed inset-0 bg-black/80 flex items-center justify-center p-4 z-50">
+          <div className="bg-theme-card border border-theme-border rounded-lg w-full max-w-sm p-6 text-center">
+            <div className="mx-auto w-12 h-12 bg-red-500/20 text-red-500 rounded-full flex items-center justify-center mb-4">
+              <AlertTriangle size={24} />
+            </div>
+            <h2 className="text-lg font-bold text-white mb-2">¿Eliminar Producto?</h2>
+            <p className="text-sm text-gray-400 mb-6">
+              Estás a punto de eliminar el producto <span className="text-white font-medium">{productToDelete.name}</span>. Esta acción no se puede deshacer.
+            </p>
+            <div className="flex gap-4">
+              <button 
+                onClick={() => setProductToDelete(null)}
+                className="flex-1 bg-theme-element text-white py-2 rounded font-bold hover:bg-gray-700 transition"
+              >
+                Cancelar
+              </button>
+              <button 
+                onClick={confirmDeleteProduct}
+                className="flex-1 bg-red-600 text-white py-2 rounded font-bold hover:bg-red-700 transition"
+              >
+                Eliminar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* User Modal */}
       {isUserModalOpen && (
         <div className="fixed inset-0 bg-black/80 flex items-center justify-center p-4 z-50">
@@ -1099,6 +1132,55 @@ export default function AdminDashboardPage() {
                   className="w-full bg-theme-base border border-theme-border rounded p-2 text-white outline-none focus:border-theme-primary" 
                   required
                 />
+              </div>
+              <div>
+                <label className="block text-sm text-gray-400 mb-1">Teléfono</label>
+                <input 
+                  name="phone"
+                  type="tel" 
+                  defaultValue={editingUser?.phone}
+                  placeholder="+56 9 1234 5678"
+                  className="w-full bg-theme-base border border-theme-border rounded p-2 text-white outline-none focus:border-theme-primary" 
+                />
+              </div>
+              <div>
+                <label className="block text-sm text-gray-400 mb-1">Fecha de Nacimiento</label>
+                <input 
+                  name="birthdate"
+                  type="date" 
+                  defaultValue={editingUser?.birthdate}
+                  className="w-full bg-theme-base border border-theme-border rounded p-2 text-white outline-none focus:border-theme-primary" 
+                />
+              </div>
+              <div>
+                <label className="block text-sm text-gray-400 mb-1">Dirección Primaria</label>
+                <input 
+                  name="address"
+                  type="text" 
+                  defaultValue={editingUser?.address}
+                  placeholder="Calle 123, Comuna..."
+                  className="w-full bg-theme-base border border-theme-border rounded p-2 text-white outline-none focus:border-theme-primary" 
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm text-gray-400 mb-1">Libreta de Direcciones</label>
+                <div className="bg-theme-base border border-theme-border rounded p-3 overflow-y-auto max-h-32 text-sm text-gray-300">
+                  {(() => {
+                    try {
+                      if (!editingUser?.addresses) return <p className="text-gray-500">Sin direcciones adicionales</p>;
+                      const addrs = JSON.parse(editingUser.addresses);
+                      if (!addrs.length) return <p className="text-gray-500">Sin direcciones adicionales</p>;
+                      return addrs.map((a: any, i: number) => (
+                        <div key={i} className="mb-2 last:mb-0 pb-2 last:pb-0 border-b last:border-0 border-theme-border">
+                          <span className="font-bold text-theme-primary">{a.label}:</span> {a.street} {a.number}, {a.commune}, {a.region}
+                        </div>
+                      ));
+                    } catch {
+                      return <p className="text-gray-500">Error leyendo direcciones</p>;
+                    }
+                  })()}
+                </div>
               </div>
               {!editingUser && (
                 <div>

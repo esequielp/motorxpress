@@ -17,6 +17,9 @@ export function initDb() {
       name TEXT NOT NULL,
       email TEXT UNIQUE NOT NULL,
       password TEXT NOT NULL,
+      phone TEXT,
+      address TEXT,
+      birthdate TEXT,
       role TEXT DEFAULT 'customer',
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP
     );
@@ -98,6 +101,18 @@ export function initDb() {
   } catch (err: any) {
     // Ignore error if column already exists
   }
+  try {
+    db.exec(`ALTER TABLE users ADD COLUMN phone TEXT;`);
+  } catch (err: any) {}
+  try {
+    db.exec(`ALTER TABLE users ADD COLUMN address TEXT;`);
+  } catch (err: any) {}
+  try {
+    db.exec(`ALTER TABLE users ADD COLUMN addresses TEXT;`); // Store JSON string of addresses
+  } catch (err: any) {}
+  try {
+    db.exec(`ALTER TABLE users ADD COLUMN birthdate TEXT;`);
+  } catch (err: any) {}
 
   // Seed data if empty
   const countStmt = db.prepare('SELECT COUNT(*) as count FROM products').get() as { count: number };

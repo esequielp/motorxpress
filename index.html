@@ -2,8 +2,26 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <title>MotorXpress</title>
+    <meta name="theme-color" content="#FFE600">
+    <link rel="apple-touch-icon" href="/pwa-192x192.svg">
+    <script>
+      // Safeguard against third-party polyfills crashing when trying to set window.fetch
+      try {
+        const originalFetch = window.fetch;
+        Object.defineProperty(window, 'fetch', {
+          configurable: true,
+          enumerable: true,
+          get: () => originalFetch,
+          set: (newFetch) => {
+            console.warn('Blocked attempt to overwrite window.fetch');
+          }
+        });
+      } catch (e) {
+        // Ignore
+      }
+    </script>
   </head>
   <body>
     <div id="root"></div>

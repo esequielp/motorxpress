@@ -167,3 +167,13 @@
 :root[data-theme="minimal"] .bg-theme-primary {
   color: #000000 !important;
 }
+
+@layer utilities {
+  .hide-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .hide-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+}

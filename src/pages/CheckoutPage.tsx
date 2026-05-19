@@ -28,7 +28,7 @@ export default function CheckoutPage() {
          if(Array.isArray(allProducts)){
             const allTerms = new Set<string>();
             items.forEach(cartItem => {
-               const fullProduct = allProducts.find(p => p.id === cartItem.id);
+               const fullProduct = allProducts.find(p => String(p.id) === String(cartItem.id));
                if(fullProduct && fullProduct.cross_sell_ids) {
                   const terms = fullProduct.cross_sell_ids.split(',').map((t: string) => t.trim().toLowerCase()).filter((t: string) => t.length > 0);
                   terms.forEach((t: string) => allTerms.add(t));
@@ -37,12 +37,12 @@ export default function CheckoutPage() {
             
             let crossSells: any[] = [];
             if(allTerms.size > 0) {
-                crossSells = allProducts.filter(p => (allTerms.has(p.sku?.toLowerCase()) || allTerms.has(p.mpn?.toLowerCase())) && !items.find((i: any) => i.id === p.id));
+                crossSells = allProducts.filter(p => (allTerms.has(p.sku?.toLowerCase()) || allTerms.has(p.mpn?.toLowerCase())) && !items.find((i: any) => String(i.id) === String(p.id)));
             }
             
             // Fallback to random popular/available products if cross sells list is empty
             if (crossSells.length === 0) {
-                crossSells = allProducts.filter(p => !items.find((i: any) => i.id === p.id));
+                crossSells = allProducts.filter(p => !items.find((i: any) => String(i.id) === String(p.id)));
             }
             
             setCheckoutCrossSells(crossSells.slice(0, 2));
@@ -87,8 +87,38 @@ export default function CheckoutPage() {
     try {
       // Simulate order creation in db
       const savedUserStr = localStorage.getItem('motorxpress_user');
-      const user = savedUserStr ? JSON.parse(savedUserStr) : null;
+      let user = savedUserStr ? JSON.parse(savedUserStr) : null;
       
+      // Save address if requested and user is logged in
+      if (user && shippingData.saveAddress) {
+        const currentAddresses = user.addresses ? JSON.parse(user.addresses) : [];
+        const newAddress = {
+          id: Date.now().toString(),
+          label: shippingData.saveAddressLabel || 'Nueva Dirección',
+          street: shippingData.street,
+          number: shippingData.number,
+          commune: shippingData.commune,
+          region: shippingData.region
+        };
+        const updatedAddresses = [...currentAddresses, newAddress];
+        try {
+          const uRes = await fetch(`/api/users/${user.id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+              ...user,
+              addresses: JSON.stringify(updatedAddresses)
+            })
+          });
+          if (uRes.ok) {
+            user = { ...user, addresses: JSON.stringify(updatedAddresses) };
+            localStorage.setItem('motorxpress_user', JSON.stringify(user));
+          }
+        } catch (e) {
+          console.error("Failed to save user address", e);
+        }
+      }
+
       const res = await fetch('/api/orders', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -97,7 +127,7 @@ export default function CheckoutPage() {
           customer_name: `${shippingData.firstName} ${shippingData.lastName}`,
           customer_email: shippingData.email,
           customer_phone: shippingData.phone,
-          shipping_address: `${shippingData.address}, ${shippingData.commune}, ${shippingData.region}`,
+          shipping_address: `${shippingData.street} ${shippingData.number}${shippingData.apartment ? ` Dpto ${shippingData.apartment}` : ''}, ${shippingData.commune}, ${shippingData.region}`,
           items,
           total: finalTotal
         })
@@ -175,7 +205,44 @@ export default function CheckoutPage() {
                     </button>
                   </div>
                 )}
+                
+                <div className="mt-6 pt-4 border-t border-theme-border text-center">
+                  <button 
+                    onClick={() => setStep(1)}
+                    className="text-theme-primary hover:underline transition-colors text-sm font-medium flex items-center gap-2 mx-auto"
+                    disabled={isProcessingPayment}
+                  >
+                    Volver a Datos de Envío
+                  </button>
+                </div>
              </div>
+          )}
+
+          {checkoutCrossSells.length > 0 && (
+            <div className="mt-8 pt-8 border-t border-theme-border">
+              <h3 className="font-bold text-xl mb-4 text-theme-primary flex items-center gap-2">
+                <span className="text-2xl">🔥</span> Ofertas exclusivas para tu pedido
+              </h3>
+              <p className="text-gray-400 mb-6 text-sm">Aprovecha y agrega estos productos recomendados antes de finalizar tu compra.</p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {checkoutCrossSells.map(product => (
+                  <div key={product.id} className="flex gap-4 p-4 border border-theme-border rounded-lg bg-theme-card group hover:border-theme-primary transition-colors items-center">
+                    <img src={product.image.split(',')[0]} alt={product.name} className="w-20 h-20 object-cover rounded bg-theme-base" />
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium text-sm text-white line-clamp-2 leading-tight mb-2">{product.name}</p>
+                      <p className="text-theme-primary font-bold">{formatCLP(product.is_offer ? product.offer_price : product.price)}</p>
+                    </div>
+                    <button 
+                      onClick={() => addItem(product)}
+                      className="flex-shrink-0 bg-theme-element hover:bg-theme-primary hover:text-white text-gray-400 p-3 rounded-md transition-colors"
+                      title="Agregar al carrito"
+                    >
+                      <Plus className="w-5 h-5" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
           )}
         </div>
 
@@ -220,41 +287,7 @@ export default function CheckoutPage() {
             <p className="text-center text-xs text-gray-500 mt-4 mb-4">
               Acepta: débito, crédito, transferencia, RedCompra
             </p>
-            
-            <button 
-              onClick={() => setStep(1)}
-              className="w-full bg-theme-element hover:bg-theme-element-hover text-white font-medium py-3 rounded-md transition-colors text-sm"
-              disabled={isProcessingPayment}
-            >
-              Volver a Datos de Envío
-            </button>
           </div>
-          
-          {checkoutCrossSells.length > 0 && (
-            <div className="mt-6">
-              <h3 className="font-bold text-lg mb-3 text-theme-primary flex items-center gap-2">
-                <span className="text-xl">🔥</span> Agrega a tu pedido
-              </h3>
-              <div className="space-y-3">
-                {checkoutCrossSells.map(product => (
-                  <div key={product.id} className="flex gap-3 p-3 border border-theme-border rounded-lg bg-theme-card group hover:border-theme-primary transition-colors items-center">
-                    <img src={product.image.split(',')[0]} alt={product.name} className="w-16 h-16 object-cover rounded bg-theme-base" />
-                    <div className="flex-1 min-w-0">
-                      <p className="font-medium text-sm text-white line-clamp-2 leading-tight mb-1">{product.name}</p>
-                      <p className="text-theme-primary font-bold">{formatCLP(product.is_offer ? product.offer_price : product.price)}</p>
-                    </div>
-                    <button 
-                      onClick={() => addItem(product)}
-                      className="flex-shrink-0 bg-theme-element hover:bg-theme-primary hover:text-white text-gray-400 p-2.5 rounded-md transition-colors"
-                      title="Agregar al carrito"
-                    >
-                      <Plus className="w-5 h-5" />
-                    </button>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
         </div>
       </div>
     </div>

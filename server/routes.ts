@@ -10,7 +10,7 @@ const router = Router();
 router.post('/auth/login', (req, res) => {
   const { email, password } = req.body;
   try {
-    const user = db.prepare('SELECT id, name, email, role FROM users WHERE email = ? AND password = ?').get(email, password);
+    const user = db.prepare('SELECT id, name, email, role, phone, address, addresses, birthdate FROM users WHERE email = ? AND password = ?').get(email, password);
     if (!user) {
       return res.status(401).json({ error: 'Invalid credentials' });
     }
@@ -22,7 +22,7 @@ router.post('/auth/login', (req, res) => {
 
 router.get('/users', (req, res) => {
   try {
-    const users = db.prepare('SELECT id, name, email, role, created_at FROM users ORDER BY created_at DESC').all();
+    const users = db.prepare('SELECT id, name, email, role, phone, address, addresses, birthdate, created_at FROM users ORDER BY created_at DESC').all();
     res.json(users);
   } catch (err) {
     res.status(500).json({ error: 'Failed to fetch users' });
@@ -30,10 +30,10 @@ router.get('/users', (req, res) => {
 });
 
 router.post('/users', (req, res) => {
-  const { name, email, password, role } = req.body;
+  const { name, email, password, role, phone, address, addresses, birthdate } = req.body;
   try {
-    const stmt = db.prepare('INSERT INTO users (name, email, password, role) VALUES (?, ?, ?, ?)');
-    const info = stmt.run(name, email, password, role || 'customer');
+    const stmt = db.prepare('INSERT INTO users (name, email, password, role, phone, address, addresses, birthdate) VALUES (?, ?, ?, ?, ?, ?, ?, ?)');
+    const info = stmt.run(name, email, password, role || 'customer', phone || null, address || null, addresses || null, birthdate || null);
     res.json({ success: true, id: info.lastInsertRowid });
   } catch (err) {
     res.status(500).json({ error: 'Failed to create user' });
@@ -42,9 +42,10 @@ router.post('/users', (req, res) => {
 
 router.put('/users/:id', (req, res) => {
   const { id } = req.params;
-  const { name, email, role } = req.body; // usually password updated separately
+  const { name, email, role, phone, address, addresses, birthdate } = req.body;
   try {
-    db.prepare('UPDATE users SET name = ?, email = ?, role = ? WHERE id = ?').run(name, email, role, id);
+    db.prepare('UPDATE users SET name = ?, email = ?, role = ?, phone = ?, address = ?, addresses = ?, birthdate = ? WHERE id = ?')
+      .run(name, email, role, phone || null, address || null, addresses || null, birthdate || null, id);
     res.json({ success: true });
   } catch (err) {
     res.status(500).json({ error: 'Failed to update user' });
