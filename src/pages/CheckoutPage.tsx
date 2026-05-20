@@ -4,6 +4,7 @@ import { formatCLP } from '../lib/utils/formatCLP';
 import CheckoutForm from '../components/checkout/CheckoutForm';
 import { useNavigate } from 'react-router-dom';
 import { Loader2, Plus } from 'lucide-react';
+import { getProductThumbnail } from '../lib/utils/image';
 
 export default function CheckoutPage() {
   const { items, total, addItem } = useCart();
@@ -218,36 +219,11 @@ export default function CheckoutPage() {
              </div>
           )}
 
-          {checkoutCrossSells.length > 0 && (
-            <div className="mt-8 pt-8 border-t border-theme-border">
-              <h3 className="font-bold text-xl mb-4 text-theme-primary flex items-center gap-2">
-                <span className="text-2xl">🔥</span> Ofertas exclusivas para tu pedido
-              </h3>
-              <p className="text-gray-400 mb-6 text-sm">Aprovecha y agrega estos productos recomendados antes de finalizar tu compra.</p>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {checkoutCrossSells.map(product => (
-                  <div key={product.id} className="flex gap-4 p-4 border border-theme-border rounded-lg bg-theme-card group hover:border-theme-primary transition-colors items-center">
-                    <img src={product.image.split(',')[0]} alt={product.name} className="w-20 h-20 object-cover rounded bg-theme-base" />
-                    <div className="flex-1 min-w-0">
-                      <p className="font-medium text-sm text-white line-clamp-2 leading-tight mb-2">{product.name}</p>
-                      <p className="text-theme-primary font-bold">{formatCLP(product.is_offer ? product.offer_price : product.price)}</p>
-                    </div>
-                    <button 
-                      onClick={() => addItem(product)}
-                      className="flex-shrink-0 bg-theme-element hover:bg-theme-primary hover:text-white text-gray-400 p-3 rounded-md transition-colors"
-                      title="Agregar al carrito"
-                    >
-                      <Plus className="w-5 h-5" />
-                    </button>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
+
         </div>
 
-        <div>
-          <div className="bg-theme-card p-6 rounded-lg border border-theme-border sticky top-24">
+        <div className="sticky top-24 space-y-6">
+          <div className="bg-theme-card p-6 rounded-lg border border-theme-border">
             <h2 className="text-xl font-bold text-white mb-4">Resumen del Pedido</h2>
             <div className="space-y-4 mb-6 max-h-[40vh] overflow-y-auto pr-2">
               {items.map(item => (
@@ -288,6 +264,33 @@ export default function CheckoutPage() {
               Acepta: débito, crédito, transferencia, RedCompra
             </p>
           </div>
+          
+          {checkoutCrossSells.length > 0 && (
+            <div className="bg-theme-card p-6 rounded-lg border border-theme-border">
+              <h3 className="font-bold text-xl mb-4 text-theme-primary flex items-center gap-2 leading-tight">
+                <span className="text-2xl pt-1">🔥</span> Ofertas exclusivas para tu pedido
+              </h3>
+              <p className="text-gray-400 mb-6 text-xs">Agrega estos productos recomendados a tu carrito.</p>
+              <div className="grid grid-cols-1 gap-4">
+                {checkoutCrossSells.map(product => (
+                  <div key={product.id} className="flex gap-4 p-3 border border-theme-border rounded-lg bg-theme-base group hover:border-theme-primary transition-colors items-center">
+                    <img src={getProductThumbnail(product.image)} alt={product.name} className="w-16 h-16 object-cover rounded bg-theme-card" />
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium text-xs text-white line-clamp-2 leading-tight mb-1">{product.name}</p>
+                      <p className="text-theme-primary font-bold text-sm">{formatCLP(product.is_offer ? product.offer_price : product.price)}</p>
+                    </div>
+                    <button 
+                      onClick={() => addItem(product)}
+                      className="flex-shrink-0 bg-theme-element hover:bg-theme-primary hover:text-white text-gray-400 p-2 rounded-md transition-colors"
+                      title="Agregar al carrito"
+                    >
+                      <Plus className="w-4 h-4" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>

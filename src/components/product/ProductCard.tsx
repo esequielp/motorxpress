@@ -16,15 +16,23 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   const [added, setAdded] = useState(false);
   const [isPopping, setIsPopping] = useState(false);
 
-  const handleAdd = (e: React.MouseEvent) => {
+  const handleAction = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
+    
+    if ((product as any).type === 'variable') {
+      window.location.href = `/producto/${product.id}`;
+      return;
+    }
+
     addItem(product);
     setAdded(true);
     setIsPopping(true);
     setTimeout(() => setIsPopping(false), 300);
     setTimeout(() => setAdded(false), 2000);
   };
+
+  const isVariable = (product as any).type === 'variable';
 
   return (
     <Link to={`/producto/${product.id}`} className="flex flex-col h-full bg-theme-card border border-theme-border rounded-lg overflow-hidden group hover:border-theme-border-hover transition-all duration-300 hover:shadow-lg select-none">
@@ -39,6 +47,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
            <span className="bg-[#e6fcf5] px-2 py-1 rounded text-[#0ca678] border border-[#0ca678]/20">✓ En stock</span>
            {(product as any).is_offer === 1 && <span className="bg-[#ffe600] px-2 py-1 rounded text-[#333333] shadow border border-[#fce100]">OFERTA</span>}
            {(product as any).is_new === 1 && <span className="bg-[#e7f5ff] px-2 py-1 rounded text-[#1971c2] shadow border border-[#1971c2]/20">NUEVO</span>}
+           {(product as any).type === 'combo' && <span className="bg-purple-100 px-2 py-1 rounded text-purple-700 shadow border border-purple-200">COMBO</span>}
         </div>
       </div>
       <div className="p-4 flex flex-col flex-1">
@@ -56,17 +65,20 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
             ) : (
                <span className="text-theme-primary font-bold text-xl sm:text-2xl leading-none">{formatCLP(product.price)}</span>
             )}
+            {isVariable && <span className="text-gray-400 text-[10px]">(Desde)</span>}
           </div>
           <button 
-            onClick={handleAdd}
+            onClick={handleAction}
             className={cn(
               "w-10 h-10 sm:w-11 sm:h-11 rounded-full transition-all duration-300 flex items-center justify-center relative z-10 shrink-0",
               added ? "bg-green-500 text-white shadow-md" : "bg-theme-primary text-theme-base hover:bg-theme-primary-hover hover:scale-105 shadow-sm",
               isPopping && "scale-125 shadow-xl ring-4 ring-theme-primary/40"
             )}
-            aria-label="Añadir al carrito"
+            aria-label={isVariable ? "Ver opciones" : "Añadir al carrito"}
           >
-            {added ? <Check className="w-4 h-4 sm:w-5 sm:h-5 animate-in zoom-in" /> : <ShoppingCart className="w-4 h-4 sm:w-5 sm:h-5" />}
+            {added ? <Check className="w-4 h-4 sm:w-5 sm:h-5 animate-in zoom-in" /> : (
+              isVariable ? <span className="text-lg font-bold">+</span> : <ShoppingCart className="w-4 h-4 sm:w-5 sm:h-5" />
+            )}
           </button>
         </div>
       </div>

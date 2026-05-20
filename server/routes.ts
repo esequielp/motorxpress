@@ -74,7 +74,21 @@ router.get('/products', (req, res) => {
       FROM products p
       LEFT JOIN categories c ON p.category_id = c.id
       LEFT JOIN brands b ON p.brand_id = b.id
-    `).all();
+    `).all() as any[];
+    
+    const getLightProduct = db.prepare('SELECT id, name, price, stock, image FROM products WHERE id = ?');
+    
+    // Parse JSON fields
+    products.forEach(p => {
+      if (p.variations) p.variations = JSON.parse(p.variations);
+      if (p.combo_items) {
+        const parsed = JSON.parse(p.combo_items);
+        p.combo_items = parsed.map((item: any) => {
+           return { ...item, product: getLightProduct.get(item.product_id) };
+        });
+      };
+    });
+
     res.json(products);
   } catch (err) {
     console.error(err);
@@ -91,8 +105,19 @@ router.get('/products/:id', (req, res) => {
       LEFT JOIN categories c ON p.category_id = c.id
       LEFT JOIN brands b ON p.brand_id = b.id
       WHERE p.id = ?
-    `).get(req.params.id);
+    `).get(req.params.id) as any;
     if (!product) return res.status(404).json({ error: 'Product not found' });
+    
+    // Parse JSON fields
+    if (product.variations) product.variations = JSON.parse(product.variations);
+    if (product.combo_items) {
+      const getLightProduct = db.prepare('SELECT id, name, price, stock, image FROM products WHERE id = ?');
+      const parsed = JSON.parse(product.combo_items);
+      product.combo_items = parsed.map((item: any) => {
+         return { ...item, product: getLightProduct.get(item.product_id) };
+      });
+    }
+
     res.json(product);
   } catch (err) {
     console.error(err);
@@ -102,13 +127,13 @@ router.get('/products/:id', (req, res) => {
 
 // Admin: add product
 router.post('/products', (req, res) => {
-  const { sku, mpn, name, vehicle, price, cost, stock, maxStock, image, category_id, brand_id, cross_sell_ids, is_featured, is_offer, is_new, offer_price, description } = req.body;
+  const { sku, mpn, name, vehicle, price, cost, stock, maxStock, image, category_id, brand_id, cross_sell_ids, is_featured, is_offer, is_new, offer_price, description, type, variations, combo_items } = req.body;
   try {
     const stmt = db.prepare(`
-      INSERT INTO products (sku, mpn, name, vehicle, price, cost, stock, maxStock, image, category_id, brand_id, cross_sell_ids, is_featured, is_offer, is_new, offer_price, description)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      INSERT INTO products (sku, mpn, name, vehicle, price, cost, stock, maxStock, image, category_id, brand_id, cross_sell_ids, is_featured, is_offer, is_new, offer_price, description, type, variations, combo_items)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `);
-    const info = stmt.run(sku, mpn || null, name, vehicle, price, cost || 0, stock, maxStock || stock, image, category_id, brand_id, cross_sell_ids || null, is_featured ? 1 : 0, is_offer ? 1 : 0, is_new ? 1 : 0, offer_price || null, description || null);
+    const info = stmt.run(sku, mpn || null, name, vehicle, price, cost || 0, stock, maxStock || stock, image, category_id, brand_id, cross_sell_ids || null, is_featured ? 1 : 0, is_offer ? 1 : 0, is_new ? 1 : 0, offer_price || null, description || null, type || 'simple', variations ? JSON.stringify(variations) : null, combo_items ? JSON.stringify(combo_items) : null);
     res.json({ success: true, id: info.lastInsertRowid });
   } catch (err) {
     console.error(err);
@@ -119,14 +144,14 @@ router.post('/products', (req, res) => {
 // Admin: update product
 router.put('/products/:id', (req, res) => {
   const { id } = req.params;
-  const { sku, mpn, name, vehicle, price, cost, stock, maxStock, image, category_id, brand_id, cross_sell_ids, is_featured, is_offer, is_new, offer_price, description } = req.body;
+  const { sku, mpn, name, vehicle, price, cost, stock, maxStock, image, category_id, brand_id, cross_sell_ids, is_featured, is_offer, is_new, offer_price, description, type, variations, combo_items } = req.body;
   try {
     const stmt = db.prepare(`
       UPDATE products 
-      SET sku = ?, mpn = ?, name = ?, vehicle = ?, price = ?, cost = ?, stock = ?, maxStock = ?, image = ?, category_id = ?, brand_id = ?, cross_sell_ids = ?, is_featured = ?, is_offer = ?, is_new = ?, offer_price = ?, description = ?, updated_at = CURRENT_TIMESTAMP
+      SET sku = ?, mpn = ?, name = ?, vehicle = ?, price = ?, cost = ?, stock = ?, maxStock = ?, image = ?, category_id = ?, brand_id = ?, cross_sell_ids = ?, is_featured = ?, is_offer = ?, is_new = ?, offer_price = ?, description = ?, type = ?, variations = ?, combo_items = ?, updated_at = CURRENT_TIMESTAMP
       WHERE id = ?
     `);
-    stmt.run(sku, mpn || null, name, vehicle, price, cost || 0, stock, maxStock, image, category_id, brand_id, cross_sell_ids || null, is_featured ? 1 : 0, is_offer ? 1 : 0, is_new ? 1 : 0, offer_price || null, description || null, id);
+    stmt.run(sku, mpn || null, name, vehicle, price, cost || 0, stock, maxStock, image, category_id, brand_id, cross_sell_ids || null, is_featured ? 1 : 0, is_offer ? 1 : 0, is_new ? 1 : 0, offer_price || null, description || null, type || 'simple', variations ? JSON.stringify(variations) : null, combo_items ? JSON.stringify(combo_items) : null, id);
     res.json({ success: true });
   } catch (err) {
     console.error(err);
@@ -203,7 +228,7 @@ router.post('/orders', (req, res) => {
         INSERT INTO orders (user_id, customer_name, customer_email, customer_phone, shipping_address, total)
         VALUES (?, ?, ?, ?, ?, ?)
       `);
-      const info = orderStmt.run(user_id || null, customer_name, customer_email, customer_phone, shipping_address, total);
+      const info = orderStmt.run(user_id || null, customer_name || null, customer_email || null, customer_phone || null, shipping_address || null, total || 0);
       const orderId = info.lastInsertRowid;
       
       const itemStmt = db.prepare(`
@@ -214,9 +239,11 @@ router.post('/orders', (req, res) => {
       const updateStockStmt = db.prepare('UPDATE products SET stock = stock - ? WHERE id = ?');
 
       for (const item of items) {
-        itemStmt.run(orderId, item.product_id || item.id, item.name, item.price, item.quantity);
-        if (item.product_id || item.id) {
-          updateStockStmt.run(item.quantity, item.product_id || item.id);
+        const pIdRaw = (item.product_id || item.id);
+        const basePId = pIdRaw ? parseInt(pIdRaw.toString().split('-')[0], 10) : null;
+        itemStmt.run(orderId, basePId || null, item.name || 'Producto', item.price || 0, item.quantity || 1);
+        if (basePId) {
+          updateStockStmt.run(item.quantity || 1, basePId);
         }
       }
       return orderId;
@@ -270,7 +297,42 @@ router.put('/settings', (req, res) => {
   }
 });
 
-export default router;
+// =====================================
+// PAGES
+// =====================================
+
+router.get('/pages', (req, res) => {
+  try {
+    const pages = db.prepare('SELECT * FROM pages').all();
+    res.json(pages);
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to fetch pages' });
+  }
+});
+
+router.get('/pages/:slug', (req, res) => {
+  try {
+    const page = db.prepare('SELECT * FROM pages WHERE slug = ?').get(req.params.slug);
+    if (!page) {
+      return res.status(404).json({ error: 'Page not found' });
+    }
+    res.json(page);
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to fetch page' });
+  }
+});
+
+router.put('/pages/:slug', (req, res) => {
+  const { title, content } = req.body;
+  const slug = req.params.slug;
+  try {
+    db.prepare('INSERT INTO pages (slug, title, content) VALUES (?, ?, ?) ON CONFLICT(slug) DO UPDATE SET title=excluded.title, content=excluded.content, updated_at=CURRENT_TIMESTAMP').run(slug, title, content);
+    res.json({ success: true });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Failed to update page' });
+  }
+});
 
 // =====================================
 // NEWSLETTER
@@ -289,4 +351,6 @@ router.post('/newsletter', (req, res) => {
     res.status(500).json({ error: 'Fallo al suscribir' });
   }
 });
+
+export default router;
 

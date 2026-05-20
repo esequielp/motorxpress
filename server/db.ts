@@ -83,6 +83,13 @@ export function initDb() {
       value TEXT NOT NULL
     );
 
+    CREATE TABLE IF NOT EXISTS pages (
+      slug TEXT PRIMARY KEY,
+      title TEXT NOT NULL,
+      content TEXT NOT NULL,
+      updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    );
+
     CREATE TABLE IF NOT EXISTS newsletters (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       email TEXT UNIQUE NOT NULL,
@@ -92,10 +99,14 @@ export function initDb() {
 
   // Migrate existing tables
   try {
-    db.exec(`ALTER TABLE products ADD COLUMN cost INTEGER DEFAULT 0;`);
-  } catch (err: any) {
-    // Ignore error if column already exists
-  }
+    db.exec(`ALTER TABLE products ADD COLUMN type TEXT DEFAULT 'simple';`);
+  } catch (err: any) {}
+  try {
+    db.exec(`ALTER TABLE products ADD COLUMN variations TEXT;`);
+  } catch (err: any) {}
+  try {
+    db.exec(`ALTER TABLE products ADD COLUMN combo_items TEXT;`);
+  } catch (err: any) {}
   try {
     db.exec(`ALTER TABLE products ADD COLUMN cross_sell_ids TEXT;`);
   } catch (err: any) {
@@ -138,32 +149,59 @@ function seedDatabase() {
   };
 
   const insertProduct = db.prepare(`
-    INSERT INTO products (sku, mpn, name, vehicle, price, stock, maxStock, image, category_id, brand_id, is_featured, is_offer, is_new, offer_price, description)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    INSERT INTO products (sku, mpn, name, vehicle, price, cost, stock, maxStock, image, category_id, brand_id, is_featured, is_offer, is_new, offer_price, description, type, variations, combo_items)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `);
 
-  insertProduct.run(
+  const prod1Id = insertProduct.run(
     'MX-FLT-001', 'FLT-TOY-001', 'KIT FILTROS TOYOTA COROLLA 1.6', 'Toyota Corolla 2005-2012 Sedán',
-    18990, 5, 5, 'https://images.unsplash.com/photo-1619642751034-765dfdf7c58e?auto=format&fit=crop&w=400&q=80',
-    catIds.filtros, brandIds.toyota, 1, 0, 0, null, 'Filtro de aire, aceite y cabina de alta retención de partículas. Extiende la vida útil de tu motor garantizando un flujo limpio y constante. Dimensiones OEM.'
-  );
+    18990, 10000, 5, 5, 'https://images.unsplash.com/photo-1619642751034-765dfdf7c58e?auto=format&fit=crop&w=400&q=80',
+    catIds.filtros, brandIds.toyota, 1, 0, 0, null, 'Filtro de aire, aceite y cabina de alta retención de partículas.', 'simple', null, null
+  ).lastInsertRowid;
 
-  insertProduct.run(
+  const prod2Id = insertProduct.run(
     'MX-BUJ-002', 'BUJ-IRI-002', 'BUJIAS IRIDIUM TOYOTA COROLLA', 'Toyota Corolla 2005-2012 Sedán',
-    12500, 12, 12, 'https://images.unsplash.com/photo-1601362840469-51e4d8d58785?auto=format&fit=crop&w=400&q=80',
-    catIds.bujias, brandIds.toyota, 0, 1, 0, 8500, 'Bujías de Iridium con electrodo central ultra fino (0.4mm). Proporciona mejor aceleración, ignición más rápida y ahorro de combustible de hasta un 5%.'
-  );
+    12500, 5000, 12, 12, 'https://images.unsplash.com/photo-1601362840469-51e4d8d58785?auto=format&fit=crop&w=400&q=80',
+    catIds.bujias, brandIds.toyota, 0, 1, 0, 8500, 'Bujías de Iridium con electrodo central ultra fino.', 'simple', null, null
+  ).lastInsertRowid;
 
   insertProduct.run(
     'MX-PST-003', 'PST-CER-003', 'PASTILLAS DE FRENO CERÁMICAS', 'Universal',
-    32900, 2, 2, 'https://images.unsplash.com/photo-1536700503339-1e4b06520771?auto=format&fit=crop&w=400&q=80',
-    catIds.frenos, brandIds.universal, 1, 0, 1, null, 'Compuesto cerámico avanzado que reduce el polvo en las llantas y ruidos ("chillidos") molestos durante el frenado continuo. Resistentes a altas temperaturas (hasta 600°C).'
+    32900, 15000, 2, 2, 'https://images.unsplash.com/photo-1536700503339-1e4b06520771?auto=format&fit=crop&w=400&q=80',
+    catIds.frenos, brandIds.universal, 1, 0, 1, null, 'Compuesto cerámico avanzado.', 'simple', null, null
   );
 
   insertProduct.run(
     'MX-ACE-004', 'ACE-5W30-004', 'ACEITE SINTÉTICO 5W30 4L', 'Universal',
-    26500, 20, 20, 'https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?auto=format&fit=crop&w=400&q=80',
-    catIds.aceite, brandIds.universal, 0, 0, 1, null, 'Lubricante 100% sintético diseñado con aditivos anti-desgaste y dispersantes de hollín. Mantiene el motor limpio y protegido incluso en arranques en frío extremos.'
+    26500, 12000, 20, 20, 'https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?auto=format&fit=crop&w=400&q=80',
+    catIds.aceite, brandIds.universal, 0, 0, 1, null, 'Lubricante 100% sintético.', 'simple', null, null
+  );
+
+  // Producto con variaciones (Casco)
+  insertProduct.run(
+    'MX-CAS-005', 'CAS-MOTO-005', 'CASCO MOTO PREMIUM', 'Universal',
+    85000, 40000, 0, 0, 'https://images.unsplash.com/photo-1558981806-ec527fa84c39?auto=format&fit=crop&w=400&q=80',
+    null, brandIds.universal, 1, 0, 1, null, 'Casco integral con certificación DOT.', 
+    'variable', 
+    JSON.stringify([
+      { id: 'v1', sku: 'MX-CAS-005-M-N', name: 'Talla M - Negro', price: 85000, stock: 5, image: 'https://images.unsplash.com/photo-1558981806-ec527fa84c39?auto=format&fit=crop&w=400&q=80' },
+      { id: 'v2', sku: 'MX-CAS-005-L-N', name: 'Talla L - Negro', price: 85000, stock: 3, image: 'https://images.unsplash.com/photo-1558981806-ec527fa84c39?auto=format&fit=crop&w=400&q=80' },
+      { id: 'v3', sku: 'MX-CAS-005-M-B', name: 'Talla M - Blanco', price: 85000, stock: 2, image: 'https://images.unsplash.com/photo-1508355655-32e604f32acc?auto=format&fit=crop&w=400&q=80' }
+    ]), 
+    null
+  );
+
+  // Producto en combo
+  insertProduct.run(
+    'MX-CMB-006', 'CMB-MANT-006', 'COMBO MANTENIMIENTO TOYOTA', 'Toyota Corolla 2005-2012 Sedán',
+    28000, 15000, 10, 10, 'https://images.unsplash.com/photo-1517524008697-84bbe3c3fd98?auto=format&fit=crop&w=400&q=80',
+    null, brandIds.toyota, 1, 1, 1, 24990, 'El combo perfecto para el mantenimiento de tu Toyota.', 
+    'combo', 
+    null, 
+    JSON.stringify([
+      { product_id: prod1Id, quantity: 1 },
+      { product_id: prod2Id, quantity: 4 }
+    ])
   );
   
   // Seed admin user and other users

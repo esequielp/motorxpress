@@ -19,12 +19,7 @@ import ScrollToTop from './components/layout/ScrollToTop';
 import AdminDashboardPage from './pages/admin/AdminDashboardPage';
 import { useThemeStore } from './store/theme';
 
-// Information pages
-import ReturnsPage from './pages/info/ReturnsPage';
-import FaqPage from './pages/info/FaqPage';
-import ShippingTimePage from './pages/info/ShippingTimePage';
-import TermsPage from './pages/info/TermsPage';
-import PrivacyPage from './pages/info/PrivacyPage';
+import DynamicPage from './pages/info/DynamicPage';
 
 export default function App() {
   const theme = useThemeStore((state) => state.theme);
@@ -53,11 +48,7 @@ export default function App() {
             <Route path="/cuenta/pedidos/:id" element={<OrderDetailPage />} />
             <Route path="/admin" element={<AdminDashboardPage />} />
             
-            <Route path="/retornos" element={<ReturnsPage />} />
-            <Route path="/faq" element={<FaqPage />} />
-            <Route path="/envios" element={<ShippingTimePage />} />
-            <Route path="/terminos" element={<TermsPage />} />
-            <Route path="/privacidad" element={<PrivacyPage />} />
+            <Route path="/p/:slug" element={<DynamicPage />} />
           </Routes>
         </main>
         <Footer />

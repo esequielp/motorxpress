@@ -6,10 +6,27 @@ import { useNavigate } from 'react-router-dom';
 import { getProductImages } from '../../lib/utils/image';
 import { useThemeStore } from '../../store/theme';
 
-function ProductFormModal({ editingProduct, onClose, onSubmit }: any) {
+function ProductFormModal({ editingProduct, onClose, onSubmit, products }: any) {
   const [isOffer, setIsOffer] = useState(!!editingProduct?.is_offer);
   const [images, setImages] = useState<string[]>(getProductImages(editingProduct?.image));
   const [isUploading, setIsUploading] = useState(false);
+  const [productType, setProductType] = useState(editingProduct?.type || 'simple');
+  
+  const [variations, setVariations] = useState<any[]>(editingProduct?.variations || []);
+  const [comboItems, setComboItems] = useState<any[]>(
+    editingProduct?.combo_items 
+      ? editingProduct.combo_items.map((i: any) => ({ product_id: i.product_id, quantity: i.quantity }))
+      : []
+  );
+  
+  const [comboSearchQueries, setComboSearchQueries] = useState<Record<number, string>>({});
+  
+  const [crossSells, setCrossSells] = useState<string[]>(
+    editingProduct?.cross_sell_ids 
+      ? editingProduct.cross_sell_ids.split(',').map((s: string) => s.trim()).filter(Boolean)
+      : []
+  );
+  const [crossSellSearch, setCrossSellSearch] = useState<string | undefined>(undefined);
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files?.[0]) return;
@@ -35,9 +52,60 @@ function ProductFormModal({ editingProduct, onClose, onSubmit }: any) {
     }
   };
 
+  const addVariation = () => {
+    setVariations([...variations, { id: `v${Date.now()}`, sku: '', name: '', price: 0, stock: 0, image: '' }]);
+  };
+
+  const updateVariation = (index: number, field: string, value: any) => {
+    const newVars = [...variations];
+    newVars[index][field] = value;
+    setVariations(newVars);
+  };
+
+  const removeVariation = (index: number) => {
+    setVariations(variations.filter((_, i) => i !== index));
+  };
+
+  const addComboItem = () => {
+    setComboItems([...comboItems, { product_id: '', quantity: 1 }]);
+  };
+
+  const updateComboItem = (index: number, field: string, value: any) => {
+    const newItems = [...comboItems];
+    newItems[index][field] = value;
+    setComboItems(newItems);
+  };
+
+  const removeComboItem = (index: number) => {
+    setComboItems(comboItems.filter((_, i) => i !== index));
+    const newQueries = { ...comboSearchQueries };
+    delete newQueries[index];
+    setComboSearchQueries(newQueries);
+  };
+
+  const handleVariationImageUpload = async (index: number, e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files?.[0]) return;
+    const file = e.target.files[0];
+    const formData = new FormData();
+    formData.append('image', file);
+    try {
+      const res = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData
+      });
+      const data = await res.json();
+      if (data.url) {
+        updateVariation(index, 'image', data.url);
+      }
+    } catch (err) {
+      console.error('Error uploading image', err);
+      alert('Error al subir la imagen de la variante');
+    }
+  };
+
   return (
     <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4 overflow-y-auto">
-      <div className="bg-theme-card border border-theme-border rounded-lg max-w-xl w-full p-6 shadow-2xl relative my-auto">
+      <div className="bg-theme-card border border-theme-border rounded-lg max-w-2xl w-full p-6 shadow-2xl relative my-auto max-h-[90vh] overflow-y-auto">
         <button 
           type="button"
           onClick={onClose}
@@ -65,23 +133,146 @@ function ProductFormModal({ editingProduct, onClose, onSubmit }: any) {
                    <input name="mpn" defaultValue={editingProduct?.mpn || ''} className="w-full bg-theme-base border border-theme-border p-2 rounded text-white outline-none focus:border-theme-primary font-mono" placeholder="Opcional" />
                  </div>
                  <div>
-                   <label className="block text-xs uppercase text-gray-500 font-bold mb-1">Precio</label>
+                   <label className="block text-xs uppercase text-gray-500 font-bold mb-1">Precio Unitario Base</label>
                    <input name="price" type="number" defaultValue={editingProduct?.price || 0} required className="w-full bg-theme-base border border-theme-border p-2 rounded text-white outline-none focus:border-theme-primary" />
                  </div>
                  <div>
-                   <label className="block text-xs uppercase text-gray-500 font-bold mb-1">Costo</label>
+                   <label className="block text-xs uppercase text-gray-500 font-bold mb-1">Costo Base</label>
                    <input name="cost" type="number" defaultValue={editingProduct?.cost || 0} required className="w-full bg-theme-base border border-theme-border p-2 rounded text-white outline-none focus:border-theme-primary" />
                  </div>
                  <div>
-                   <label className="block text-xs uppercase text-gray-500 font-bold mb-1">Stock</label>
+                   <label className="block text-xs uppercase text-gray-500 font-bold mb-1">Stock Base</label>
                    <input name="stock" type="number" defaultValue={editingProduct?.stock || 0} required className="w-full bg-theme-base border border-theme-border p-2 rounded text-white outline-none focus:border-theme-primary" />
                  </div>
                  <div className="col-span-2">
                    <label className="block text-xs uppercase text-gray-500 font-bold mb-1">Vehículo de Compatibilidad</label>
                    <input name="vehicle" defaultValue={editingProduct?.vehicle || 'Universal'} required className="w-full bg-theme-base border border-theme-border p-2 rounded text-white outline-none focus:border-theme-primary" />
                  </div>
+
                  <div className="col-span-2">
-                   <label className="block text-xs uppercase text-gray-500 font-bold mb-1">Imágenes del Producto</label>
+                   <label className="block text-xs uppercase text-gray-500 font-bold mb-1">Tipo de Producto</label>
+                   <select 
+                     name="type" 
+                     className="w-full bg-theme-base border border-theme-border p-2 rounded text-white outline-none focus:border-theme-primary"
+                     value={productType}
+                     onChange={(e) => setProductType(e.target.value)}
+                   >
+                     <option value="simple">Simple</option>
+                     <option value="variable">Variables / Configurable</option>
+                     <option value="combo">Combo / Bundle</option>
+                   </select>
+                 </div>
+
+                 {productType === 'variable' && (
+                   <div className="col-span-2 bg-theme-base border border-theme-border rounded-lg p-4">
+                     <label className="block text-xs uppercase text-gray-500 font-bold mb-3">Configuración de Variaciones</label>
+                     <input type="hidden" name="variations" value={JSON.stringify(variations)} />
+                     <div className="space-y-3">
+                       {variations.map((v, index) => (
+                         <div key={v.id || index} className="flex flex-wrap md:flex-nowrap gap-2 items-start bg-theme-card p-3 rounded border border-theme-border relative">
+                           <button type="button" onClick={() => removeVariation(index)} className="absolute -top-2 -right-2 bg-red-600 text-white rounded-full p-1 hover:bg-red-700 w-6 h-6 flex items-center justify-center">
+                             <X size={12} />
+                           </button>
+                           <div className="flex-1 min-w-[120px]">
+                             <label className="block text-[10px] text-gray-500 mb-1">SKU</label>
+                             <input value={v.sku} onChange={e => updateVariation(index, 'sku', e.target.value)} className="w-full bg-theme-base border border-theme-border p-1.5 rounded text-white text-sm" placeholder="SKU-VAR" />
+                           </div>
+                           <div className="flex-1 min-w-[150px]">
+                             <label className="block text-[10px] text-gray-500 mb-1">Nombre Variante</label>
+                             <input value={v.name} onChange={e => updateVariation(index, 'name', e.target.value)} className="w-full bg-theme-base border border-theme-border p-1.5 rounded text-white text-sm" placeholder="Talla M - Rojo" />
+                           </div>
+                           <div className="w-24">
+                             <label className="block text-[10px] text-gray-500 mb-1">Precio</label>
+                             <input type="number" value={v.price} onChange={e => updateVariation(index, 'price', Number(e.target.value))} className="w-full bg-theme-base border border-theme-border p-1.5 rounded text-white text-sm" />
+                           </div>
+                           <div className="w-20">
+                             <label className="block text-[10px] text-gray-500 mb-1">Stock</label>
+                             <input type="number" value={v.stock} onChange={e => updateVariation(index, 'stock', Number(e.target.value))} className="w-full bg-theme-base border border-theme-border p-1.5 rounded text-white text-sm" />
+                           </div>
+                           <div className="w-full md:w-32">
+                             <label className="block text-[10px] text-gray-500 mb-1">Imagen</label>
+                             <div className="flex gap-2 items-center">
+                               {v.image && <img src={v.image} className="w-8 h-8 object-cover rounded bg-theme-base border border-theme-border shrink-0" alt="var" />}
+                               <label className="flex-1 bg-theme-element hover:bg-theme-primary text-white p-1.5 rounded cursor-pointer transition flex items-center justify-center text-[10px]" title="Subir Imagen">
+                                 <Plus size={14} className="mr-1" /> Subir
+                                 <input type="file" accept="image/*" onChange={(e) => handleVariationImageUpload(index, e)} className="hidden" />
+                               </label>
+                             </div>
+                           </div>
+                         </div>
+                       ))}
+                       <button type="button" onClick={addVariation} className="flex items-center gap-1 text-sm bg-theme-element hover:bg-theme-primary px-3 py-1.5 rounded text-white transition">
+                         <Plus size={14} /> Añadir Variante
+                       </button>
+                     </div>
+                   </div>
+                 )}
+
+                 {productType === 'combo' && (
+                   <div className="col-span-2 bg-theme-base border border-theme-border rounded-lg p-4">
+                     <label className="block text-xs uppercase text-gray-500 font-bold mb-3">Productos del Bundle</label>
+                     <input type="hidden" name="combo_items" value={JSON.stringify(comboItems)} />
+                     <div className="space-y-3">
+                       {comboItems.map((item, index) => (
+                         <div key={index} className="flex gap-2 items-end bg-theme-card p-3 rounded border border-theme-border relative">
+                           <button type="button" onClick={() => removeComboItem(index)} className="absolute -top-2 -right-2 bg-red-600 text-white rounded-full p-1 hover:bg-red-700 w-6 h-6 flex items-center justify-center">
+                             <X size={12} />
+                           </button>
+                           <div className="flex-1 group/combo">
+                             <label className="block text-[10px] text-gray-500 mb-1">Producto (Buscar por SKU/Nombre)</label>
+                             <div className="flex items-center gap-2 relative">
+                               <input 
+                                 type="text"
+                                 placeholder="Escribe para buscar..."
+                                 value={comboSearchQueries[index] !== undefined ? comboSearchQueries[index] : (products?.find((p:any) => p.id === item.product_id)?.name || '')}
+                                 onChange={e => setComboSearchQueries({...comboSearchQueries, [index]: e.target.value})}
+                                 onFocus={() => {
+                                   if (comboSearchQueries[index] === undefined) {
+                                      setComboSearchQueries({...comboSearchQueries, [index]: ''});
+                                   }
+                                 }}
+                                 className="w-full bg-theme-base border border-theme-border p-1.5 rounded text-white text-sm focus:border-theme-primary transition-colors outline-none"
+                               />
+                               {comboSearchQueries[index] !== undefined && (
+                                 <div className="absolute z-50 left-0 right-0 top-full mt-1 bg-theme-card border border-theme-border shadow-2xl max-h-48 overflow-y-auto rounded text-sm hidden group-focus-within/combo:block">
+                                   {products?.filter((p:any) => p.id !== editingProduct?.id && (!comboSearchQueries[index] || p.name.toLowerCase().includes(comboSearchQueries[index].toLowerCase()) || p.sku.toLowerCase().includes(comboSearchQueries[index].toLowerCase()))).slice(0, 20).map((p: any) => (
+                                     <div 
+                                       key={p.id}
+                                       className="p-2 hover:bg-theme-element cursor-pointer border-b border-theme-border/50 text-white flex justify-between"
+                                       onMouseDown={(e) => {
+                                         e.preventDefault();
+                                         updateComboItem(index, 'product_id', p.id);
+                                         setComboSearchQueries({...comboSearchQueries, [index]: undefined});
+                                       }}
+                                     >
+                                       <span className="truncate">{p.name}</span> <span className="text-xs text-gray-400 shrink-0 ml-2">{p.sku}</span>
+                                     </div>
+                                   ))}
+                                   {products?.filter((p:any) => p.id !== editingProduct?.id && (!comboSearchQueries[index] || p.name.toLowerCase().includes(comboSearchQueries[index].toLowerCase()) || p.sku.toLowerCase().includes(comboSearchQueries[index].toLowerCase()))).length === 0 && (
+                                     <div className="p-2 text-gray-500 italic text-center">No hay resultados</div>
+                                   )}
+                                 </div>
+                               )}
+                               {item.product_id && (
+                                 <div className="shrink-0 text-[10px] text-theme-primary font-mono bg-theme-primary/10 px-2 py-1 rounded" title="ID">#{item.product_id}</div>
+                               )}
+                             </div>
+                           </div>
+                           <div className="w-24">
+                             <label className="block text-[10px] text-gray-500 mb-1">Cantidad</label>
+                             <input type="number" value={item.quantity} onChange={e => updateComboItem(index, 'quantity', parseInt(e.target.value) || 1)} className="w-full bg-theme-base border border-theme-border p-1.5 rounded text-white text-sm" min="1" />
+                           </div>
+                         </div>
+                       ))}
+                       <button type="button" onClick={addComboItem} className="flex items-center gap-1 text-sm bg-theme-element hover:bg-theme-primary px-3 py-1.5 rounded text-white transition">
+                         <Plus size={14} /> Añadir Producto al Bundle
+                       </button>
+                     </div>
+                   </div>
+                 )}
+
+                 <div className="col-span-2">
+                   <label className="block text-xs uppercase text-gray-500 font-bold mb-1">Imágenes del Producto Base</label>
                    <div className="flex flex-col gap-4 relative">
                      {images.length > 0 && (
                        <div className="flex flex-wrap gap-2">
@@ -119,8 +310,56 @@ function ProductFormModal({ editingProduct, onClose, onSubmit }: any) {
                  </div>
                  
                  <div className="col-span-2">
-                   <label className="block text-xs uppercase text-gray-500 font-bold mb-1">Venta Cruzada Manual (SKU o MPN separados por comas)</label>
-                   <input name="cross_sell_ids" defaultValue={editingProduct?.cross_sell_ids || ''} className="w-full bg-theme-base border border-theme-border p-2 rounded text-white outline-none focus:border-theme-primary font-mono" placeholder="Ej: MX-FLT-001, FLT-TOY-002" />
+                   <label className="block text-xs uppercase text-gray-500 font-bold mb-1">Venta Cruzada Manual (Búsqueda por Nombre o SKU)</label>
+                   <input type="hidden" name="cross_sell_ids" value={crossSells.join(', ')} />
+                   
+                   <div className="flex flex-wrap gap-2 mb-2">
+                     {crossSells.map((sku, index) => {
+                       const linkedProduct = products?.find((p: any) => p.sku === sku || p.mpn === sku);
+                       return (
+                         <div key={index} className="flex items-center gap-1 bg-theme-element text-white px-2 py-1 rounded text-sm">
+                           <span>{linkedProduct ? linkedProduct.name : sku}</span>
+                           <button type="button" onClick={() => setCrossSells(crossSells.filter((_, i) => i !== index))} className="hover:text-red-400 ml-1">
+                             <X size={14} />
+                           </button>
+                         </div>
+                       );
+                     })}
+                   </div>
+
+                   <div className="relative group/cross">
+                     <input 
+                       type="text"
+                       placeholder="Escribre para buscar y añadir productos..."
+                       value={crossSellSearch || ''}
+                       onChange={(e) => setCrossSellSearch(e.target.value)}
+                       onFocus={() => { if (crossSellSearch === undefined) setCrossSellSearch(''); }}
+                       className="w-full bg-theme-base border border-theme-border p-2 rounded text-white outline-none focus:border-theme-primary" 
+                     />
+                     
+                     {crossSellSearch !== undefined && (
+                       <div className="absolute z-50 left-0 right-0 top-full mt-1 bg-theme-card border border-theme-border shadow-2xl max-h-48 overflow-y-auto rounded text-sm hidden group-focus-within/cross:block">
+                         {products?.filter((p:any) => p.id !== editingProduct?.id && !crossSells.includes(p.sku) && (!crossSellSearch || p.name.toLowerCase().includes(crossSellSearch.toLowerCase()) || p.sku.toLowerCase().includes(crossSellSearch.toLowerCase()))).slice(0, 20).map((p: any) => (
+                           <div 
+                             key={p.id}
+                             className="p-2 hover:bg-theme-element cursor-pointer border-b border-theme-border/50 text-white flex justify-between"
+                             onMouseDown={(e) => {
+                               e.preventDefault();
+                               if (p.sku && !crossSells.includes(p.sku)) {
+                                 setCrossSells([...crossSells, p.sku]);
+                               }
+                               setCrossSellSearch(undefined);
+                             }}
+                           >
+                             <span className="truncate">{p.name}</span> <span className="text-xs text-gray-400 shrink-0 ml-2">{p.sku}</span>
+                           </div>
+                         ))}
+                         {products?.filter((p:any) => p.id !== editingProduct?.id && !crossSells.includes(p.sku) && (!crossSellSearch || p.name.toLowerCase().includes(crossSellSearch.toLowerCase()) || p.sku.toLowerCase().includes(crossSellSearch.toLowerCase()))).length === 0 && (
+                           <div className="p-2 text-gray-500 italic text-center">No hay resultados</div>
+                         )}
+                       </div>
+                     )}
+                   </div>
                  </div>
                  
                  <div className="col-span-2 flex flex-wrap gap-6 items-center mt-2 p-4 bg-theme-base border border-theme-border rounded-lg">
@@ -187,6 +426,9 @@ export default function AdminDashboardPage() {
 
   const [newsletterSearch, setNewsletterSearch] = useState('');
   const [newsletterPage, setNewsletterPage] = useState(1);
+  
+  const [pages, setPages] = useState<any[]>([]);
+  const [editingPage, setEditingPage] = useState<any>(null);
 
   // Computed state
   const filteredProducts = products.filter(p => 
@@ -276,6 +518,7 @@ export default function AdminDashboardPage() {
     fetch('/api/orders').then(r => r.json()).then(d => setOrders(Array.isArray(d) ? d : []));
     fetch('/api/users').then(r => r.json()).then(d => setUsers(Array.isArray(d) ? d : []));
     fetch('/api/settings').then(r => r.json()).then(d => setSettings(d || {}));
+    fetch('/api/pages').then(r => r.json()).then(d => setPages(Array.isArray(d) ? d : []));
   }, []);
 
   const confirmDeleteProduct = async () => {
@@ -350,6 +593,31 @@ export default function AdminDashboardPage() {
     }
   };
 
+  const handleSavePage = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setSaveError('');
+    setSaveSuccess('');
+    const formData = new FormData(e.currentTarget);
+    const data = Object.fromEntries(formData.entries());
+    
+    try {
+      const res = await fetch(`/api/pages/${data.slug}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title: data.title, content: data.content })
+      });
+      if (!res.ok) throw new Error('Error al guardar página');
+      
+      const newPage = { slug: data.slug, title: data.title, content: data.content };
+      setPages(prev => prev.find(p => p.slug === data.slug) ? prev.map(p => p.slug === data.slug ? newPage : p) : [...prev, newPage]);
+      setEditingPage(null);
+      setSaveSuccess('Página guardada exitosamente.');
+      setTimeout(() => setSaveSuccess(''), 3000);
+    } catch (err: any) {
+      setSaveError(err.message || 'Error al guardar');
+    }
+  };
+
   const handleProductSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
@@ -368,6 +636,22 @@ export default function AdminDashboardPage() {
     data.is_featured = formData.get('is_featured') ? 1 : 0;
     data.is_offer = formData.get('is_offer') ? 1 : 0;
     data.is_new = formData.get('is_new') ? 1 : 0;
+
+    try {
+      if (data.type === 'variable' && data.variations) {
+        data.variations = JSON.parse(data.variations);
+      } else {
+        data.variations = null;
+      }
+      if (data.type === 'combo' && data.combo_items) {
+        data.combo_items = JSON.parse(data.combo_items);
+      } else {
+        data.combo_items = null;
+      }
+    } catch (e) {
+      alert("Error en el formato de JSON para variaciones o combo");
+      return;
+    }
 
     if (editingProduct) {
       await fetch(`/api/products/${editingProduct.id}`, {
@@ -435,7 +719,7 @@ export default function AdminDashboardPage() {
 
       {/* Tabs */}
       <div className="flex gap-4 border-b border-theme-border mb-6 overflow-x-auto select-none no-scrollbar">
-        {['dashboard', 'products', 'orders', 'users', 'customers', 'newsletter', 'settings'].map(tab => (
+        {['dashboard', 'products', 'orders', 'users', 'customers', 'newsletter', 'pages', 'settings'].map(tab => (
           <button 
             key={tab}
             onClick={() => {
@@ -447,7 +731,7 @@ export default function AdminDashboardPage() {
                  setUserFilter('customers');
               } else {
                  setActiveTab(tab);
-                 if (tab === 'products' || tab === 'orders' || tab === 'settings' || tab === 'dashboard' || tab === 'newsletter') {
+                 if (tab === 'products' || tab === 'orders' || tab === 'settings' || tab === 'dashboard' || tab === 'newsletter' || tab === 'pages') {
                     setUserFilter('all'); // reset or ignore
                  }
               }
@@ -460,7 +744,7 @@ export default function AdminDashboardPage() {
                 : 'text-gray-400 hover:text-white'
             }`}
           >
-            {tab === 'dashboard' ? 'Resumen' : tab === 'products' ? 'Productos' : tab === 'orders' ? 'Órdenes' : tab === 'users' ? 'Admin. Staff' : tab === 'customers' ? 'Clientes' : tab === 'newsletter' ? 'Suscriptores Boletín' : 'Configuración'}
+            {tab === 'dashboard' ? 'Resumen' : tab === 'products' ? 'Productos' : tab === 'orders' ? 'Órdenes' : tab === 'users' ? 'Admin. Staff' : tab === 'customers' ? 'Clientes' : tab === 'newsletter' ? 'Suscriptores Boletín' : tab === 'pages' ? 'Páginas (CMS)' : 'Configuración'}
           </button>
         ))}
       </div>
@@ -607,6 +891,7 @@ export default function AdminDashboardPage() {
             <table className="w-full text-left text-sm text-gray-400">
               <thead className="bg-theme-base text-xs uppercase">
                 <tr>
+                  <th className="px-6 py-3">Imagen</th>
                   <th className="px-6 py-3">SKU / MPN</th>
                   <th className="px-6 py-3">Nombre</th>
                   <th className="px-6 py-3">Costo</th>
@@ -619,11 +904,18 @@ export default function AdminDashboardPage() {
               <tbody>
                 {paginatedProducts.length === 0 ? (
                   <tr>
-                    <td colSpan={7} className="px-6 py-8 text-center text-gray-500">No se encontraron productos.</td>
+                    <td colSpan={8} className="px-6 py-8 text-center text-gray-500">No se encontraron productos.</td>
                   </tr>
                 ) : (
                   paginatedProducts.map(p => (
                     <tr key={p.id} className="border-b border-theme-border hover:bg-theme-element/50">
+                      <td className="px-6 py-4">
+                        <img 
+                          src={getProductImages(p.image)[0] || 'https://via.placeholder.com/150'} 
+                          alt={p.name} 
+                          className="w-12 h-12 rounded object-cover border border-theme-border" 
+                        />
+                      </td>
                       <td className="px-6 py-4 font-mono text-xs">
                         <div>{p.sku}</div>
                         {p.mpn && <div className="text-gray-500 mt-1">{p.mpn}</div>}
@@ -944,6 +1236,49 @@ export default function AdminDashboardPage() {
         </div>
       )}
 
+      {/* Pages CMS Panel */}
+      {activeTab === 'pages' && (
+        <div className="space-y-6">
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="font-bold text-lg">Páginas de Información</h2>
+            <button 
+              onClick={() => setEditingPage({})}
+              className="bg-theme-element hover:bg-theme-primary text-white px-4 py-2 rounded font-medium flex items-center gap-2 transition"
+            >
+              <Plus size={16} /> Nueva Página
+            </button>
+          </div>
+          
+          {saveSuccess && <div className="mb-4 bg-green-500/20 text-green-400 p-3 rounded border border-green-500/30 font-medium text-sm">{saveSuccess}</div>}
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {pages.map(page => (
+              <div key={page.slug} className="bg-theme-card border border-theme-border p-4 rounded-lg flex flex-col justify-between hover:border-theme-primary transition">
+                <div>
+                  <h3 className="font-bold text-lg text-white mb-1">{page.title}</h3>
+                  <p className="font-mono text-xs text-gray-500 bg-theme-base inline-block px-2 py-0.5 rounded">/p/{page.slug}</p>
+                </div>
+                <div className="mt-4 flex justify-end">
+                  <button 
+                    onClick={() => setEditingPage(page)}
+                    className="flex items-center gap-2 text-theme-primary hover:text-white transition text-sm font-medium"
+                  >
+                    <Edit size={14} /> Editar Contenido
+                  </button>
+                </div>
+              </div>
+            ))}
+            
+            {pages.length === 0 && (
+              <div className="col-span-full py-12 text-center text-gray-500">
+                <p>No hay páginas creadas todavía.</p>
+                <p className="text-sm">Te sugerimos crear: retornos, faq, envios, terminos, privacidad, quienes-somos, garantia</p>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
       {/* Settings Panel */}
       {activeTab === 'settings' && (
         <div className="bg-theme-card border border-theme-border rounded-lg p-6 max-w-2xl">
@@ -1066,6 +1401,7 @@ export default function AdminDashboardPage() {
       {/* Product Create/Edit Modal */}
       {isProductModalOpen && (
         <ProductFormModal 
+          products={products}
           editingProduct={editingProduct} 
           onClose={() => setProductModalOpen(false)} 
           onSubmit={handleProductSubmit} 
@@ -1210,6 +1546,73 @@ export default function AdminDashboardPage() {
                 <button 
                   type="button"
                   onClick={() => setUserModalOpen(false)}
+                  className="flex-1 bg-theme-element text-white py-2 rounded font-bold hover:bg-gray-700 transition"
+                >
+                  Cancelar
+                </button>
+                <button 
+                  type="submit"
+                  className="flex-1 bg-theme-primary text-white py-2 rounded font-bold hover:bg-theme-primary-hover transition"
+                >
+                  Guardar
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Page Modal */}
+      {editingPage && (
+        <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4">
+          <div className="bg-theme-card border border-theme-border rounded-lg max-w-4xl w-full p-6 shadow-2xl relative my-auto max-h-[90vh] flex flex-col">
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-xl text-white font-bold">{editingPage.slug ? 'Editar Página' : 'Nueva Página'}</h2>
+              <button onClick={() => setEditingPage(null)} className="text-gray-400 hover:text-white">
+                <X size={24} />
+              </button>
+            </div>
+            
+            <form onSubmit={handleSavePage} className="space-y-4 flex-1 flex flex-col min-h-0 overflow-y-auto">
+              <div className="grid grid-cols-2 gap-4 shrink-0">
+                <div>
+                  <label className="block text-sm text-gray-400 mb-1">Título</label>
+                  <input 
+                    name="title"
+                    type="text" 
+                    required
+                    defaultValue={editingPage.title}
+                    className="w-full bg-theme-base border border-theme-border rounded p-2 text-white outline-none focus:border-theme-primary"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm text-gray-400 mb-1">Slug (Ruta /p/slug)</label>
+                  <input 
+                    name="slug"
+                    type="text" 
+                    required
+                    readOnly={!!editingPage.slug}
+                    defaultValue={editingPage.slug}
+                    placeholder="ej: envios"
+                    className="w-full bg-theme-base border border-theme-border rounded p-2 text-white outline-none focus:border-theme-primary read-only:opacity-50"
+                  />
+                </div>
+              </div>
+              
+              <div className="flex-1 flex flex-col shrink-0 min-h-[300px]">
+                <label className="block text-sm text-gray-400 mb-1">Contenido (HTML / Texto)</label>
+                <textarea 
+                  name="content"
+                  required
+                  defaultValue={editingPage.content}
+                  className="w-full flex-1 bg-theme-base border border-theme-border rounded p-2 text-white outline-none focus:border-theme-primary font-mono text-sm resize-none"
+                />
+              </div>
+
+              <div className="pt-4 flex gap-4 shrink-0">
+                <button 
+                  type="button"
+                  onClick={() => setEditingPage(null)}
                   className="flex-1 bg-theme-element text-white py-2 rounded font-bold hover:bg-gray-700 transition"
                 >
                   Cancelar

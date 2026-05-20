@@ -11,16 +11,18 @@ export default function Footer() {
         <div>
           <h4 className="text-white font-bold mb-4">Soporte</h4>
           <ul className="space-y-2">
-            <li><Link to="/retornos" className="hover:text-white">Políticas de Devolución</Link></li>
-            <li><Link to="/faq" className="hover:text-white">Preguntas Frecuentes</Link></li>
-            <li><Link to="/envios" className="hover:text-white">Tiempos de Envío</Link></li>
+            <li><Link to="/p/retornos" className="hover:text-white">Políticas de Devolución</Link></li>
+            <li><Link to="/p/faq" className="hover:text-white">Preguntas Frecuentes</Link></li>
+            <li><Link to="/p/envios" className="hover:text-white">Tiempos de Envío</Link></li>
+            <li><Link to="/p/garantia" className="hover:text-white">Política de Garantía</Link></li>
           </ul>
         </div>
         <div>
           <h4 className="text-white font-bold mb-4">Legal</h4>
           <ul className="space-y-2">
-            <li><Link to="/terminos" className="hover:text-white">Términos y Condiciones</Link></li>
-            <li><Link to="/privacidad" className="hover:text-white">Política de Privacidad</Link></li>
+            <li><Link to="/p/quienes-somos" className="hover:text-white">Quiénes Somos</Link></li>
+            <li><Link to="/p/terminos" className="hover:text-white">Términos y Condiciones</Link></li>
+            <li><Link to="/p/privacidad" className="hover:text-white">Política de Privacidad</Link></li>
           </ul>
         </div>
         <div>

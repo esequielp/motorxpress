@@ -59,7 +59,7 @@ export default function SupportChat() {
     }
   };
 
-  if (location.pathname.startsWith('/admin')) {
+  if (location.pathname.startsWith('/admin') || location.pathname.includes('/checkout')) {
     return null;
   }
 
