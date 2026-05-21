@@ -113,6 +113,15 @@ export function initDb() {
     // Ignore error if column already exists
   }
   try {
+    db.exec(`ALTER TABLE products ADD COLUMN meta_title TEXT;`);
+  } catch (err: any) {}
+  try {
+    db.exec(`ALTER TABLE products ADD COLUMN meta_description TEXT;`);
+  } catch (err: any) {}
+  try {
+    db.exec(`ALTER TABLE products ADD COLUMN slug TEXT;`);
+  } catch (err: any) {}
+  try {
     db.exec(`ALTER TABLE users ADD COLUMN phone TEXT;`);
   } catch (err: any) {}
   try {

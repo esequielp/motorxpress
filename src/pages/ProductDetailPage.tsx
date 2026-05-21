@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
+import { motion, AnimatePresence } from 'motion/react';
 import { useCart } from '../store/cart';
 import { formatCLP } from '../lib/utils/formatCLP';
 import { getProductImages, getProductThumbnail } from '../lib/utils/image';
@@ -162,8 +164,19 @@ export default function ProductDetailPage() {
     return <div className="min-h-[60vh] flex items-center justify-center text-white">Producto no encontrado.</div>;
   }
 
+  const metaTitle = product ? (product.meta_title || `${product.name} | MOTOR[X]PRESS`) : 'Producto | MOTOR[X]PRESS';
+  const metaDesc = product?.meta_description || (product?.description ? product.description.substring(0, 160) : 'Compre repuestos originales para su vehículo.');
+
   return (
     <div className="container mx-auto px-4 py-12 max-w-6xl selection:bg-theme-primary">
+      <Helmet>
+        <title>{metaTitle}</title>
+        <meta name="description" content={metaDesc} />
+        {product && <meta property="og:title" content={product.meta_title || product.name} />}
+        {product && <meta property="og:description" content={metaDesc} />}
+        {images[0] && <meta property="og:image" content={images[0]} />}
+      </Helmet>
+
       {/* Breadcrumb */}
       <div className="text-sm text-gray-500 mb-8 font-medium">
         <Link to="/" className="hover:text-white">Inicio</Link> &gt;{' '}
@@ -344,16 +357,42 @@ export default function ProductDetailPage() {
                : product.stock;
              
              return (
-               <button 
+               <motion.button 
+                 whileTap={displayStock > 0 ? { scale: 0.95 } : {}}
+                 animate={added ? { scale: [1, 1.05, 1] } : {}}
+                 transition={{ duration: 0.3 }}
                  onClick={handleAdd}
                  disabled={displayStock === 0}
-                 className={`w-full py-4 rounded-lg flex items-center justify-center gap-3 text-lg font-bebas tracking-wide uppercase transition-all transform ${added ? 'bg-green-600 text-white cursor-default' : displayStock === 0 ? 'bg-theme-card border border-theme-border text-gray-500 cursor-not-allowed' : 'bg-theme-primary text-black hover:bg-theme-primary-hover active:scale-95 shadow-lg'}`}
+                 className={`w-full py-4 rounded-lg flex items-center justify-center gap-3 text-lg font-bebas tracking-wide uppercase transition-all transform ${added ? 'bg-green-600 text-white cursor-default shadow-[0_0_20px_rgba(22,163,74,0.4)]' : displayStock === 0 ? 'bg-theme-card border border-theme-border text-gray-500 cursor-not-allowed' : 'bg-theme-primary text-black hover:bg-theme-primary-hover shadow-lg'}`}
                >
-                 <ShoppingCart className="w-5 h-5 shrink-0" />
-                 <span className="leading-none pt-1">
-                   {added ? '¡AÑADIDO AL CARRITO!' : displayStock === 0 ? 'AGOTADO' : 'AGREGAR AL CARRITO'}
-                 </span>
-               </button>
+                 <AnimatePresence mode="wait">
+                   {added ? (
+                     <motion.div
+                       key="check-icon"
+                       initial={{ scale: 0 }}
+                       animate={{ scale: 1 }}
+                       exit={{ scale: 0 }}
+                       className="flex items-center gap-3"
+                     >
+                       <CheckCircle2 className="w-5 h-5 shrink-0" />
+                       <span className="leading-none pt-1">¡AÑADIDO AL CARRITO!</span>
+                     </motion.div>
+                   ) : (
+                     <motion.div
+                       key="cart-icon"
+                       initial={{ scale: 0 }}
+                       animate={{ scale: 1 }}
+                       exit={{ scale: 0 }}
+                       className="flex items-center gap-3"
+                     >
+                       <ShoppingCart className="w-5 h-5 shrink-0" />
+                       <span className="leading-none pt-1">
+                         {displayStock === 0 ? 'AGOTADO' : 'AGREGAR AL CARRITO'}
+                       </span>
+                     </motion.div>
+                   )}
+                 </AnimatePresence>
+               </motion.button>
              );
           })()}
 

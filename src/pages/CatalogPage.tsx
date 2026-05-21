@@ -33,6 +33,10 @@ export default function CatalogPage() {
   const [filterNew, setFilterNew] = useState<boolean>(searchParams.get('new') === 'true');
   const [filterStock, setFilterStock] = useState<boolean>(searchParams.get('stock') === 'true');
 
+  const [currentPage, setCurrentPage] = useState<number>(Number(searchParams.get('page')) || 1);
+  const [totalPages, setTotalPages] = useState<number>(1);
+  const [totalItems, setTotalItems] = useState<number>(0);
+
   const [showAllCategories, setShowAllCategories] = useState(false);
   const [showAllBrands, setShowAllBrands] = useState(false);
 
@@ -45,12 +49,17 @@ export default function CatalogPage() {
       fetch('/api/categories').then(res => res.json()),
       fetch('/api/brands').then(res => res.json())
     ]).then(([productsData, categoriesData, brandsData]) => {
-      const p = Array.isArray(productsData) ? productsData : [];
+      const p = Array.isArray(productsData) ? productsData : (productsData?.data || []);
       setProducts(p); // keeping this for getBrandCount / getCategoryCount
       setDbCategories(Array.isArray(categoriesData) ? categoriesData : []);
       setDbBrands(Array.isArray(brandsData) ? brandsData : []);
     }).catch(console.error);
   }, []);
+
+  // Reset page when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [category, brand, vehicleMake, vehicleModel, vehicleYear, sortBy, searchQuery, priceMin, priceMax, filterOffer, filterNew, filterStock]);
 
   // AJAX Fetching whenever filters change
   useEffect(() => {
@@ -70,6 +79,7 @@ export default function CatalogPage() {
     if (filterNew) params.set('new', 'true');
     if (filterStock) params.set('stock', 'true');
     if (sortBy && sortBy !== 'featured') params.set('sort', sortBy);
+    if (currentPage > 1) params.set('page', currentPage.toString());
     
     setSearchParams(params, { replace: true });
 
@@ -90,11 +100,22 @@ export default function CatalogPage() {
         if (filterNew) queryParams.set('is_new', 'true');
         if (filterStock) queryParams.set('in_stock', 'true');
         if (sortBy) queryParams.set('sort', sortBy);
+        queryParams.set('page', currentPage.toString());
+        queryParams.set('limit', '12');
 
         const res = await fetch(`/api/products?${queryParams.toString()}`);
         if (!res.ok) throw new Error('Failed to fetch filtered products');
         const data = await res.json();
-        setFilteredProducts(Array.isArray(data) ? data : []);
+        
+        if (data && data.data) {
+          setFilteredProducts(data.data);
+          setTotalItems(data.total);
+          setTotalPages(data.totalPages);
+        } else {
+          setFilteredProducts(Array.isArray(data) ? data : []);
+          setTotalItems(Array.isArray(data) ? data.length : 0);
+          setTotalPages(1);
+        }
       } catch (err) {
         console.error("AJAX Error:", err);
       } finally {
@@ -106,7 +127,7 @@ export default function CatalogPage() {
   }, [
     category, brand, vehicleMake, vehicleModel, vehicleYear, sortBy, 
     searchQuery, priceMin, priceMax, filterOffer, filterNew, filterStock, 
-    isClient, setSearchParams
+    currentPage, isClient, setSearchParams
   ]);
 
   if (!isClient) return null;
@@ -424,7 +445,7 @@ export default function CatalogPage() {
         <div>
           <h1 className="text-3xl font-bebas uppercase tracking-wide text-white">CATÁLOGO DE REPUESTOS</h1>
           <p className="text-gray-400 text-sm font-mono mt-1">
-            {filteredProducts.length} productos coincidentes
+            {totalItems} productos coincidentes
           </p>
         </div>
 
@@ -454,7 +475,7 @@ export default function CatalogPage() {
       {/* Main Structural Layout */}
       <div className="flex flex-col lg:flex-row gap-8 items-start">
         {/* Left Sidebar (Desktop Only) */}
-        <aside className="hidden lg:block w-64 xl:w-72 shrink-0 bg-theme-card border border-theme-border p-5 rounded-lg sticky top-24 max-h-[85vh] overflow-y-auto scrollbar-thin">
+        <aside className="hidden lg:block w-64 xl:w-72 shrink-0 bg-theme-card border border-theme-border p-5 rounded-lg sticky top-24">
           <FiltersSidebar />
         </aside>
 
@@ -499,6 +520,52 @@ export default function CatalogPage() {
               </AnimatePresence>
             </motion.div>
           )}
+
+          {/* Pagination Controls */}
+          {totalPages > 1 && (
+            <div className="mt-12 flex justify-center items-center gap-2">
+              <button 
+                onClick={() => {
+                  setCurrentPage(prev => Math.max(prev - 1, 1));
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                }}
+                disabled={currentPage === 1}
+                className="px-4 py-2 border border-theme-border rounded bg-theme-card text-gray-300 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-theme-border transition-colors"
+              >
+                Anterior
+              </button>
+              
+              <div className="flex gap-1">
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+                  <button
+                    key={page}
+                    onClick={() => {
+                      setCurrentPage(page);
+                      window.scrollTo({ top: 0, behavior: 'smooth' });
+                    }}
+                    className={`w-10 h-10 rounded flex items-center justify-center border transition-colors ${
+                      currentPage === page 
+                        ? 'bg-theme-primary text-black border-theme-primary font-bold' 
+                        : 'bg-theme-card border-theme-border text-gray-300 hover:bg-theme-border'
+                    }`}
+                  >
+                    {page}
+                  </button>
+                ))}
+              </div>
+
+              <button 
+                onClick={() => {
+                  setCurrentPage(prev => Math.min(prev + 1, totalPages));
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                }}
+                disabled={currentPage === totalPages}
+                className="px-4 py-2 border border-theme-border rounded bg-theme-card text-gray-300 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-theme-border transition-colors"
+              >
+                Siguiente
+              </button>
+            </div>
+          )}
         </main>
       </div>
 
@@ -526,7 +593,7 @@ export default function CatalogPage() {
                   onClick={() => setShowMobileFilters(false)}
                   className="w-full bg-theme-primary hover:bg-theme-primary-hover text-white py-3 rounded-lg font-bold text-xs"
                 >
-                  Ver {filteredProducts.length} Resultados
+                  Ver {totalItems} Resultados
                 </button>
               </div>
             </div>

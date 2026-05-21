@@ -150,12 +150,26 @@ router.get('/products', (req, res) => {
        }
     }
     
+    const { page, limit } = req.query;
+    let paginatedProducts = finalProducts;
+    let total = finalProducts.length;
+    let totalPages = 1;
+    let pageNum = 1;
+
+    if (page && limit) {
+      pageNum = Number(page) || 1;
+      const limitNum = Number(limit) || 12;
+      totalPages = Math.ceil(total / limitNum);
+      const offset = (pageNum - 1) * limitNum;
+      paginatedProducts = finalProducts.slice(offset, offset + limitNum);
+    }
+    
     const getLightProduct = db.prepare('SELECT id, name, price, stock, image FROM products WHERE id = ?');
     
-    // Parse JSON fields
-    finalProducts.forEach(p => {
-      if (p.variations) p.variations = JSON.parse(p.variations);
-      if (p.combo_items) {
+    // Parse JSON fields only for paginated/returned results
+    paginatedProducts.forEach(p => {
+      if (typeof p.variations === 'string') p.variations = JSON.parse(p.variations);
+      if (typeof p.combo_items === 'string') {
         const parsed = JSON.parse(p.combo_items);
         p.combo_items = parsed.map((item: any) => {
            return { ...item, product: getLightProduct.get(item.product_id) };
@@ -163,7 +177,16 @@ router.get('/products', (req, res) => {
       };
     });
 
-    res.json(finalProducts);
+    if (page && limit) {
+      res.json({
+        data: paginatedProducts,
+        total,
+        page: pageNum,
+        totalPages
+      });
+    } else {
+      res.json(paginatedProducts);
+    }
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Failed to fetch products' });
@@ -201,13 +224,13 @@ router.get('/products/:id', (req, res) => {
 
 // Admin: add product
 router.post('/products', (req, res) => {
-  const { sku, mpn, name, vehicle, price, cost, stock, maxStock, image, category_id, brand_id, cross_sell_ids, is_featured, is_offer, is_new, offer_price, description, type, variations, combo_items } = req.body;
+  const { sku, mpn, name, vehicle, price, cost, stock, maxStock, image, category_id, brand_id, cross_sell_ids, is_featured, is_offer, is_new, offer_price, description, type, variations, combo_items, meta_title, meta_description, slug } = req.body;
   try {
     const stmt = db.prepare(`
-      INSERT INTO products (sku, mpn, name, vehicle, price, cost, stock, maxStock, image, category_id, brand_id, cross_sell_ids, is_featured, is_offer, is_new, offer_price, description, type, variations, combo_items)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      INSERT INTO products (sku, mpn, name, vehicle, price, cost, stock, maxStock, image, category_id, brand_id, cross_sell_ids, is_featured, is_offer, is_new, offer_price, description, type, variations, combo_items, meta_title, meta_description, slug)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `);
-    const info = stmt.run(sku, mpn || null, name, vehicle, price, cost || 0, stock, maxStock || stock, image, category_id, brand_id, cross_sell_ids || null, is_featured ? 1 : 0, is_offer ? 1 : 0, is_new ? 1 : 0, offer_price || null, description || null, type || 'simple', variations ? JSON.stringify(variations) : null, combo_items ? JSON.stringify(combo_items) : null);
+    const info = stmt.run(sku, mpn || null, name, vehicle, price, cost || 0, stock, maxStock || stock, image, category_id, brand_id, cross_sell_ids || null, is_featured ? 1 : 0, is_offer ? 1 : 0, is_new ? 1 : 0, offer_price || null, description || null, type || 'simple', variations ? JSON.stringify(variations) : null, combo_items ? JSON.stringify(combo_items) : null, meta_title || null, meta_description || null, slug || null);
     res.json({ success: true, id: info.lastInsertRowid });
   } catch (err) {
     console.error(err);
@@ -218,14 +241,14 @@ router.post('/products', (req, res) => {
 // Admin: update product
 router.put('/products/:id', (req, res) => {
   const { id } = req.params;
-  const { sku, mpn, name, vehicle, price, cost, stock, maxStock, image, category_id, brand_id, cross_sell_ids, is_featured, is_offer, is_new, offer_price, description, type, variations, combo_items } = req.body;
+  const { sku, mpn, name, vehicle, price, cost, stock, maxStock, image, category_id, brand_id, cross_sell_ids, is_featured, is_offer, is_new, offer_price, description, type, variations, combo_items, meta_title, meta_description, slug } = req.body;
   try {
     const stmt = db.prepare(`
       UPDATE products 
-      SET sku = ?, mpn = ?, name = ?, vehicle = ?, price = ?, cost = ?, stock = ?, maxStock = ?, image = ?, category_id = ?, brand_id = ?, cross_sell_ids = ?, is_featured = ?, is_offer = ?, is_new = ?, offer_price = ?, description = ?, type = ?, variations = ?, combo_items = ?, updated_at = CURRENT_TIMESTAMP
+      SET sku = ?, mpn = ?, name = ?, vehicle = ?, price = ?, cost = ?, stock = ?, maxStock = ?, image = ?, category_id = ?, brand_id = ?, cross_sell_ids = ?, is_featured = ?, is_offer = ?, is_new = ?, offer_price = ?, description = ?, type = ?, variations = ?, combo_items = ?, meta_title = ?, meta_description = ?, slug = ?, updated_at = CURRENT_TIMESTAMP
       WHERE id = ?
     `);
-    stmt.run(sku, mpn || null, name, vehicle, price, cost || 0, stock, maxStock, image, category_id, brand_id, cross_sell_ids || null, is_featured ? 1 : 0, is_offer ? 1 : 0, is_new ? 1 : 0, offer_price || null, description || null, type || 'simple', variations ? JSON.stringify(variations) : null, combo_items ? JSON.stringify(combo_items) : null, id);
+    stmt.run(sku, mpn || null, name, vehicle, price, cost || 0, stock, maxStock, image, category_id, brand_id, cross_sell_ids || null, is_featured ? 1 : 0, is_offer ? 1 : 0, is_new ? 1 : 0, offer_price || null, description || null, type || 'simple', variations ? JSON.stringify(variations) : null, combo_items ? JSON.stringify(combo_items) : null, meta_title || null, meta_description || null, slug || null, id);
     res.json({ success: true });
   } catch (err) {
     console.error(err);

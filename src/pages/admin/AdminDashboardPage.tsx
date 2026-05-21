@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { Package, Users, ShoppingCart, Settings as SettingsIcon, Plus, Edit, Trash2, Save, X, DollarSign, TrendingUp, AlertTriangle, Bold, Italic, Underline, AlignLeft, AlignCenter, AlignRight, List, ListOrdered, Link as LinkIcon, Image as ImageIcon, Upload, Code, Eye, Search } from 'lucide-react';
+import { Package, Users, ShoppingCart, Settings as SettingsIcon, Plus, Edit, Trash2, Save, X, DollarSign, TrendingUp, AlertTriangle, Bold, Italic, Underline, AlignLeft, AlignCenter, AlignRight, List, ListOrdered, Link as LinkIcon, Image as ImageIcon, Upload, Code, Eye, Search, Sparkles } from 'lucide-react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 import { useNavigate } from 'react-router-dom';
@@ -11,6 +11,44 @@ function ProductFormModal({ editingProduct, onClose, onSubmit, products }: any) 
   const [images, setImages] = useState<string[]>(getProductImages(editingProduct?.image));
   const [isUploading, setIsUploading] = useState(false);
   const [productType, setProductType] = useState(editingProduct?.type || 'simple');
+  const [isOptimizing, setIsOptimizing] = useState(false);
+  const [activeTab, setActiveTab] = useState<'basicos' | 'imagenes' | 'seo' | 'opciones'>('basicos');
+  
+  const nameRef = useRef<HTMLInputElement>(null);
+  const descRef = useRef<HTMLTextAreaElement>(null);
+  const metaTitleRef = useRef<HTMLInputElement>(null);
+  const metaDescRef = useRef<HTMLTextAreaElement>(null);
+  const slugRef = useRef<HTMLInputElement>(null);
+
+  const handleAIOptimize = async () => {
+    if (!nameRef.current || !descRef.current) return;
+    
+    setIsOptimizing(true);
+    try {
+      const res = await fetch('/api/ai/optimize-product', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          product: {
+            name: nameRef.current.value,
+            description: descRef.current.value,
+            vehicle: (document.querySelector('input[name="vehicle"]') as HTMLInputElement)?.value || ''
+          }
+        })
+      });
+      const data = await res.json();
+      if (data.name) nameRef.current.value = data.name;
+      if (data.description) descRef.current.value = data.description;
+      if (data.meta_title && metaTitleRef.current) metaTitleRef.current.value = data.meta_title;
+      if (data.meta_description && metaDescRef.current) metaDescRef.current.value = data.meta_description;
+      if (data.slug && slugRef.current) slugRef.current.value = data.slug;
+    } catch (e) {
+      console.error(e);
+      alert('Error en IA');
+    } finally {
+      setIsOptimizing(false);
+    }
+  };
   
   const [variations, setVariations] = useState<any[]>(editingProduct?.variations || []);
   const [comboItems, setComboItems] = useState<any[]>(
@@ -114,15 +152,35 @@ function ProductFormModal({ editingProduct, onClose, onSubmit, products }: any) 
           <X size={24} />
         </button>
         
-        <h2 className="text-2xl font-bebas text-white mb-6">
-          {editingProduct ? 'Editar Producto' : 'Nuevo Producto'}
-        </h2>
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-2xl font-bebas text-white">
+            {editingProduct ? 'Editar Producto' : 'Nuevo Producto'}
+          </h2>
+          <button
+            type="button"
+            onClick={handleAIOptimize}
+            disabled={isOptimizing}
+            className="flex items-center gap-2 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white px-3 py-1.5 rounded text-sm font-bold shadow-lg transition-transform active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <Sparkles size={16} />
+            {isOptimizing ? 'Optimizando...' : 'Optimizar con IA'}
+          </button>
+        </div>
 
         <form onSubmit={onSubmit} className="space-y-4">
-               <div className="grid grid-cols-2 gap-4">
-                 <div>
+               {/* Tabs Header */}
+               <div className="flex border-b border-theme-border mb-4 overflow-x-auto scrollbar-thin">
+                 <button type="button" onClick={() => setActiveTab('basicos')} className={`px-4 py-2 font-bold text-sm whitespace-nowrap transition-colors ${activeTab === 'basicos' ? 'border-b-2 border-theme-primary text-theme-primary' : 'text-gray-400 hover:text-white'}`}>Básicos</button>
+                 <button type="button" onClick={() => setActiveTab('opciones')} className={`px-4 py-2 font-bold text-sm whitespace-nowrap transition-colors ${activeTab === 'opciones' ? 'border-b-2 border-theme-primary text-theme-primary' : 'text-gray-400 hover:text-white'}`}>Opciones / Combos</button>
+                 <button type="button" onClick={() => setActiveTab('imagenes')} className={`px-4 py-2 font-bold text-sm whitespace-nowrap transition-colors ${activeTab === 'imagenes' ? 'border-b-2 border-theme-primary text-theme-primary' : 'text-gray-400 hover:text-white'}`}>Imágenes y Desc.</button>
+                 <button type="button" onClick={() => setActiveTab('seo')} className={`px-4 py-2 font-bold text-sm whitespace-nowrap transition-colors ${activeTab === 'seo' ? 'border-b-2 border-theme-primary text-theme-primary' : 'text-gray-400 hover:text-white'}`}>SEO y Extras</button>
+               </div>
+
+               <div className={activeTab === 'basicos' ? 'block' : 'hidden'}>
+                 <div className="grid grid-cols-2 gap-4">
+                   <div>
                    <label className="block text-xs uppercase text-gray-500 font-bold mb-1">Nombre</label>
-                   <input name="name" defaultValue={editingProduct?.name} required className="w-full bg-theme-base border border-theme-border p-2 rounded text-white outline-none focus:border-theme-primary" />
+                   <input ref={nameRef} name="name" defaultValue={editingProduct?.name} required className="w-full bg-theme-base border border-theme-border p-2 rounded text-white outline-none focus:border-theme-primary" />
                  </div>
                  <div>
                    <label className="block text-xs uppercase text-gray-500 font-bold mb-1">SKU</label>
@@ -163,6 +221,90 @@ function ProductFormModal({ editingProduct, onClose, onSubmit, products }: any) 
                    </select>
                  </div>
 
+                 <div className="col-span-2">
+                   <label className="block text-xs uppercase text-gray-500 font-bold mb-1">Venta Cruzada Manual (Búsqueda por Nombre o SKU)</label>
+                   <input type="hidden" name="cross_sell_ids" value={crossSells.join(', ')} />
+                   
+                   <div className="flex flex-wrap gap-2 mb-2">
+                     {crossSells.map((sku, index) => {
+                       const linkedProduct = products?.find((p: any) => p.sku === sku || p.mpn === sku);
+                       return (
+                         <div key={index} className="flex items-center gap-1 bg-theme-element text-white px-2 py-1 rounded text-sm">
+                           <span>{linkedProduct ? linkedProduct.name : sku}</span>
+                           <button type="button" onClick={() => setCrossSells(crossSells.filter((_, i) => i !== index))} className="hover:text-red-400 ml-1">
+                             <X size={14} />
+                           </button>
+                         </div>
+                       );
+                     })}
+                   </div>
+
+                   <div className="relative group/cross">
+                     <input 
+                       type="text"
+                       placeholder="Escribre para buscar y añadir productos..."
+                       value={crossSellSearch || ''}
+                       onChange={(e) => setCrossSellSearch(e.target.value)}
+                       onFocus={() => { if (crossSellSearch === undefined) setCrossSellSearch(''); }}
+                       className="w-full bg-theme-base border border-theme-border p-2 rounded text-white outline-none focus:border-theme-primary" 
+                     />
+                     
+                     {crossSellSearch !== undefined && (
+                       <div className="absolute z-50 left-0 right-0 top-full mt-1 bg-theme-card border border-theme-border shadow-2xl max-h-48 overflow-y-auto rounded text-sm hidden group-focus-within/cross:block">
+                         {products?.filter((p:any) => p.id !== editingProduct?.id && !crossSells.includes(p.sku) && (!crossSellSearch || p.name.toLowerCase().includes(crossSellSearch.toLowerCase()) || p.sku.toLowerCase().includes(crossSellSearch.toLowerCase()))).slice(0, 20).map((p: any) => (
+                           <div 
+                             key={p.id}
+                             className="p-2 hover:bg-theme-element cursor-pointer border-b border-theme-border/50 text-white flex justify-between"
+                             onMouseDown={(e) => {
+                               e.preventDefault();
+                               if (p.sku && !crossSells.includes(p.sku)) {
+                                 setCrossSells([...crossSells, p.sku]);
+                               }
+                               setCrossSellSearch(undefined);
+                             }}
+                           >
+                             <span className="truncate">{p.name}</span> <span className="text-xs text-gray-400 shrink-0 ml-2">{p.sku}</span>
+                           </div>
+                         ))}
+                         {products?.filter((p:any) => p.id !== editingProduct?.id && !crossSells.includes(p.sku) && (!crossSellSearch || p.name.toLowerCase().includes(crossSellSearch.toLowerCase()) || p.sku.toLowerCase().includes(crossSellSearch.toLowerCase()))).length === 0 && (
+                           <div className="p-2 text-gray-500 italic text-center">No hay resultados</div>
+                         )}
+                       </div>
+                     )}
+                   </div>
+                 </div>
+                 
+                 <div className="col-span-2 flex flex-wrap gap-6 items-center mt-2 p-4 bg-theme-base border border-theme-border rounded-lg">
+                   <label className="flex items-center gap-2 text-sm text-gray-300 cursor-pointer">
+                     <input type="checkbox" name="is_featured" value="1" defaultChecked={editingProduct?.is_featured} className="accent-theme-primary w-4 h-4 cursor-pointer" />
+                     Destacado (Home)
+                   </label>
+                   <label className="flex items-center gap-2 text-sm text-gray-300 cursor-pointer">
+                     <input type="checkbox" name="is_offer" value="1" checked={isOffer} onChange={(e) => setIsOffer(e.target.checked)} className="accent-theme-primary w-4 h-4 cursor-pointer" />
+                     En Oferta
+                   </label>
+                   <label className="flex items-center gap-2 text-sm text-gray-300 cursor-pointer">
+                     <input type="checkbox" name="is_new" value="1" defaultChecked={editingProduct?.is_new} className="accent-theme-primary w-4 h-4 cursor-pointer" />
+                     Recién Llegado
+                   </label>
+                   
+                   {isOffer && (
+                     <div className="w-full mt-2 transition-all">
+                        <label className="block text-xs uppercase text-gray-500 font-bold mb-1">Precio de Oferta</label>
+                        <input name="offer_price" type="number" defaultValue={editingProduct?.offer_price || ''} className="w-full bg-theme-card border border-theme-border p-2 rounded text-white outline-none focus:border-theme-primary" placeholder="Ej: 15000" />
+                     </div>
+                   )}
+                 </div>
+               </div>
+             </div>
+
+             <div className={activeTab === 'opciones' ? 'block' : 'hidden'}>
+               <div className="grid grid-cols-1 gap-4">
+                 {productType === 'simple' && (
+                   <div className="p-4 text-center text-gray-400 bg-theme-base border border-theme-border rounded-lg">
+                     Este producto es Simple. Ve a "Imágenes y Desc." o "SEO y Extras" para continuar.
+                   </div>
+                 )}
                  {productType === 'variable' && (
                    <div className="col-span-2 bg-theme-base border border-theme-border rounded-lg p-4">
                      <label className="block text-xs uppercase text-gray-500 font-bold mb-3">Configuración de Variaciones</label>
@@ -270,8 +412,12 @@ function ProductFormModal({ editingProduct, onClose, onSubmit, products }: any) 
                      </div>
                    </div>
                  )}
+               </div>
+             </div>
 
-                 <div className="col-span-2">
+             <div className={activeTab === 'imagenes' ? 'block' : 'hidden'}>
+               <div className="grid grid-cols-1 gap-4">
+                 <div className="col-span-1">
                    <label className="block text-xs uppercase text-gray-500 font-bold mb-1">Imágenes del Producto Base</label>
                    <div className="flex flex-col gap-4 relative">
                      {images.length > 0 && (
@@ -304,12 +450,36 @@ function ProductFormModal({ editingProduct, onClose, onSubmit, products }: any) 
                    </div>
                  </div>
 
-                 <div className="col-span-2">
+                 <div className="col-span-1">
                    <label className="block text-xs uppercase text-gray-500 font-bold mb-1">Descripción Técnica</label>
-                   <textarea name="description" rows={3} defaultValue={editingProduct?.description || ''} className="w-full bg-theme-base border border-theme-border p-2 rounded text-white outline-none focus:border-theme-primary resize-none" placeholder="Ingresa la descripción del producto..." />
+                   <textarea ref={descRef} name="description" rows={5} defaultValue={editingProduct?.description || ''} className="w-full bg-theme-base border border-theme-border p-2 rounded text-white outline-none focus:border-theme-primary resize-none" placeholder="Ingresa la descripción del producto..." />
                  </div>
+               </div>
+             </div>
+
+             <div className={activeTab === 'seo' ? 'block' : 'hidden'}>
+               <div className="grid grid-cols-1 gap-4">
                  
-                 <div className="col-span-2">
+                 <div className="col-span-1 bg-theme-base border border-theme-border rounded-lg p-4">
+                   <h3 className="font-bold text-white mb-3">SEO y Metadatos</h3>
+                   <div className="space-y-3">
+                     <div>
+                       <label className="block text-[10px] uppercase text-gray-500 font-bold mb-1">URL Optimizada (Slug)</label>
+                       <input ref={slugRef} name="slug" defaultValue={editingProduct?.slug || ''} placeholder="ej-kit-filtros-toyota-corolla" className="w-full bg-theme-card border border-theme-border p-2 rounded text-white outline-none focus:border-theme-primary font-mono text-sm" />
+                       <span className="text-[10px] text-gray-500">Deja en blanco para autogenerar o ingresa una url amigable.</span>
+                     </div>
+                     <div>
+                       <label className="block text-[10px] uppercase text-gray-500 font-bold mb-1">Meta Title</label>
+                       <input ref={metaTitleRef} name="meta_title" defaultValue={editingProduct?.meta_title || ''} placeholder="Kit Filtros Toyota Corolla 1.6 | Oferta" className="w-full bg-theme-card border border-theme-border p-2 rounded text-white outline-none focus:border-theme-primary text-sm" />
+                     </div>
+                     <div>
+                       <label className="block text-[10px] uppercase text-gray-500 font-bold mb-1">Meta Description</label>
+                       <textarea ref={metaDescRef} name="meta_description" rows={2} defaultValue={editingProduct?.meta_description || ''} placeholder="Compra el mejor Kit de Filtros..." className="w-full bg-theme-card border border-theme-border p-2 rounded text-white outline-none focus:border-theme-primary resize-none text-sm" />
+                     </div>
+                   </div>
+                 </div>
+
+                 <div className="col-span-1 hidden">
                    <label className="block text-xs uppercase text-gray-500 font-bold mb-1">Venta Cruzada Manual (Búsqueda por Nombre o SKU)</label>
                    <input type="hidden" name="cross_sell_ids" value={crossSells.join(', ')} />
                    
@@ -362,7 +532,7 @@ function ProductFormModal({ editingProduct, onClose, onSubmit, products }: any) 
                    </div>
                  </div>
                  
-                 <div className="col-span-2 flex flex-wrap gap-6 items-center mt-2 p-4 bg-theme-base border border-theme-border rounded-lg">
+                 <div className="col-span-1 hidden">
                    <label className="flex items-center gap-2 text-sm text-gray-300 cursor-pointer">
                      <input type="checkbox" name="is_featured" value="1" defaultChecked={editingProduct?.is_featured} className="accent-theme-primary w-4 h-4 cursor-pointer" />
                      Destacado (Home)
@@ -386,6 +556,7 @@ function ProductFormModal({ editingProduct, onClose, onSubmit, products }: any) 
                  <input name="category_id" type="hidden" value="1" />
                  <input name="brand_id" type="hidden" value="1" />
                </div>
+             </div>
                
                <div className="pt-4 flex flex-row-reverse gap-4">
                  <button type="submit" className="bg-theme-primary text-white px-6 py-2 rounded font-bold hover:bg-theme-primary-hover transition">
@@ -435,6 +606,54 @@ export default function AdminDashboardPage() {
   const [editorTab, setEditorTab] = useState<'visual' | 'html'>('visual');
   const editorRef = useRef<HTMLDivElement>(null);
   const editorImageInputRef = useRef<HTMLInputElement>(null);
+
+  // AI Bulk Optimization State
+  const [isOptimizingAll, setIsOptimizingAll] = useState(false);
+  const [optimizeProgress, setOptimizeProgress] = useState({ current: 0, total: 0 });
+
+  const startBulkOptimization = async () => {
+    if (!window.confirm(`¿Estás seguro de que quieres optimizar el SEO de TODOS los ${products.length} productos con IA? Esta operación puede tardar varios minutos y modificará el nombre y descripción de los productos.`)) return;
+
+    setIsOptimizingAll(true);
+    setOptimizeProgress({ current: 0, total: products.length });
+
+    try {
+      for (let i = 0; i < products.length; i++) {
+        const p = products[i];
+        try {
+          const aiRes = await fetch('/api/ai/optimize-product', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ product: p })
+          });
+          
+          if (aiRes.ok) {
+            const optData = await aiRes.json();
+            await fetch(`/api/products/${p.id}`, {
+              method: 'PUT',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                ...p,
+                name: optData.name || p.name,
+                description: optData.description || p.description,
+                meta_title: optData.meta_title || p.meta_title,
+                meta_description: optData.meta_description || p.meta_description,
+                slug: optData.slug || p.slug
+              })
+            });
+          }
+        } catch (err) {
+          console.error(`Failed to optimize product ${p.id}`, err);
+        }
+        setOptimizeProgress({ current: i + 1, total: products.length });
+      }
+      alert('Optimización masiva completada');
+      // Refresh products
+      fetch('/api/products').then(r => r.json()).then(d => setProducts(Array.isArray(d) ? d : []));
+    } finally {
+      setIsOptimizingAll(false);
+    }
+  };
 
   // Computed state
   const filteredProducts = products.filter(p => 
@@ -976,6 +1195,14 @@ export default function AdminDashboardPage() {
                 value={productSearch}
                 onChange={e => { setProductSearch(e.target.value); setProductPage(1); }}
               />
+              <button
+                onClick={startBulkOptimization}
+                disabled={isOptimizingAll}
+                className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white px-4 py-2 rounded text-sm font-bold flex items-center gap-2 transition disabled:opacity-50"
+              >
+                <Sparkles size={16} />
+                {isOptimizingAll ? `Procesando (${optimizeProgress.current}/${optimizeProgress.total})` : 'Optimizar Todo con IA'}
+              </button>
               <button 
                 onClick={() => { setEditingProduct(null); setProductModalOpen(true); }}
                 className="bg-theme-primary text-white px-4 py-2 rounded text-sm font-bold flex items-center gap-2 hover:bg-theme-primary-hover transition"

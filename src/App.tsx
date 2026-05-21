@@ -5,6 +5,7 @@
 
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { useEffect } from 'react';
+import { HelmetProvider } from 'react-helmet-async';
 import Header from './components/layout/Header';
 import Footer from './components/layout/Footer';
 import HomePage from './pages/HomePage';
@@ -33,27 +34,29 @@ export default function App() {
   }, [theme]);
 
   return (
-    <Router>
-      <ScrollToTop />
-      <div className="min-h-screen bg-theme-base font-sans text-white flex flex-col">
-        <Header />
-        <main className="flex-1">
-          <Routes>
-            <Route path="/" element={<HomePage />} />
-            <Route path="/catalogo" element={<CatalogPage />} />
-            <Route path="/producto/:id" element={<ProductDetailPage />} />
-            <Route path="/checkout" element={<CheckoutPage />} />
-            <Route path="/checkout/confirmacion" element={<CheckoutConfirmationPage />} />
-            <Route path="/cuenta" element={<AccountPage />} />
-            <Route path="/cuenta/pedidos/:id" element={<OrderDetailPage />} />
-            <Route path="/admin" element={<AdminDashboardPage />} />
-            
-            <Route path="/p/:slug" element={<DynamicPage />} />
-          </Routes>
-        </main>
-        <Footer />
-        <SupportChat />
-      </div>
-    </Router>
+    <HelmetProvider>
+      <Router>
+        <ScrollToTop />
+        <div className="min-h-screen bg-theme-base font-sans text-white flex flex-col">
+          <Header />
+          <main className="flex-1">
+            <Routes>
+              <Route path="/" element={<HomePage />} />
+              <Route path="/catalogo" element={<CatalogPage />} />
+              <Route path="/producto/:id" element={<ProductDetailPage />} />
+              <Route path="/checkout" element={<CheckoutPage />} />
+              <Route path="/checkout/confirmacion" element={<CheckoutConfirmationPage />} />
+              <Route path="/cuenta" element={<AccountPage />} />
+              <Route path="/cuenta/pedidos/:id" element={<OrderDetailPage />} />
+              <Route path="/admin" element={<AdminDashboardPage />} />
+              
+              <Route path="/p/:slug" element={<DynamicPage />} />
+            </Routes>
+          </main>
+          <Footer />
+          <SupportChat />
+        </div>
+      </Router>
+    </HelmetProvider>
   );
 }
