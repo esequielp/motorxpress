@@ -44,7 +44,31 @@ export default function DynamicPage() {
   return (
     <div className="container mx-auto px-4 py-16 min-h-[60vh] max-w-4xl text-gray-300 space-y-6">
       <h1 className="text-5xl font-bebas tracking-wide mb-8 text-white uppercase">{page.title}</h1>
-      <div className="prose prose-invert max-w-none text-base leading-relaxed" dangerouslySetInnerHTML={{ __html: page.content }}></div>
+      <div 
+        className="dynamic-content max-w-none text-base leading-relaxed space-y-4" 
+        dangerouslySetInnerHTML={{ __html: page.content }} 
+      />
+      <style>{`
+        .dynamic-content h1, .dynamic-content h2, .dynamic-content h3, .dynamic-content h4 { 
+          color: var(--theme-text-header, #ffffff); 
+          font-weight: bold; 
+          margin-top: 1.5em; 
+          margin-bottom: 0.5em; 
+        }
+        .dynamic-content h2 { font-size: 1.5rem; }
+        .dynamic-content p { 
+          color: var(--theme-text-body, #d1d5db); 
+          margin-bottom: 1em; 
+        }
+        .dynamic-content ul { list-style-type: disc; padding-left: 1.5em; margin-bottom: 1em; }
+        .dynamic-content li { 
+          color: var(--theme-text-body, #d1d5db); 
+          margin-bottom: 0.5em; 
+        }
+        .dynamic-content strong { 
+          color: var(--theme-text-header, #ffffff); 
+        }
+      `}</style>
     </div>
   );
 }

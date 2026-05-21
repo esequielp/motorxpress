@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { Package, Users, ShoppingCart, Settings as SettingsIcon, Plus, Edit, Trash2, Save, X, DollarSign, TrendingUp, AlertTriangle } from 'lucide-react';
+import React, { useEffect, useState, useRef } from 'react';
+import { Package, Users, ShoppingCart, Settings as SettingsIcon, Plus, Edit, Trash2, Save, X, DollarSign, TrendingUp, AlertTriangle, Bold, Italic, Underline, AlignLeft, AlignCenter, AlignRight, List, ListOrdered, Link as LinkIcon, Image as ImageIcon, Upload, Code, Eye, Search } from 'lucide-react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 import { useNavigate } from 'react-router-dom';
@@ -429,6 +429,12 @@ export default function AdminDashboardPage() {
   
   const [pages, setPages] = useState<any[]>([]);
   const [editingPage, setEditingPage] = useState<any>(null);
+  const [pageSearch, setPageSearch] = useState('');
+  const [pageToDeleteConfirm, setPageToDeleteConfirm] = useState<string | null>(null);
+  const [editorContent, setEditorContent] = useState('');
+  const [editorTab, setEditorTab] = useState<'visual' | 'html'>('visual');
+  const editorRef = useRef<HTMLDivElement>(null);
+  const editorImageInputRef = useRef<HTMLInputElement>(null);
 
   // Computed state
   const filteredProducts = products.filter(p => 
@@ -593,28 +599,119 @@ export default function AdminDashboardPage() {
     }
   };
 
+  // Keep editor content in sync when editor is opened
+  useEffect(() => {
+    if (editingPage) {
+      setEditorContent(editingPage.content || '');
+      setEditorTab('visual');
+    }
+  }, [editingPage]);
+
+  // Keep ref content in sync when entering visual tab
+  useEffect(() => {
+    if (editorTab === 'visual' && editorRef.current && editingPage) {
+      // Small timeout to ensure DOM ref is fully ready
+      const timer = setTimeout(() => {
+        if (editorRef.current) {
+          editorRef.current.innerHTML = editorContent;
+        }
+      }, 50);
+      return () => clearTimeout(timer);
+    }
+  }, [editorTab, editingPage]);
+
+  const handleFormat = (command: string, value: string = '') => {
+    document.execCommand(command, false, value);
+    if (editorRef.current) {
+      setEditorContent(editorRef.current.innerHTML);
+    }
+  };
+
+  const handleInsertLink = () => {
+    const url = prompt('Ingrese el enlace URL (ej: https://example.com):');
+    if (url) {
+      handleFormat('createLink', url);
+    }
+  };
+
+  const handleInsertImageUrl = () => {
+    const url = prompt('Ingrese la URL de la imagen:');
+    if (url) {
+      handleFormat('insertImage', url);
+    }
+  };
+
+  const handleEditorImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files?.[0]) return;
+    const file = e.target.files[0];
+    const formData = new FormData();
+    formData.append('image', file);
+    try {
+      const res = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData
+      });
+      const data = await res.json();
+      if (data.url) {
+        if (editorRef.current) {
+          editorRef.current.focus();
+        }
+        document.execCommand('insertImage', false, data.url);
+        if (editorRef.current) {
+          setEditorContent(editorRef.current.innerHTML);
+        }
+      }
+    } catch (err) {
+      console.error('Error uploading inline image', err);
+      alert('Error al subir la imagen');
+    }
+  };
+
   const handleSavePage = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setSaveError('');
     setSaveSuccess('');
+    
     const formData = new FormData(e.currentTarget);
-    const data = Object.fromEntries(formData.entries());
+    const titleVal = formData.get('title') as string;
+    const slugVal = formData.get('slug') as string;
+    
+    // Get correct content depending on current active tab
+    let finalContent = editorContent;
+    if (editorTab === 'visual' && editorRef.current) {
+      finalContent = editorRef.current.innerHTML;
+    }
     
     try {
-      const res = await fetch(`/api/pages/${data.slug}`, {
+      const res = await fetch(`/api/pages/${slugVal}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ title: data.title, content: data.content })
+        body: JSON.stringify({ title: titleVal, content: finalContent })
       });
       if (!res.ok) throw new Error('Error al guardar página');
       
-      const newPage = { slug: data.slug, title: data.title, content: data.content };
-      setPages(prev => prev.find(p => p.slug === data.slug) ? prev.map(p => p.slug === data.slug ? newPage : p) : [...prev, newPage]);
+      const newPage = { slug: slugVal, title: titleVal, content: finalContent };
+      setPages(prev => prev.find(p => p.slug === slugVal) ? prev.map(p => p.slug === slugVal ? newPage : p) : [...prev, newPage]);
       setEditingPage(null);
       setSaveSuccess('Página guardada exitosamente.');
       setTimeout(() => setSaveSuccess(''), 3000);
     } catch (err: any) {
       setSaveError(err.message || 'Error al guardar');
+    }
+  };
+
+  const handleDeletePage = async (slug: string) => {
+    try {
+      const res = await fetch(`/api/pages/${slug}`, {
+        method: 'DELETE'
+      });
+      if (!res.ok) throw new Error('Error al eliminar página');
+      setPages(prev => prev.filter(p => p.slug !== slug));
+      setPageToDeleteConfirm(null);
+      setSaveSuccess('Página eliminada exitosamente.');
+      setTimeout(() => setSaveSuccess(''), 3000);
+    } catch (err: any) {
+      setSaveError(err.message || 'Error al eliminar página');
     }
   };
 
@@ -1239,42 +1336,134 @@ export default function AdminDashboardPage() {
       {/* Pages CMS Panel */}
       {activeTab === 'pages' && (
         <div className="space-y-6">
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="font-bold text-lg">Páginas de Información</h2>
-            <button 
-              onClick={() => setEditingPage({})}
-              className="bg-theme-element hover:bg-theme-primary text-white px-4 py-2 rounded font-medium flex items-center gap-2 transition"
-            >
-              <Plus size={16} /> Nueva Página
-            </button>
-          </div>
-          
-          {saveSuccess && <div className="mb-4 bg-green-500/20 text-green-400 p-3 rounded border border-green-500/30 font-medium text-sm">{saveSuccess}</div>}
+          <div className="bg-theme-card border border-theme-border rounded-lg overflow-hidden flex flex-col min-h-[400px]">
+            <div className="p-4 border-b border-theme-border flex flex-col sm:flex-row justify-between items-center gap-4">
+              <h2 className="font-bold text-lg flex items-center gap-2 text-white">
+                CMS de Páginas <span className="text-sm font-normal text-gray-500 bg-theme-base px-2 py-0.5 rounded-full">
+                  {pages.filter(p => 
+                    (p.title || '').toLowerCase().includes(pageSearch.toLowerCase()) || 
+                    (p.slug || '').toLowerCase().includes(pageSearch.toLowerCase()) ||
+                    (p.content || '').toLowerCase().includes(pageSearch.toLowerCase())
+                  ).length}
+                </span>
+              </h2>
+              <div className="flex gap-4 w-full sm:w-auto flex-col sm:flex-row">
+                <div className="relative flex-1 sm:min-w-[250px]">
+                  <Search className="absolute left-3 top-2.5 text-gray-500" size={16} />
+                  <input 
+                    type="text" 
+                    placeholder="Buscar páginas por título, slug..." 
+                    className="w-full bg-theme-base border border-theme-border text-white text-sm rounded pl-9 pr-3 py-2 outline-none focus:border-theme-primary"
+                    value={pageSearch}
+                    onChange={e => setPageSearch(e.target.value)}
+                  />
+                </div>
+                <button 
+                  onClick={() => setEditingPage({})}
+                  className="bg-theme-primary text-white px-4 py-2 rounded text-sm font-bold flex items-center gap-2 hover:bg-theme-primary-hover transition"
+                >
+                  <Plus size={16} /> Nueva Página
+                </button>
+              </div>
+            </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {pages.map(page => (
-              <div key={page.slug} className="bg-theme-card border border-theme-border p-4 rounded-lg flex flex-col justify-between hover:border-theme-primary transition">
-                <div>
-                  <h3 className="font-bold text-lg text-white mb-1">{page.title}</h3>
-                  <p className="font-mono text-xs text-gray-500 bg-theme-base inline-block px-2 py-0.5 rounded">/p/{page.slug}</p>
-                </div>
-                <div className="mt-4 flex justify-end">
-                  <button 
-                    onClick={() => setEditingPage(page)}
-                    className="flex items-center gap-2 text-theme-primary hover:text-white transition text-sm font-medium"
-                  >
-                    <Edit size={14} /> Editar Contenido
-                  </button>
-                </div>
-              </div>
-            ))}
-            
-            {pages.length === 0 && (
-              <div className="col-span-full py-12 text-center text-gray-500">
-                <p>No hay páginas creadas todavía.</p>
-                <p className="text-sm">Te sugerimos crear: retornos, faq, envios, terminos, privacidad, quienes-somos, garantia</p>
-              </div>
-            )}
+            {saveSuccess && <div className="m-4 bg-green-500/20 text-green-400 p-3 rounded border border-green-500/30 font-medium text-sm">{saveSuccess}</div>}
+            {saveError && <div className="m-4 bg-red-500/20 text-red-400 p-3 rounded border border-red-500/30 font-medium text-sm">{saveError}</div>}
+
+            <div className="overflow-x-auto flex-1">
+              <table className="w-full text-left text-sm text-gray-400">
+                <thead className="bg-theme-base text-xs uppercase text-gray-400">
+                  <tr>
+                    <th className="px-6 py-3">Título de la Página</th>
+                    <th className="px-6 py-3">Ruta del Enlace</th>
+                    <th className="px-6 py-3">Tamaño del Contenido</th>
+                    <th className="px-6 py-3 text-right">Acciones</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {pages.filter(p => 
+                    (p.title || '').toLowerCase().includes(pageSearch.toLowerCase()) || 
+                    (p.slug || '').toLowerCase().includes(pageSearch.toLowerCase()) ||
+                    (p.content || '').toLowerCase().includes(pageSearch.toLowerCase())
+                  ).length === 0 ? (
+                    <tr>
+                      <td colSpan={4} className="px-6 py-12 text-center text-gray-500">
+                        <p className="font-semibold text-base mb-1">No se encontraron páginas.</p>
+                        <p className="text-xs">Sugeridas: retornos, faq, envios, terminos, privacidad, quienes-somos, garantia</p>
+                      </td>
+                    </tr>
+                  ) : (
+                    pages.filter(p => 
+                      (p.title || '').toLowerCase().includes(pageSearch.toLowerCase()) || 
+                      (p.slug || '').toLowerCase().includes(pageSearch.toLowerCase()) ||
+                      (p.content || '').toLowerCase().includes(pageSearch.toLowerCase())
+                    ).map(page => (
+                      <tr key={page.slug} className="border-b border-theme-border hover:bg-theme-element/30 font-medium text-gray-300">
+                        <td className="px-6 py-4 font-semibold text-white">
+                          {page.title}
+                        </td>
+                        <td className="px-6 py-4 font-mono text-xs">
+                          <a 
+                            href={`/p/${page.slug}`} 
+                            target="_blank" 
+                            rel="noopener noreferrer" 
+                            className="text-theme-primary hover:underline flex items-center gap-1 hover:text-white transition"
+                          >
+                            /p/{page.slug}
+                            <Eye size={12} className="opacity-60" />
+                          </a>
+                        </td>
+                        <td className="px-6 py-4 text-xs">
+                          <span className="px-2.5 py-1 bg-theme-base border border-theme-border rounded text-gray-400">
+                            {(page.content || '').length} caracteres
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 text-right">
+                          <div className="flex justify-end items-center gap-3">
+                            {pageToDeleteConfirm === page.slug ? (
+                              <div className="flex items-center gap-2">
+                                <span className="text-xs text-red-400">¿Eliminar?</span>
+                                <button 
+                                  onClick={() => handleDeletePage(page.slug)}
+                                  className="bg-red-600 hover:bg-red-700 text-white text-xs px-2 py-1 rounded transition"
+                                >
+                                  Sí
+                                </button>
+                                <button 
+                                  onClick={() => setPageToDeleteConfirm(null)}
+                                  className="bg-theme-element hover:bg-theme-element-hover text-white text-xs px-2 py-1 rounded transition"
+                                >
+                                  No
+                                </button>
+                              </div>
+                            ) : (
+                              <>
+                                <button 
+                                  onClick={() => setEditingPage(page)}
+                                  className="text-blue-400 hover:text-blue-300 transition flex items-center gap-1 text-xs"
+                                  title="Editar Contenido"
+                                >
+                                  <Edit size={16} />
+                                  <span>Editar</span>
+                                </button>
+                                <button 
+                                  onClick={() => setPageToDeleteConfirm(page.slug)}
+                                  className="text-theme-primary hover:text-red-400 transition flex items-center gap-1 text-xs"
+                                  title="Eliminar Página"
+                                >
+                                  <Trash2 size={16} />
+                                  <span>Eliminar</span>
+                                </button>
+                              </>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
       )}
@@ -1599,14 +1788,217 @@ export default function AdminDashboardPage() {
                 </div>
               </div>
               
-              <div className="flex-1 flex flex-col shrink-0 min-h-[300px]">
-                <label className="block text-sm text-gray-400 mb-1">Contenido (HTML / Texto)</label>
-                <textarea 
-                  name="content"
-                  required
-                  defaultValue={editingPage.content}
-                  className="w-full flex-1 bg-theme-base border border-theme-border rounded p-2 text-white outline-none focus:border-theme-primary font-mono text-sm resize-none"
-                />
+              <div className="flex-1 flex flex-col shrink-0 min-h-[400px]">
+                <label className="block text-sm text-gray-400 mb-1">Contenido de la Página</label>
+                
+                {/* Visual / HTML editor tabs */}
+                <div className="flex border-b border-theme-border mb-2 shrink-0">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (editorTab === 'html') {
+                        // Content in editorContent state will be re-injected by useEffect
+                        setEditorTab('visual');
+                      }
+                    }}
+                    className={`px-4 py-2 text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 border-b-2 transition ${editorTab === 'visual' ? 'border-theme-primary text-theme-primary' : 'border-transparent text-gray-400 hover:text-white'}`}
+                  >
+                    <Eye size={14} /> Estilo Visual (WYSIWYG)
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (editorTab === 'visual' && editorRef.current) {
+                        setEditorContent(editorRef.current.innerHTML);
+                      }
+                      setEditorTab('html');
+                    }}
+                    className={`px-4 py-2 text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 border-b-2 transition ${editorTab === 'html' ? 'border-theme-primary text-theme-primary' : 'border-transparent text-gray-400 hover:text-white'}`}
+                  >
+                    <Code size={14} /> Código Fuente HTML
+                  </button>
+                </div>
+
+                {/* Toolbar only for Visual tab */}
+                {editorTab === 'visual' && (
+                  <div className="flex flex-wrap gap-1 p-2 bg-theme-base border border-theme-border border-b-0 rounded-t flex-shrink-0 items-center justify-start">
+                    <button
+                      type="button"
+                      onClick={() => handleFormat('bold')}
+                      className="p-1.5 rounded hover:bg-theme-element text-gray-300 hover:text-white transition"
+                      title="Negrita"
+                    >
+                      <Bold size={14} />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleFormat('italic')}
+                      className="p-1.5 rounded hover:bg-theme-element text-gray-300 hover:text-white transition"
+                      title="Cursiva"
+                    >
+                      <Italic size={14} />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleFormat('underline')}
+                      className="p-1.5 rounded hover:bg-theme-element text-gray-300 hover:text-white transition"
+                      title="Subrayado"
+                    >
+                      <Underline size={14} />
+                    </button>
+                    
+                    <div className="w-px h-6 bg-theme-border mx-1" />
+
+                    <button
+                      type="button"
+                      onClick={() => handleFormat('justifyLeft')}
+                      className="p-1.5 rounded hover:bg-theme-element text-gray-300 hover:text-white transition"
+                      title="Alinear Izquierda"
+                    >
+                      <AlignLeft size={14} />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleFormat('justifyCenter')}
+                      className="p-1.5 rounded hover:bg-theme-element text-gray-300 hover:text-white transition"
+                      title="Centrar"
+                    >
+                      <AlignCenter size={14} />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleFormat('justifyRight')}
+                      className="p-1.5 rounded hover:bg-theme-element text-gray-300 hover:text-white transition"
+                      title="Alinear Derecha"
+                    >
+                      <AlignRight size={14} />
+                    </button>
+
+                    <div className="w-px h-6 bg-theme-border mx-1" />
+
+                    <button
+                      type="button"
+                      onClick={() => handleFormat('insertUnorderedList')}
+                      className="p-1.5 rounded hover:bg-theme-element text-gray-300 hover:text-white transition"
+                      title="Viñetas"
+                    >
+                      <List size={14} />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleFormat('insertOrderedList')}
+                      className="p-1.5 rounded hover:bg-theme-element text-gray-300 hover:text-white transition"
+                      title="Numeración"
+                    >
+                      <ListOrdered size={14} />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleFormat('insertHorizontalRule')}
+                      className="p-1.5 rounded hover:bg-theme-element text-gray-300 hover:text-white text-xs font-bold transition px-2"
+                      title="Línea Horizontal"
+                    >
+                      <span className="text-gray-400">LINEA</span>
+                    </button>
+
+                    <div className="w-px h-6 bg-theme-border mx-1" />
+
+                    <select
+                      onChange={(e) => handleFormat('formatBlock', e.target.value)}
+                      defaultValue="p"
+                      className="bg-theme-card text-gray-300 border border-theme-border rounded px-2 py-1 text-xs outline-none"
+                    >
+                      <option value="p">Párrafo (Texto)</option>
+                      <option value="h1">Título 1</option>
+                      <option value="h2">Título 2</option>
+                      <option value="h3">Título 3</option>
+                      <option value="h4">Título 4</option>
+                      <option value="blockquote">Cita (Bloque)</option>
+                    </select>
+
+                    <div className="w-px h-6 bg-theme-border mx-1" />
+
+                    <button
+                      type="button"
+                      onClick={handleInsertLink}
+                      className="p-1.5 rounded hover:bg-theme-element text-gray-300 hover:text-white transition"
+                      title="Añadir Enlace"
+                    >
+                      <LinkIcon size={14} />
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={handleInsertImageUrl}
+                      className="p-1.5 rounded hover:bg-theme-element text-gray-300 hover:text-white transition"
+                      title="Añadir Imagen por URL"
+                    >
+                      <ImageIcon size={14} />
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => editorImageInputRef.current?.click()}
+                      className="bg-theme-element hover:bg-theme-primary text-white text-xs px-2.5 py-1.5 rounded transition flex items-center gap-1.5 font-semibold"
+                      title="Subir Archivo de Imagen"
+                    >
+                      <Upload size={12} />
+                      <span>Subir PC</span>
+                    </button>
+                    <input
+                      type="file"
+                      ref={editorImageInputRef}
+                      onChange={handleEditorImageUpload}
+                      accept="image/*"
+                      className="hidden"
+                    />
+
+                    <div className="w-px h-6 bg-theme-border mx-1" />
+
+                    <button
+                      type="button"
+                      onClick={() => handleFormat('removeFormat')}
+                      className="text-xs text-gray-500 hover:text-red-400 transition px-1 py-0.5 uppercase tracking-wider font-semibold"
+                      title="Limpiar Formato"
+                    >
+                      Limpiar
+                    </button>
+                  </div>
+                )}
+
+                {/* Editor Area Content */}
+                <div className="flex-1 min-h-[350px] flex flex-col">
+                  {editorTab === 'visual' ? (
+                    <div
+                      ref={editorRef}
+                      contentEditable
+                      className="flex-1 w-full bg-theme-base border border-theme-border rounded-b p-4 text-white outline-none focus:border-theme-primary overflow-y-auto wysiwyg-editor-content text-base leading-relaxed"
+                      style={{ minHeight: '350px' }}
+                    />
+                  ) : (
+                    <textarea
+                      value={editorContent}
+                      onChange={(e) => setEditorContent(e.target.value)}
+                      className="w-full flex-1 bg-theme-base border border-theme-border rounded p-4 text-white outline-none focus:border-theme-primary font-mono text-sm resize-none"
+                      style={{ minHeight: '350px' }}
+                      placeholder="<!-- Escribe tu código HTML aquí -->"
+                    />
+                  )}
+                </div>
+
+                <style>{`
+                  .wysiwyg-editor-content h1 { font-size: 2.25rem; font-weight: bold; margin-bottom: 0.5em; color: white; }
+                  .wysiwyg-editor-content h2 { font-size: 1.75rem; font-weight: bold; margin-bottom: 0.5em; color: white; margin-top: 1em; }
+                  .wysiwyg-editor-content h3 { font-size: 1.25rem; font-weight: bold; margin-bottom: 0.5em; color: white; margin-top: 1em; }
+                  .wysiwyg-editor-content h4 { font-size: 1.1rem; font-weight: bold; margin-bottom: 0.5em; color: white; margin-top: 1em; }
+                  .wysiwyg-editor-content p { margin-bottom: 1em; line-height: 1.6; color: #d1d5db; }
+                  .wysiwyg-editor-content ul { list-style-type: disc; padding-left: 1.5rem; margin-bottom: 1rem; }
+                  .wysiwyg-editor-content ol { list-style-type: decimal; padding-left: 1.5rem; margin-bottom: 1rem; }
+                  .wysiwyg-editor-content blockquote { border-left: 4px solid var(--theme-primary); padding-left: 1rem; margin-bottom: 1rem; color: #9ca3af; font-style: italic; }
+                  .wysiwyg-editor-content img { max-width: 100%; height: auto; border-radius: 6px; margin: 1em 0; display: block; border: 1px solid var(--theme-border); }
+                  .wysiwyg-editor-content a { color: var(--theme-primary); text-decoration: underline; }
+                  .wysiwyg-editor-content strong { color: white; font-weight: bold; }
+                `}</style>
               </div>
 
               <div className="pt-4 flex gap-4 shrink-0">

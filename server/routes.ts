@@ -66,20 +66,94 @@ router.delete('/users/:id', (req, res) => {
 // PRODUCTS
 // =====================================
 
-// Get all products
+// Get all products with optional filters
 router.get('/products', (req, res) => {
   try {
-    const products = db.prepare(`
+    const { category, brand, search, vehicle_make, vehicle_model, vehicle_year, price_min, price_max, is_offer, is_new, in_stock, sort } = req.query;
+
+    let queryText = `
       SELECT p.*, c.name as category, b.name as brandName 
       FROM products p
       LEFT JOIN categories c ON p.category_id = c.id
       LEFT JOIN brands b ON p.brand_id = b.id
-    `).all() as any[];
+      WHERE 1=1
+    `;
+    const params: any[] = [];
+
+    if (category) {
+      queryText += ' AND p.category_id = ?';
+      params.push(Number(category));
+    }
+    if (brand) {
+      queryText += ' AND p.brand_id = ?';
+      params.push(Number(brand));
+    }
+    if (search) {
+      queryText += ' AND (p.name LIKE ? OR p.sku LIKE ? OR b.name LIKE ? OR p.vehicle LIKE ?)';
+      const s = `%${search}%`;
+      params.push(s, s, s, s);
+    }
+    if (vehicle_make) {
+      queryText += ' AND p.vehicle LIKE ?';
+      params.push(`%${vehicle_make}%`);
+    }
+    if (vehicle_model) {
+      queryText += ' AND p.vehicle LIKE ?';
+      params.push(`%${vehicle_model}%`);
+    }
+    if (vehicle_year) {
+      queryText += ' AND (p.vehicle LIKE ? OR p.vehicle LIKE ?)';
+      params.push(`%${vehicle_year}%`, '%Universal%');
+    }
+    if (is_offer === 'true') {
+      queryText += ' AND p.is_offer = 1';
+    }
+    if (is_new === 'true') {
+      queryText += ' AND p.is_new = 1';
+    }
+    if (in_stock === 'true') {
+      queryText += ' AND (p.stock > 0 OR p.stock_status = "instock" OR p.is_stock = 1)';
+    }
+
+    // Default sorting (featured first, then name)
+    // Detailed sorting will be processed in javascript if needed to handle custom price logic
+    // but we can sort by name or featured in SQL
+    if (sort === 'name-asc') queryText += ' ORDER BY p.name ASC';
+    else if (sort === 'name-desc') queryText += ' ORDER BY p.name DESC';
+    else queryText += ' ORDER BY p.is_featured DESC, p.id DESC';
+
+    const products = db.prepare(queryText).all(...params) as any[];
+    
+    // Process post-fetch filters (like price calculation that involves offers)
+    let finalProducts = products;
+    
+    if (price_min || price_max || sort === 'price-asc' || sort === 'price-desc') {
+       finalProducts = products.filter(p => {
+         const effectivePrice = (p.is_offer === 1 && p.offer_price) ? p.offer_price : p.price;
+         if (price_min && effectivePrice < Number(price_min)) return false;
+         if (price_max && effectivePrice > Number(price_max)) return false;
+         return true;
+       });
+       
+       if (sort === 'price-asc') {
+         finalProducts.sort((a, b) => {
+           const pa = (a.is_offer === 1 && a.offer_price) ? a.offer_price : a.price;
+           const pb = (b.is_offer === 1 && b.offer_price) ? b.offer_price : b.price;
+           return pa - pb;
+         });
+       } else if (sort === 'price-desc') {
+         finalProducts.sort((a, b) => {
+           const pa = (a.is_offer === 1 && a.offer_price) ? a.offer_price : a.price;
+           const pb = (b.is_offer === 1 && b.offer_price) ? b.offer_price : b.price;
+           return pb - pa;
+         });
+       }
+    }
     
     const getLightProduct = db.prepare('SELECT id, name, price, stock, image FROM products WHERE id = ?');
     
     // Parse JSON fields
-    products.forEach(p => {
+    finalProducts.forEach(p => {
       if (p.variations) p.variations = JSON.parse(p.variations);
       if (p.combo_items) {
         const parsed = JSON.parse(p.combo_items);
@@ -89,7 +163,7 @@ router.get('/products', (req, res) => {
       };
     });
 
-    res.json(products);
+    res.json(finalProducts);
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Failed to fetch products' });
@@ -331,6 +405,17 @@ router.put('/pages/:slug', (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Failed to update page' });
+  }
+});
+
+router.delete('/pages/:slug', (req, res) => {
+  const { slug } = req.params;
+  try {
+    db.prepare('DELETE FROM pages WHERE slug = ?').run(slug);
+    res.json({ success: true });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Failed to delete page' });
   }
 });
 

@@ -125,6 +125,19 @@ export function initDb() {
     db.exec(`ALTER TABLE users ADD COLUMN birthdate TEXT;`);
   } catch (err: any) {}
 
+  // Seed pages if empty
+  const countPagesStmt = db.prepare('SELECT COUNT(*) as count FROM pages').get() as { count: number };
+  if (countPagesStmt.count === 0) {
+    const insertPage = db.prepare('INSERT INTO pages (slug, title, content) VALUES (?, ?, ?)');
+    insertPage.run('retornos', 'Políticas de Devolución', '<h2>Políticas de Devolución</h2>\n<p>Aceptamos devoluciones dentro de los primeros 30 días tras su compra, siempre y cuando el producto se encuentre sellado y en su empaque original.</p>\n<p>Si el producto presenta fallas de fábrica, por favor diríjase a la sección de garantías.</p>');
+    insertPage.run('faq', 'Preguntas Frecuentes', '<h2>Preguntas Frecuentes</h2>\n<ul>\n<li><strong>¿Hacen envíos a todo Chile?</strong><br>Sí, enviamos a todas las regiones mediante Chilexpress o Starken.</li>\n<li><strong>¿Cómo puedo rastrear mi pedido?</strong><br>Una vez despachado, le enviaremos el número de seguimiento por correo.</li>\n<li><strong>¿Venden repuestos originales?</strong><br>Todos nuestros productos son repuestos de calidad y marcas certificadas.</li>\n</ul>');
+    insertPage.run('envios', 'Tiempos de Envío', '<h2>Tiempos de Envío</h2>\n<p>Los pedidos se procesan en 24 a 48 horas hábiles tras la confirmación de pago.</p>\n<ul>\n<li>Región Metropolitana: 1-3 días hábiles.</li>\n<li>Otras regiones: 3-7 días hábiles dependiendo de la localidad.</li>\n</ul>');
+    insertPage.run('terminos', 'Términos y Condiciones', '<h2>Términos y Condiciones</h2>\n<p>El uso de este sitio web y la compra de productos a través de él están sujetos a nuestros términos y condiciones comerciales. Cuidamos su experiencia de compra y garantizamos la seguridad de sus pagos vía Webpay / Flow.</p>');
+    insertPage.run('privacidad', 'Política de Privacidad', '<h2>Política de Privacidad</h2>\n<p>Su información personal (nombre, correo electrónico, dirección) solo es utilizada para gestionar sus compras y enviar comunicaciones relacionadas con sus pedidos o promociones, en caso de haberlo autorizado explícitamente.</p>');
+    insertPage.run('quienes-somos', 'Quiénes Somos', '<h2>Quiénes Somos</h2>\n<p>Somos MotorXPress, una tienda líder en repuestos automotrices con años de experiencia en el mercado. Nuestro objetivo es llevar hasta la puerta de su casa u taller los mejores repuestos al mejor precio.</p>');
+    insertPage.run('garantia', 'Política de Garantía', '<h2>Política de Garantía</h2>\n<p>Todos nuestros productos cuentan con garantía legal de 6 meses (garantía 3x3) ante fallas o defectos de fabricación. Esto no cubre daños por mala instalación o desgaste normal del producto.</p>');
+  }
+
   // Seed data if empty
   const countStmt = db.prepare('SELECT COUNT(*) as count FROM products').get() as { count: number };
   if (countStmt.count === 0) {

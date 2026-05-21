@@ -41,52 +41,63 @@ export default function ProductDetailPage() {
   };
 
   useEffect(() => {
-    setLoading(true);
-    fetch(`/api/products/${id}`)
-      .then(r => {
-        if (!r.ok) throw new Error('Not found');
-        return r.json();
-      })
-      .then(data => {
+    let isMounted = true;
+    
+    const loadProduct = async () => {
+      try {
+        setLoading(true);
+        const res = await fetch(`/api/products/${id}`);
+        if (!res.ok) throw new Error('Product not found');
+        
+        const data = await res.json();
+        if (!isMounted) return;
+        
         setProduct(data);
-        setActiveImage(0); // reset image index on product change
+        setActiveImage(0);
+        
         if (data.type === 'variable' && data.variations && data.variations.length > 0) {
            setSelectedVariationId(data.variations[0].id);
         }
+
+        // Fetch related separately
+        try {
+          const relRes = await fetch('/api/products');
+          if (relRes.ok) {
+             const allProducts = await relRes.json();
+             if (Array.isArray(allProducts) && isMounted) {
+                let manualCrossSells: any[] = [];
+                if (data.cross_sell_ids) {
+                  const terms = data.cross_sell_ids.split(',').map((t: string) => t.trim().toLowerCase()).filter((t: string) => t.length > 0);
+                  manualCrossSells = allProducts.filter(p => (terms.includes(p.sku?.toLowerCase()) || terms.includes(p.mpn?.toLowerCase())) && p.id !== data.id);
+                }
+                
+                let automaticRelated = allProducts.filter(p => p.category_id === data.category_id && p.id !== data.id && !manualCrossSells.find(m => m.id === p.id));
+                let related = [...manualCrossSells, ...automaticRelated];
+                
+                if (related.length === 0) {
+                   related = allProducts.filter(p => p.id !== data.id && !manualCrossSells.find(m => m.id === p.id));
+                   related = [...manualCrossSells, ...related];
+                }
+                setRelatedProducts(related.slice(0, 4));
+             }
+          }
+        } catch (e) {
+          console.error("Failed fetching related products", e);
+        }
         
-        // Fetch related products
-        fetch('/api/products')
-          .then(r => r.json())
-          .then(allProducts => {
-            if (Array.isArray(allProducts)) {
-              let manualCrossSells: any[] = [];
-              if (data.cross_sell_ids) {
-                const terms = data.cross_sell_ids.split(',').map((t: string) => t.trim().toLowerCase()).filter((t: string) => t.length > 0);
-                manualCrossSells = allProducts.filter(p => (terms.includes(p.sku?.toLowerCase()) || terms.includes(p.mpn?.toLowerCase())) && p.id !== data.id);
-              }
-              
-              let automaticRelated = allProducts.filter(p => p.category_id === data.category_id && p.id !== data.id && !manualCrossSells.find(m => m.id === p.id));
-              
-              let related = [...manualCrossSells, ...automaticRelated];
-              
-              if (related.length === 0) {
-                 // Fallback to random products
-                 related = allProducts.filter(p => p.id !== data.id && !manualCrossSells.find(m => m.id === p.id));
-                 related = [...manualCrossSells, ...related];
-              }
-              setRelatedProducts(related.slice(0, 4));
-            }
-            setLoading(false);
-          })
-          .catch((err) => {
-            console.error('Failed to fetch related products:', err);
-            setLoading(false);
-          });
-      })
-      .catch((err) => {
-        console.error(err);
-        setLoading(false);
-      });
+      } catch (err) {
+        console.error("Failed fetching product", err);
+        if (isMounted) setProduct(null);
+      } finally {
+        if (isMounted) setLoading(false);
+      }
+    };
+    
+    loadProduct();
+
+    return () => {
+      isMounted = false;
+    };
   }, [id]);
 
   useEffect(() => {

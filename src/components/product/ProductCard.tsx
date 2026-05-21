@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { ShoppingCart, Check, Share2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { motion, AnimatePresence } from 'motion/react';
 import { useCart, CartItem } from '../../store/cart';
 import { formatCLP } from '../../lib/utils/formatCLP';
 import { cn } from '../../lib/utils/cn';
@@ -67,19 +68,56 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
             )}
             {isVariable && <span className="text-gray-400 text-[10px]">(Desde)</span>}
           </div>
-          <button 
-            onClick={handleAction}
-            className={cn(
-              "w-10 h-10 sm:w-11 sm:h-11 rounded-full transition-all duration-300 flex items-center justify-center relative z-10 shrink-0",
-              added ? "bg-green-500 text-white shadow-md" : "bg-theme-primary text-theme-base hover:bg-theme-primary-hover hover:scale-105 shadow-sm",
-              isPopping && "scale-125 shadow-xl ring-4 ring-theme-primary/40"
-            )}
-            aria-label={isVariable ? "Ver opciones" : "Añadir al carrito"}
-          >
-            {added ? <Check className="w-4 h-4 sm:w-5 sm:h-5 animate-in zoom-in" /> : (
-              isVariable ? <span className="text-lg font-bold">+</span> : <ShoppingCart className="w-4 h-4 sm:w-5 sm:h-5" />
-            )}
-          </button>
+          <div className="relative">
+            <motion.button 
+              whileTap={{ scale: 0.9 }}
+              animate={isPopping ? { scale: [1, 1.2, 1], rotate: [0, -10, 10, 0] } : {}}
+              transition={{ duration: 0.4 }}
+              onClick={handleAction}
+              className={cn(
+                "w-10 h-10 sm:w-11 sm:h-11 rounded-full flex items-center justify-center relative z-10 shrink-0",
+                added ? "bg-green-500 text-white shadow-md shadow-green-500/30" : "bg-theme-primary text-theme-base hover:bg-theme-primary-hover shadow-sm"
+              )}
+              aria-label={isVariable ? "Ver opciones" : "Añadir al carrito"}
+            >
+              <AnimatePresence mode="wait">
+                {added ? (
+                  <motion.div
+                    key="check"
+                    initial={{ scale: 0, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    exit={{ scale: 0, opacity: 0 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    <Check className="w-4 h-4 sm:w-5 sm:h-5" />
+                  </motion.div>
+                ) : (
+                  <motion.div
+                    key="cart"
+                    initial={{ scale: 0, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    exit={{ scale: 0, opacity: 0 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    {isVariable ? <span className="text-lg font-bold">+</span> : <ShoppingCart className="w-4 h-4 sm:w-5 sm:h-5" />}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </motion.button>
+            <AnimatePresence>
+              {isPopping && (
+                <motion.div
+                  initial={{ opacity: 1, scale: 1, y: 0 }}
+                  animate={{ opacity: 0, scale: 1.5, y: -20 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.5 }}
+                  className="absolute -top-1 -right-1 text-theme-primary font-bold z-20 pointer-events-none"
+                >
+                  +1
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
         </div>
       </div>
     </Link>
