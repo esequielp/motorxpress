@@ -152,7 +152,7 @@ function ProductFormModal({ editingProduct, onClose, onSubmit, products }: any) 
           <X size={24} />
         </button>
         
-        <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center justify-between mb-6 pr-8">
           <h2 className="text-2xl font-bebas text-white">
             {editingProduct ? 'Editar Producto' : 'Nuevo Producto'}
           </h2>
@@ -160,7 +160,7 @@ function ProductFormModal({ editingProduct, onClose, onSubmit, products }: any) 
             type="button"
             onClick={handleAIOptimize}
             disabled={isOptimizing}
-            className="flex items-center gap-2 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white px-3 py-1.5 rounded text-sm font-bold shadow-lg transition-transform active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex items-center gap-2 mr-6 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white px-3 py-1.5 rounded text-sm font-bold shadow-lg transition-transform active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <Sparkles size={16} />
             {isOptimizing ? 'Optimizando...' : 'Optimizar con IA'}
@@ -219,6 +219,11 @@ function ProductFormModal({ editingProduct, onClose, onSubmit, products }: any) 
                      <option value="variable">Variables / Configurable</option>
                      <option value="combo">Combo / Bundle</option>
                    </select>
+                 </div>
+
+                 <div className="col-span-2">
+                   <label className="block text-xs uppercase text-gray-500 font-bold mb-1">Descripción Técnica</label>
+                   <textarea ref={descRef} name="description" rows={5} defaultValue={editingProduct?.description || ''} className="w-full bg-theme-base border border-theme-border p-2 rounded text-white outline-none focus:border-theme-primary resize-none" placeholder="Ingresa la descripción del producto..." />
                  </div>
 
                  <div className="col-span-2">
@@ -450,9 +455,9 @@ function ProductFormModal({ editingProduct, onClose, onSubmit, products }: any) 
                    </div>
                  </div>
 
-                 <div className="col-span-1">
+                 <div className="col-span-1 hidden">
                    <label className="block text-xs uppercase text-gray-500 font-bold mb-1">Descripción Técnica</label>
-                   <textarea ref={descRef} name="description" rows={5} defaultValue={editingProduct?.description || ''} className="w-full bg-theme-base border border-theme-border p-2 rounded text-white outline-none focus:border-theme-primary resize-none" placeholder="Ingresa la descripción del producto..." />
+                   <textarea name="description_duplicate_hidden" rows={5} className="hidden" />
                  </div>
                </div>
              </div>
