@@ -72,32 +72,35 @@ export default function Header() {
 
   return (
     <>
-      <header className="sticky top-0 z-40 w-full bg-theme-base border-b border-theme-border">
-        <div className="container mx-auto px-4 h-16 flex items-center justify-between">
+      <header className="sticky top-0 z-40 bg-theme-primary border-b border-theme-primary shadow-sm text-theme-text-header">
+        {/* Level 1: Main Header bar */}
+        <div className="container mx-auto px-4 h-16 flex items-center justify-between gap-4">
           <div className="flex items-center gap-4">
-            <button className="md:hidden text-white" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
+            <button className="md:hidden text-inherit" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
               <Menu className="w-6 h-6" />
             </button>
-            <Link to="/" className="text-white font-bebas text-2xl tracking-wider">
-              MOTOR<span className="text-theme-primary">[X]</span>PRESS
+            <Link to="/" className="text-inherit font-sans text-2xl tracking-tight flex items-center hover:opacity-90">
+              <span className="font-semibold text-inherit">Motor</span>
+              <span className="font-extrabold text-inherit">Xpress</span>
             </Link>
           </div>
 
+          {/* Desktop Search Engine inside white curved container */}
           <div className="hidden md:flex flex-1 max-w-xl mx-8 relative" ref={desktopSearchRef}>
             <div className="relative w-full">
               <input
                 type="text"
-                placeholder="Busca por marca, modelo o SKU..."
+                placeholder="Buscar repuestos, accesorios y más..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 onFocus={() => { if(searchQuery.length > 2) setShowDropdown(true); }}
-                className="w-full bg-theme-card border border-theme-border text-white rounded-md pl-4 pr-10 py-2 focus:outline-none focus:border-theme-primary"
+                className="w-full bg-theme-card border border-theme-border text-theme-text-body placeholder-theme-text-body/60 rounded-md pl-4 pr-10 py-2 text-sm focus:outline-none focus:border-theme-primary focus:ring-1 focus:ring-theme-primary shadow-sm"
               />
-              <Search className="absolute right-3 top-2.5 w-5 h-5 text-gray-400" />
+              <Search className="absolute right-3 top-2.5 w-4 h-4 text-theme-text-body/60 cursor-pointer hover:scale-110 transition-transform" />
             </div>
             
             {showDropdown && (
-              <div className="absolute top-12 left-0 w-full bg-theme-card border border-theme-border rounded-md shadow-xl overflow-hidden z-50">
+              <div className="absolute top-11 left-0 w-full bg-theme-card border border-theme-border rounded-md shadow-xl overflow-hidden z-50">
                 {searchResults.length > 0 ? (
                   <div className="flex flex-col">
                      {searchResults.map(result => (
@@ -107,25 +110,25 @@ export default function Header() {
                          className="flex items-center gap-3 p-3 hover:bg-theme-element text-left border-b border-theme-border last:border-0 transition-colors w-full"
                        >
                          {result.image ? (
-                           <img src={getProductThumbnail(result.image)} alt={result.name} className="w-10 h-10 object-cover rounded" />
+                           <img src={getProductThumbnail(result.image)} alt={result.name} className="w-10 h-10 object-cover rounded bg-theme-base" />
                          ) : (
                            <div className="w-10 h-10 bg-theme-base rounded flex-shrink-0" />
                          )}
                          <div>
-                            <p className="text-white font-medium text-sm">{result.name}</p>
-                            <p className="text-xs text-gray-400 font-mono">{result.sku}</p>
+                            <p className="text-theme-text-header font-medium text-sm">{result.name}</p>
+                            <p className="text-xs text-theme-text-body font-mono">{result.sku}</p>
                          </div>
                        </button>
                      ))}
                      <button 
                        onClick={() => handleSelectResult()}
-                       className="p-3 bg-theme-base text-theme-primary text-sm font-bold flex items-center justify-center gap-1 hover:bg-theme-element transition-colors w-full"
+                       className="p-3 bg-theme-element text-theme-text-header text-sm font-bold flex items-center justify-center gap-1 hover:brightness-95 transition-colors w-full"
                      >
                        Ver todos los resultados <ArrowRight className="w-4 h-4" />
                      </button>
                   </div>
                 ) : (
-                  <div className="p-4 text-center text-gray-400 text-sm">
+                  <div className="p-4 text-center text-theme-text-body text-sm">
                     No se encontraron resultados para "{searchQuery}"
                   </div>
                 )}
@@ -133,21 +136,24 @@ export default function Header() {
             )}
           </div>
 
+          {/* Desktop utility elements */}
           <div className="flex items-center gap-6">
-            <Link to="/admin" className="text-gray-400 hover:text-theme-primary font-bold transition-colors hidden md:block text-sm uppercase tracking-wider" title="Dashboard">
+            <Link to="/admin" className="text-inherit hover:opacity-80 transition-colors hidden md:block text-sm font-medium" title="Dashboard">
               Admin
             </Link>
-            <Link to="/cuenta" className="text-gray-300 hover:text-white transition-colors hidden md:block" title="Mi Cuenta">
-              <User className="w-6 h-6" />
+            <Link to="/cuenta" className="flex items-center gap-1 text-inherit hover:opacity-80 transition-colors hidden md:block text-sm font-medium" title="Mi Cuenta">
+              <User className="w-5 h-5" />
+              <span>Mi Cuenta</span>
             </Link>
             {!isAdminRoute && (
               <button 
-                className="relative text-gray-300 hover:text-white transition-colors"
+                className="relative flex items-center gap-1 text-inherit hover:opacity-80 transition-colors text-sm font-medium"
                 onClick={() => setIsOpen(true)}
               >
-                <ShoppingCart className="w-6 h-6" />
+                <ShoppingCart className="w-5 h-5" />
+                <span className="hidden md:inline">Carrito</span>
                 {count > 0 && (
-                  <span className="absolute -top-2 -right-2 bg-theme-primary text-white text-xs font-bold w-5 h-5 flex items-center justify-center rounded-full">
+                  <span className="absolute -top-1.5 -right-2 bg-red-600 text-white text-[10px] font-bold w-4.5 h-4.5 flex items-center justify-center rounded-full animate-pulse">
                     {count}
                   </span>
                 )}
@@ -158,7 +164,7 @@ export default function Header() {
 
         {/* Mobile Search & Menu */}
         {mobileMenuOpen && (
-          <div className="md:hidden border-t border-theme-border p-4 bg-theme-base relative shadow-xl z-50 flex flex-col gap-4" ref={mobileSearchRef}>
+          <div className="md:hidden border-t border-black/10 p-4 bg-theme-primary relative shadow-xl z-50 flex flex-col gap-4" ref={mobileSearchRef}>
              <div className="relative w-full">
               <input
                 type="text"
@@ -166,9 +172,9 @@ export default function Header() {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 onFocus={() => { if(searchQuery.length > 2) setShowDropdown(true); }}
-                className="w-full bg-theme-card border border-theme-border text-white rounded-md pl-4 pr-10 py-3 focus:outline-none focus:border-theme-primary text-base"
+                className="w-full bg-theme-card border border-theme-border text-theme-text-body rounded-md pl-4 pr-10 py-3 focus:outline-none focus:border-theme-primary text-base"
               />
-              <Search className="absolute right-3 top-3 w-5 h-5 text-gray-400" />
+              <Search className="absolute right-3 top-3 w-5 h-5 text-theme-text-body/60" />
             </div>
 
             {showDropdown && (
@@ -187,20 +193,20 @@ export default function Header() {
                            <div className="w-10 h-10 bg-theme-base rounded flex-shrink-0" />
                          )}
                          <div>
-                            <p className="text-white font-medium text-sm line-clamp-1">{result.name}</p>
-                            <p className="text-xs text-gray-400 font-mono">{result.sku}</p>
+                            <p className="text-theme-text-header font-medium text-sm line-clamp-1">{result.name}</p>
+                            <p className="text-xs text-theme-text-body font-mono">{result.sku}</p>
                          </div>
                        </button>
                      ))}
                      <button 
                        onClick={() => { setMobileMenuOpen(false); handleSelectResult(); }}
-                       className="p-3 bg-theme-base text-theme-primary text-sm font-bold flex items-center justify-center gap-1 hover:bg-theme-element transition-colors w-full"
+                       className="p-3 bg-theme-element text-theme-text-header text-sm font-bold flex items-center justify-center gap-1 hover:brightness-95 transition-colors w-full"
                      >
                        Ver todos los resultados <ArrowRight className="w-4 h-4" />
                      </button>
                   </div>
                 ) : (
-                  <div className="p-4 text-center text-gray-400 text-sm">
+                  <div className="p-4 text-center text-theme-text-body text-sm">
                     No se encontraron resultados para "{searchQuery}"
                   </div>
                 )}
@@ -208,17 +214,20 @@ export default function Header() {
             )}
 
             <nav className="flex flex-col gap-2 mt-2">
-              <Link to="/" onClick={() => setMobileMenuOpen(false)} className="px-4 py-3 text-white font-medium hover:bg-theme-card border-b border-theme-border/50 flex items-center justify-between">
-                Inicio <ArrowRight className="w-4 h-4 text-gray-500" />
+              <Link to="/" onClick={() => setMobileMenuOpen(false)} className="px-4 py-3 text-theme-text-header font-medium hover:bg-theme-element border-b border-theme-border flex items-center justify-between">
+                Inicio <ArrowRight className="w-4 h-4" />
               </Link>
-              <Link to="/catalogo" onClick={() => setMobileMenuOpen(false)} className="px-4 py-3 text-white font-medium hover:bg-theme-card border-b border-theme-border/50 flex items-center justify-between">
-                Ver Catálogo Completo <ArrowRight className="w-4 h-4 text-gray-500" />
+              <Link to="/catalogo" onClick={() => setMobileMenuOpen(false)} className="px-4 py-3 text-theme-text-header font-medium hover:bg-theme-element border-b border-theme-border flex items-center justify-between">
+                Catálogo de Productos <ArrowRight className="w-4 h-4" />
               </Link>
-              <Link to="/cuenta" onClick={() => setMobileMenuOpen(false)} className="px-4 py-3 text-white font-medium hover:bg-theme-card flex items-center justify-between">
+              <Link to="/admin" onClick={() => setMobileMenuOpen(false)} className="px-4 py-3 text-theme-text-header font-medium hover:bg-theme-element border-b border-theme-border flex items-center justify-between">
+                Administración <ArrowRight className="w-4 h-4" />
+              </Link>
+              <Link to="/cuenta" onClick={() => setMobileMenuOpen(false)} className="px-4 py-3 text-theme-text-header font-medium hover:bg-theme-element flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <User className="w-5 h-5" /> Mi Cuenta
                 </div>
-                <ArrowRight className="w-4 h-4 text-gray-500" />
+                <ArrowRight className="w-4 h-4" />
               </Link>
             </nav>
           </div>

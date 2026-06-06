@@ -144,74 +144,75 @@ function ProductFormModal({ editingProduct, onClose, onSubmit, products }: any) 
   return (
     <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4 overflow-y-auto">
       <div className="bg-theme-card border border-theme-border rounded-lg max-w-2xl w-full p-6 shadow-2xl relative my-auto max-h-[90vh] overflow-y-auto">
-        <button 
-          type="button"
-          onClick={onClose}
-          className="absolute top-4 right-4 text-gray-400 hover:text-white transition"
-        >
-          <X size={24} />
-        </button>
-        
-        <div className="flex items-center justify-between mb-6 pr-8">
-          <h2 className="text-2xl font-bebas text-white">
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-2xl font-bebas text-theme-text-header">
             {editingProduct ? 'Editar Producto' : 'Nuevo Producto'}
           </h2>
-          <button
-            type="button"
-            onClick={handleAIOptimize}
-            disabled={isOptimizing}
-            className="flex items-center gap-2 mr-6 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white px-3 py-1.5 rounded text-sm font-bold shadow-lg transition-transform active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            <Sparkles size={16} />
-            {isOptimizing ? 'Optimizando...' : 'Optimizar con IA'}
-          </button>
+          <div className="flex items-center gap-4">
+            <button
+              type="button"
+              onClick={handleAIOptimize}
+              disabled={isOptimizing}
+              className="flex items-center gap-2 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-theme-text-header px-3 py-1.5 rounded text-sm font-bold shadow-lg transition-transform active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <Sparkles size={16} />
+              {isOptimizing ? 'Optimizando...' : 'Optimizar con IA'}
+            </button>
+            <button 
+              type="button"
+              onClick={onClose}
+              className="text-theme-text-body\/60 hover:text-theme-text-header transition"
+            >
+              <X size={24} />
+            </button>
+          </div>
         </div>
 
         <form onSubmit={onSubmit} className="space-y-4">
                {/* Tabs Header */}
                <div className="flex border-b border-theme-border mb-4 overflow-x-auto scrollbar-thin">
-                 <button type="button" onClick={() => setActiveTab('basicos')} className={`px-4 py-2 font-bold text-sm whitespace-nowrap transition-colors ${activeTab === 'basicos' ? 'border-b-2 border-theme-primary text-theme-primary' : 'text-gray-400 hover:text-white'}`}>Básicos</button>
-                 <button type="button" onClick={() => setActiveTab('opciones')} className={`px-4 py-2 font-bold text-sm whitespace-nowrap transition-colors ${activeTab === 'opciones' ? 'border-b-2 border-theme-primary text-theme-primary' : 'text-gray-400 hover:text-white'}`}>Opciones / Combos</button>
-                 <button type="button" onClick={() => setActiveTab('imagenes')} className={`px-4 py-2 font-bold text-sm whitespace-nowrap transition-colors ${activeTab === 'imagenes' ? 'border-b-2 border-theme-primary text-theme-primary' : 'text-gray-400 hover:text-white'}`}>Imágenes y Desc.</button>
-                 <button type="button" onClick={() => setActiveTab('seo')} className={`px-4 py-2 font-bold text-sm whitespace-nowrap transition-colors ${activeTab === 'seo' ? 'border-b-2 border-theme-primary text-theme-primary' : 'text-gray-400 hover:text-white'}`}>SEO y Extras</button>
+                 <button type="button" onClick={() => setActiveTab('basicos')} className={`px-4 py-2 font-bold text-sm whitespace-nowrap transition-colors ${activeTab === 'basicos' ? 'border-b-2 border-theme-primary text-theme-text-header' : 'text-theme-text-body\/60 hover:text-theme-text-header'}`}>Básicos</button>
+                 <button type="button" onClick={() => setActiveTab('opciones')} className={`px-4 py-2 font-bold text-sm whitespace-nowrap transition-colors ${activeTab === 'opciones' ? 'border-b-2 border-theme-primary text-theme-text-header' : 'text-theme-text-body\/60 hover:text-theme-text-header'}`}>Opciones / Combos</button>
+                 <button type="button" onClick={() => setActiveTab('imagenes')} className={`px-4 py-2 font-bold text-sm whitespace-nowrap transition-colors ${activeTab === 'imagenes' ? 'border-b-2 border-theme-primary text-theme-text-header' : 'text-theme-text-body\/60 hover:text-theme-text-header'}`}>Imágenes y Desc.</button>
+                 <button type="button" onClick={() => setActiveTab('seo')} className={`px-4 py-2 font-bold text-sm whitespace-nowrap transition-colors ${activeTab === 'seo' ? 'border-b-2 border-theme-primary text-theme-text-header' : 'text-theme-text-body\/60 hover:text-theme-text-header'}`}>SEO y Extras</button>
                </div>
 
                <div className={activeTab === 'basicos' ? 'block' : 'hidden'}>
                  <div className="grid grid-cols-2 gap-4">
                    <div>
                    <label className="block text-xs uppercase text-gray-500 font-bold mb-1">Nombre</label>
-                   <input ref={nameRef} name="name" defaultValue={editingProduct?.name} required className="w-full bg-theme-base border border-theme-border p-2 rounded text-white outline-none focus:border-theme-primary" />
+                   <input ref={nameRef} name="name" defaultValue={editingProduct?.name} required className="w-full bg-theme-base border border-theme-border p-2 rounded text-theme-text-header outline-none focus:border-theme-primary" />
                  </div>
                  <div>
                    <label className="block text-xs uppercase text-gray-500 font-bold mb-1">SKU</label>
-                   <input name="sku" defaultValue={editingProduct?.sku} required className="w-full bg-theme-base border border-theme-border p-2 rounded text-white outline-none focus:border-theme-primary font-mono" />
+                   <input name="sku" defaultValue={editingProduct?.sku} required className="w-full bg-theme-base border border-theme-border p-2 rounded text-theme-text-header outline-none focus:border-theme-primary font-mono" />
                  </div>
                  <div>
                    <label className="block text-xs uppercase text-gray-500 font-bold mb-1">MPN (Número de Parte)</label>
-                   <input name="mpn" defaultValue={editingProduct?.mpn || ''} className="w-full bg-theme-base border border-theme-border p-2 rounded text-white outline-none focus:border-theme-primary font-mono" placeholder="Opcional" />
+                   <input name="mpn" defaultValue={editingProduct?.mpn || ''} className="w-full bg-theme-base border border-theme-border p-2 rounded text-theme-text-header outline-none focus:border-theme-primary font-mono" placeholder="Opcional" />
                  </div>
                  <div>
                    <label className="block text-xs uppercase text-gray-500 font-bold mb-1">Precio Unitario Base</label>
-                   <input name="price" type="number" defaultValue={editingProduct?.price || 0} required className="w-full bg-theme-base border border-theme-border p-2 rounded text-white outline-none focus:border-theme-primary" />
+                   <input name="price" type="number" defaultValue={editingProduct?.price || 0} required className="w-full bg-theme-base border border-theme-border p-2 rounded text-theme-text-header outline-none focus:border-theme-primary" />
                  </div>
                  <div>
                    <label className="block text-xs uppercase text-gray-500 font-bold mb-1">Costo Base</label>
-                   <input name="cost" type="number" defaultValue={editingProduct?.cost || 0} required className="w-full bg-theme-base border border-theme-border p-2 rounded text-white outline-none focus:border-theme-primary" />
+                   <input name="cost" type="number" defaultValue={editingProduct?.cost || 0} required className="w-full bg-theme-base border border-theme-border p-2 rounded text-theme-text-header outline-none focus:border-theme-primary" />
                  </div>
                  <div>
                    <label className="block text-xs uppercase text-gray-500 font-bold mb-1">Stock Base</label>
-                   <input name="stock" type="number" defaultValue={editingProduct?.stock || 0} required className="w-full bg-theme-base border border-theme-border p-2 rounded text-white outline-none focus:border-theme-primary" />
+                   <input name="stock" type="number" defaultValue={editingProduct?.stock || 0} required className="w-full bg-theme-base border border-theme-border p-2 rounded text-theme-text-header outline-none focus:border-theme-primary" />
                  </div>
                  <div className="col-span-2">
                    <label className="block text-xs uppercase text-gray-500 font-bold mb-1">Vehículo de Compatibilidad</label>
-                   <input name="vehicle" defaultValue={editingProduct?.vehicle || 'Universal'} required className="w-full bg-theme-base border border-theme-border p-2 rounded text-white outline-none focus:border-theme-primary" />
+                   <input name="vehicle" defaultValue={editingProduct?.vehicle || 'Universal'} required className="w-full bg-theme-base border border-theme-border p-2 rounded text-theme-text-header outline-none focus:border-theme-primary" />
                  </div>
 
                  <div className="col-span-2">
                    <label className="block text-xs uppercase text-gray-500 font-bold mb-1">Tipo de Producto</label>
                    <select 
                      name="type" 
-                     className="w-full bg-theme-base border border-theme-border p-2 rounded text-white outline-none focus:border-theme-primary"
+                     className="w-full bg-theme-base border border-theme-border p-2 rounded text-theme-text-header outline-none focus:border-theme-primary"
                      value={productType}
                      onChange={(e) => setProductType(e.target.value)}
                    >
@@ -223,7 +224,7 @@ function ProductFormModal({ editingProduct, onClose, onSubmit, products }: any) 
 
                  <div className="col-span-2">
                    <label className="block text-xs uppercase text-gray-500 font-bold mb-1">Descripción Técnica</label>
-                   <textarea ref={descRef} name="description" rows={5} defaultValue={editingProduct?.description || ''} className="w-full bg-theme-base border border-theme-border p-2 rounded text-white outline-none focus:border-theme-primary resize-none" placeholder="Ingresa la descripción del producto..." />
+                   <textarea ref={descRef} name="description" rows={5} defaultValue={editingProduct?.description || ''} className="w-full bg-theme-base border border-theme-border p-2 rounded text-theme-text-header outline-none focus:border-theme-primary resize-none" placeholder="Ingresa la descripción del producto..." />
                  </div>
 
                  <div className="col-span-2">
@@ -234,7 +235,7 @@ function ProductFormModal({ editingProduct, onClose, onSubmit, products }: any) 
                      {crossSells.map((sku, index) => {
                        const linkedProduct = products?.find((p: any) => p.sku === sku || p.mpn === sku);
                        return (
-                         <div key={index} className="flex items-center gap-1 bg-theme-element text-white px-2 py-1 rounded text-sm">
+                         <div key={index} className="flex items-center gap-1 bg-theme-element text-theme-text-header px-2 py-1 rounded text-sm">
                            <span>{linkedProduct ? linkedProduct.name : sku}</span>
                            <button type="button" onClick={() => setCrossSells(crossSells.filter((_, i) => i !== index))} className="hover:text-red-400 ml-1">
                              <X size={14} />
@@ -251,7 +252,7 @@ function ProductFormModal({ editingProduct, onClose, onSubmit, products }: any) 
                        value={crossSellSearch || ''}
                        onChange={(e) => setCrossSellSearch(e.target.value)}
                        onFocus={() => { if (crossSellSearch === undefined) setCrossSellSearch(''); }}
-                       className="w-full bg-theme-base border border-theme-border p-2 rounded text-white outline-none focus:border-theme-primary" 
+                       className="w-full bg-theme-base border border-theme-border p-2 rounded text-theme-text-header outline-none focus:border-theme-primary" 
                      />
                      
                      {crossSellSearch !== undefined && (
@@ -259,7 +260,7 @@ function ProductFormModal({ editingProduct, onClose, onSubmit, products }: any) 
                          {products?.filter((p:any) => p.id !== editingProduct?.id && !crossSells.includes(p.sku) && (!crossSellSearch || p.name.toLowerCase().includes(crossSellSearch.toLowerCase()) || p.sku.toLowerCase().includes(crossSellSearch.toLowerCase()))).slice(0, 20).map((p: any) => (
                            <div 
                              key={p.id}
-                             className="p-2 hover:bg-theme-element cursor-pointer border-b border-theme-border/50 text-white flex justify-between"
+                             className="p-2 hover:bg-theme-element cursor-pointer border-b border-theme-border/50 text-theme-text-header flex justify-between"
                              onMouseDown={(e) => {
                                e.preventDefault();
                                if (p.sku && !crossSells.includes(p.sku)) {
@@ -268,7 +269,7 @@ function ProductFormModal({ editingProduct, onClose, onSubmit, products }: any) 
                                setCrossSellSearch(undefined);
                              }}
                            >
-                             <span className="truncate">{p.name}</span> <span className="text-xs text-gray-400 shrink-0 ml-2">{p.sku}</span>
+                             <span className="truncate">{p.name}</span> <span className="text-xs text-theme-text-body\/60 shrink-0 ml-2">{p.sku}</span>
                            </div>
                          ))}
                          {products?.filter((p:any) => p.id !== editingProduct?.id && !crossSells.includes(p.sku) && (!crossSellSearch || p.name.toLowerCase().includes(crossSellSearch.toLowerCase()) || p.sku.toLowerCase().includes(crossSellSearch.toLowerCase()))).length === 0 && (
@@ -280,15 +281,15 @@ function ProductFormModal({ editingProduct, onClose, onSubmit, products }: any) 
                  </div>
                  
                  <div className="col-span-2 flex flex-wrap gap-6 items-center mt-2 p-4 bg-theme-base border border-theme-border rounded-lg">
-                   <label className="flex items-center gap-2 text-sm text-gray-300 cursor-pointer">
+                   <label className="flex items-center gap-2 text-sm text-theme-text-body cursor-pointer">
                      <input type="checkbox" name="is_featured" value="1" defaultChecked={editingProduct?.is_featured} className="accent-theme-primary w-4 h-4 cursor-pointer" />
                      Destacado (Home)
                    </label>
-                   <label className="flex items-center gap-2 text-sm text-gray-300 cursor-pointer">
+                   <label className="flex items-center gap-2 text-sm text-theme-text-body cursor-pointer">
                      <input type="checkbox" name="is_offer" value="1" checked={isOffer} onChange={(e) => setIsOffer(e.target.checked)} className="accent-theme-primary w-4 h-4 cursor-pointer" />
                      En Oferta
                    </label>
-                   <label className="flex items-center gap-2 text-sm text-gray-300 cursor-pointer">
+                   <label className="flex items-center gap-2 text-sm text-theme-text-body cursor-pointer">
                      <input type="checkbox" name="is_new" value="1" defaultChecked={editingProduct?.is_new} className="accent-theme-primary w-4 h-4 cursor-pointer" />
                      Recién Llegado
                    </label>
@@ -296,7 +297,7 @@ function ProductFormModal({ editingProduct, onClose, onSubmit, products }: any) 
                    {isOffer && (
                      <div className="w-full mt-2 transition-all">
                         <label className="block text-xs uppercase text-gray-500 font-bold mb-1">Precio de Oferta</label>
-                        <input name="offer_price" type="number" defaultValue={editingProduct?.offer_price || ''} className="w-full bg-theme-card border border-theme-border p-2 rounded text-white outline-none focus:border-theme-primary" placeholder="Ej: 15000" />
+                        <input name="offer_price" type="number" defaultValue={editingProduct?.offer_price || ''} className="w-full bg-theme-card border border-theme-border p-2 rounded text-theme-text-header outline-none focus:border-theme-primary" placeholder="Ej: 15000" />
                      </div>
                    )}
                  </div>
@@ -306,7 +307,7 @@ function ProductFormModal({ editingProduct, onClose, onSubmit, products }: any) 
              <div className={activeTab === 'opciones' ? 'block' : 'hidden'}>
                <div className="grid grid-cols-1 gap-4">
                  {productType === 'simple' && (
-                   <div className="p-4 text-center text-gray-400 bg-theme-base border border-theme-border rounded-lg">
+                   <div className="p-4 text-center text-theme-text-body\/60 bg-theme-base border border-theme-border rounded-lg">
                      Este producto es Simple. Ve a "Imágenes y Desc." o "SEO y Extras" para continuar.
                    </div>
                  )}
@@ -317,30 +318,30 @@ function ProductFormModal({ editingProduct, onClose, onSubmit, products }: any) 
                      <div className="space-y-3">
                        {variations.map((v, index) => (
                          <div key={v.id || index} className="flex flex-wrap md:flex-nowrap gap-2 items-start bg-theme-card p-3 rounded border border-theme-border relative">
-                           <button type="button" onClick={() => removeVariation(index)} className="absolute -top-2 -right-2 bg-red-600 text-white rounded-full p-1 hover:bg-red-700 w-6 h-6 flex items-center justify-center">
+                           <button type="button" onClick={() => removeVariation(index)} className="absolute -top-2 -right-2 bg-red-600 text-theme-text-header rounded-full p-1 hover:bg-red-700 w-6 h-6 flex items-center justify-center">
                              <X size={12} />
                            </button>
                            <div className="flex-1 min-w-[120px]">
                              <label className="block text-[10px] text-gray-500 mb-1">SKU</label>
-                             <input value={v.sku} onChange={e => updateVariation(index, 'sku', e.target.value)} className="w-full bg-theme-base border border-theme-border p-1.5 rounded text-white text-sm" placeholder="SKU-VAR" />
+                             <input value={v.sku} onChange={e => updateVariation(index, 'sku', e.target.value)} className="w-full bg-theme-base border border-theme-border p-1.5 rounded text-theme-text-header text-sm" placeholder="SKU-VAR" />
                            </div>
                            <div className="flex-1 min-w-[150px]">
                              <label className="block text-[10px] text-gray-500 mb-1">Nombre Variante</label>
-                             <input value={v.name} onChange={e => updateVariation(index, 'name', e.target.value)} className="w-full bg-theme-base border border-theme-border p-1.5 rounded text-white text-sm" placeholder="Talla M - Rojo" />
+                             <input value={v.name} onChange={e => updateVariation(index, 'name', e.target.value)} className="w-full bg-theme-base border border-theme-border p-1.5 rounded text-theme-text-header text-sm" placeholder="Talla M - Rojo" />
                            </div>
                            <div className="w-24">
                              <label className="block text-[10px] text-gray-500 mb-1">Precio</label>
-                             <input type="number" value={v.price} onChange={e => updateVariation(index, 'price', Number(e.target.value))} className="w-full bg-theme-base border border-theme-border p-1.5 rounded text-white text-sm" />
+                             <input type="number" value={v.price} onChange={e => updateVariation(index, 'price', Number(e.target.value))} className="w-full bg-theme-base border border-theme-border p-1.5 rounded text-theme-text-header text-sm" />
                            </div>
                            <div className="w-20">
                              <label className="block text-[10px] text-gray-500 mb-1">Stock</label>
-                             <input type="number" value={v.stock} onChange={e => updateVariation(index, 'stock', Number(e.target.value))} className="w-full bg-theme-base border border-theme-border p-1.5 rounded text-white text-sm" />
+                             <input type="number" value={v.stock} onChange={e => updateVariation(index, 'stock', Number(e.target.value))} className="w-full bg-theme-base border border-theme-border p-1.5 rounded text-theme-text-header text-sm" />
                            </div>
                            <div className="w-full md:w-32">
                              <label className="block text-[10px] text-gray-500 mb-1">Imagen</label>
                              <div className="flex gap-2 items-center">
                                {v.image && <img src={v.image} className="w-8 h-8 object-cover rounded bg-theme-base border border-theme-border shrink-0" alt="var" />}
-                               <label className="flex-1 bg-theme-element hover:bg-theme-primary text-white p-1.5 rounded cursor-pointer transition flex items-center justify-center text-[10px]" title="Subir Imagen">
+                               <label className="flex-1 bg-theme-element hover:bg-theme-primary text-theme-text-header p-1.5 rounded cursor-pointer transition flex items-center justify-center text-[10px]" title="Subir Imagen">
                                  <Plus size={14} className="mr-1" /> Subir
                                  <input type="file" accept="image/*" onChange={(e) => handleVariationImageUpload(index, e)} className="hidden" />
                                </label>
@@ -348,7 +349,7 @@ function ProductFormModal({ editingProduct, onClose, onSubmit, products }: any) 
                            </div>
                          </div>
                        ))}
-                       <button type="button" onClick={addVariation} className="flex items-center gap-1 text-sm bg-theme-element hover:bg-theme-primary px-3 py-1.5 rounded text-white transition">
+                       <button type="button" onClick={addVariation} className="flex items-center gap-1 text-sm bg-theme-element hover:bg-theme-primary px-3 py-1.5 rounded text-theme-text-header transition">
                          <Plus size={14} /> Añadir Variante
                        </button>
                      </div>
@@ -362,7 +363,7 @@ function ProductFormModal({ editingProduct, onClose, onSubmit, products }: any) 
                      <div className="space-y-3">
                        {comboItems.map((item, index) => (
                          <div key={index} className="flex gap-2 items-end bg-theme-card p-3 rounded border border-theme-border relative">
-                           <button type="button" onClick={() => removeComboItem(index)} className="absolute -top-2 -right-2 bg-red-600 text-white rounded-full p-1 hover:bg-red-700 w-6 h-6 flex items-center justify-center">
+                           <button type="button" onClick={() => removeComboItem(index)} className="absolute -top-2 -right-2 bg-red-600 text-theme-text-header rounded-full p-1 hover:bg-red-700 w-6 h-6 flex items-center justify-center">
                              <X size={12} />
                            </button>
                            <div className="flex-1 group/combo">
@@ -378,21 +379,21 @@ function ProductFormModal({ editingProduct, onClose, onSubmit, products }: any) 
                                       setComboSearchQueries({...comboSearchQueries, [index]: ''});
                                    }
                                  }}
-                                 className="w-full bg-theme-base border border-theme-border p-1.5 rounded text-white text-sm focus:border-theme-primary transition-colors outline-none"
+                                 className="w-full bg-theme-base border border-theme-border p-1.5 rounded text-theme-text-header text-sm focus:border-theme-primary transition-colors outline-none"
                                />
                                {comboSearchQueries[index] !== undefined && (
                                  <div className="absolute z-50 left-0 right-0 top-full mt-1 bg-theme-card border border-theme-border shadow-2xl max-h-48 overflow-y-auto rounded text-sm hidden group-focus-within/combo:block">
                                    {products?.filter((p:any) => p.id !== editingProduct?.id && (!comboSearchQueries[index] || p.name.toLowerCase().includes(comboSearchQueries[index].toLowerCase()) || p.sku.toLowerCase().includes(comboSearchQueries[index].toLowerCase()))).slice(0, 20).map((p: any) => (
                                      <div 
                                        key={p.id}
-                                       className="p-2 hover:bg-theme-element cursor-pointer border-b border-theme-border/50 text-white flex justify-between"
+                                       className="p-2 hover:bg-theme-element cursor-pointer border-b border-theme-border/50 text-theme-text-header flex justify-between"
                                        onMouseDown={(e) => {
                                          e.preventDefault();
                                          updateComboItem(index, 'product_id', p.id);
                                          setComboSearchQueries({...comboSearchQueries, [index]: undefined});
                                        }}
                                      >
-                                       <span className="truncate">{p.name}</span> <span className="text-xs text-gray-400 shrink-0 ml-2">{p.sku}</span>
+                                       <span className="truncate">{p.name}</span> <span className="text-xs text-theme-text-body\/60 shrink-0 ml-2">{p.sku}</span>
                                      </div>
                                    ))}
                                    {products?.filter((p:any) => p.id !== editingProduct?.id && (!comboSearchQueries[index] || p.name.toLowerCase().includes(comboSearchQueries[index].toLowerCase()) || p.sku.toLowerCase().includes(comboSearchQueries[index].toLowerCase()))).length === 0 && (
@@ -407,11 +408,11 @@ function ProductFormModal({ editingProduct, onClose, onSubmit, products }: any) 
                            </div>
                            <div className="w-24">
                              <label className="block text-[10px] text-gray-500 mb-1">Cantidad</label>
-                             <input type="number" value={item.quantity} onChange={e => updateComboItem(index, 'quantity', parseInt(e.target.value) || 1)} className="w-full bg-theme-base border border-theme-border p-1.5 rounded text-white text-sm" min="1" />
+                             <input type="number" value={item.quantity} onChange={e => updateComboItem(index, 'quantity', parseInt(e.target.value) || 1)} className="w-full bg-theme-base border border-theme-border p-1.5 rounded text-theme-text-header text-sm" min="1" />
                            </div>
                          </div>
                        ))}
-                       <button type="button" onClick={addComboItem} className="flex items-center gap-1 text-sm bg-theme-element hover:bg-theme-primary px-3 py-1.5 rounded text-white transition">
+                       <button type="button" onClick={addComboItem} className="flex items-center gap-1 text-sm bg-theme-element hover:bg-theme-primary px-3 py-1.5 rounded text-theme-text-header transition">
                          <Plus size={14} /> Añadir Producto al Bundle
                        </button>
                      </div>
@@ -433,12 +434,12 @@ function ProductFormModal({ editingProduct, onClose, onSubmit, products }: any) 
                              <button 
                                type="button"
                                onClick={() => setImages(images.filter((_, index) => index !== i))}
-                               className="absolute top-1 right-1 bg-red-600 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center h-5 w-5"
+                               className="absolute top-1 right-1 bg-red-600 text-theme-text-header rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center h-5 w-5"
                              >
                                <X size={12} />
                              </button>
                              {i === 0 && (
-                               <span className="absolute bottom-0 left-0 right-0 bg-black/80 text-[10px] text-center py-0.5 text-white">Principal</span>
+                               <span className="absolute bottom-0 left-0 right-0 bg-black/80 text-[10px] text-center py-0.5 text-theme-text-header">Principal</span>
                              )}
                            </div>
                          ))}
@@ -446,7 +447,7 @@ function ProductFormModal({ editingProduct, onClose, onSubmit, products }: any) 
                      )}
                      <div className="flex gap-2 items-center">
                        <input type="hidden" name="image" value={JSON.stringify(images)} />
-                       <label className="bg-theme-element hover:bg-[#2A2A35] text-white px-4 py-2 rounded cursor-pointer transition flex items-center justify-center whitespace-nowrap">
+                       <label className="bg-theme-element hover:bg-[#2A2A35] text-theme-text-header px-4 py-2 rounded cursor-pointer transition flex items-center justify-center whitespace-nowrap">
                          {isUploading ? 'Subiendo...' : 'Subir Imagen'}
                          <input type="file" accept="image/*" onChange={handleImageUpload} disabled={isUploading} className="hidden" />
                        </label>
@@ -466,20 +467,20 @@ function ProductFormModal({ editingProduct, onClose, onSubmit, products }: any) 
                <div className="grid grid-cols-1 gap-4">
                  
                  <div className="col-span-1 bg-theme-base border border-theme-border rounded-lg p-4">
-                   <h3 className="font-bold text-white mb-3">SEO y Metadatos</h3>
+                   <h3 className="font-bold text-theme-text-header mb-3">SEO y Metadatos</h3>
                    <div className="space-y-3">
                      <div>
                        <label className="block text-[10px] uppercase text-gray-500 font-bold mb-1">URL Optimizada (Slug)</label>
-                       <input ref={slugRef} name="slug" defaultValue={editingProduct?.slug || ''} placeholder="ej-kit-filtros-toyota-corolla" className="w-full bg-theme-card border border-theme-border p-2 rounded text-white outline-none focus:border-theme-primary font-mono text-sm" />
+                       <input ref={slugRef} name="slug" defaultValue={editingProduct?.slug || ''} placeholder="ej-kit-filtros-toyota-corolla" className="w-full bg-theme-card border border-theme-border p-2 rounded text-theme-text-header outline-none focus:border-theme-primary font-mono text-sm" />
                        <span className="text-[10px] text-gray-500">Deja en blanco para autogenerar o ingresa una url amigable.</span>
                      </div>
                      <div>
                        <label className="block text-[10px] uppercase text-gray-500 font-bold mb-1">Meta Title</label>
-                       <input ref={metaTitleRef} name="meta_title" defaultValue={editingProduct?.meta_title || ''} placeholder="Kit Filtros Toyota Corolla 1.6 | Oferta" className="w-full bg-theme-card border border-theme-border p-2 rounded text-white outline-none focus:border-theme-primary text-sm" />
+                       <input ref={metaTitleRef} name="meta_title" defaultValue={editingProduct?.meta_title || ''} placeholder="Kit Filtros Toyota Corolla 1.6 | Oferta" className="w-full bg-theme-card border border-theme-border p-2 rounded text-theme-text-header outline-none focus:border-theme-primary text-sm" />
                      </div>
                      <div>
                        <label className="block text-[10px] uppercase text-gray-500 font-bold mb-1">Meta Description</label>
-                       <textarea ref={metaDescRef} name="meta_description" rows={2} defaultValue={editingProduct?.meta_description || ''} placeholder="Compra el mejor Kit de Filtros..." className="w-full bg-theme-card border border-theme-border p-2 rounded text-white outline-none focus:border-theme-primary resize-none text-sm" />
+                       <textarea ref={metaDescRef} name="meta_description" rows={2} defaultValue={editingProduct?.meta_description || ''} placeholder="Compra el mejor Kit de Filtros..." className="w-full bg-theme-card border border-theme-border p-2 rounded text-theme-text-header outline-none focus:border-theme-primary resize-none text-sm" />
                      </div>
                    </div>
                  </div>
@@ -492,7 +493,7 @@ function ProductFormModal({ editingProduct, onClose, onSubmit, products }: any) 
                      {crossSells.map((sku, index) => {
                        const linkedProduct = products?.find((p: any) => p.sku === sku || p.mpn === sku);
                        return (
-                         <div key={index} className="flex items-center gap-1 bg-theme-element text-white px-2 py-1 rounded text-sm">
+                         <div key={index} className="flex items-center gap-1 bg-theme-element text-theme-text-header px-2 py-1 rounded text-sm">
                            <span>{linkedProduct ? linkedProduct.name : sku}</span>
                            <button type="button" onClick={() => setCrossSells(crossSells.filter((_, i) => i !== index))} className="hover:text-red-400 ml-1">
                              <X size={14} />
@@ -509,7 +510,7 @@ function ProductFormModal({ editingProduct, onClose, onSubmit, products }: any) 
                        value={crossSellSearch || ''}
                        onChange={(e) => setCrossSellSearch(e.target.value)}
                        onFocus={() => { if (crossSellSearch === undefined) setCrossSellSearch(''); }}
-                       className="w-full bg-theme-base border border-theme-border p-2 rounded text-white outline-none focus:border-theme-primary" 
+                       className="w-full bg-theme-base border border-theme-border p-2 rounded text-theme-text-header outline-none focus:border-theme-primary" 
                      />
                      
                      {crossSellSearch !== undefined && (
@@ -517,7 +518,7 @@ function ProductFormModal({ editingProduct, onClose, onSubmit, products }: any) 
                          {products?.filter((p:any) => p.id !== editingProduct?.id && !crossSells.includes(p.sku) && (!crossSellSearch || p.name.toLowerCase().includes(crossSellSearch.toLowerCase()) || p.sku.toLowerCase().includes(crossSellSearch.toLowerCase()))).slice(0, 20).map((p: any) => (
                            <div 
                              key={p.id}
-                             className="p-2 hover:bg-theme-element cursor-pointer border-b border-theme-border/50 text-white flex justify-between"
+                             className="p-2 hover:bg-theme-element cursor-pointer border-b border-theme-border/50 text-theme-text-header flex justify-between"
                              onMouseDown={(e) => {
                                e.preventDefault();
                                if (p.sku && !crossSells.includes(p.sku)) {
@@ -526,7 +527,7 @@ function ProductFormModal({ editingProduct, onClose, onSubmit, products }: any) 
                                setCrossSellSearch(undefined);
                              }}
                            >
-                             <span className="truncate">{p.name}</span> <span className="text-xs text-gray-400 shrink-0 ml-2">{p.sku}</span>
+                             <span className="truncate">{p.name}</span> <span className="text-xs text-theme-text-body\/60 shrink-0 ml-2">{p.sku}</span>
                            </div>
                          ))}
                          {products?.filter((p:any) => p.id !== editingProduct?.id && !crossSells.includes(p.sku) && (!crossSellSearch || p.name.toLowerCase().includes(crossSellSearch.toLowerCase()) || p.sku.toLowerCase().includes(crossSellSearch.toLowerCase()))).length === 0 && (
@@ -538,15 +539,15 @@ function ProductFormModal({ editingProduct, onClose, onSubmit, products }: any) 
                  </div>
                  
                  <div className="col-span-1 hidden">
-                   <label className="flex items-center gap-2 text-sm text-gray-300 cursor-pointer">
+                   <label className="flex items-center gap-2 text-sm text-theme-text-body cursor-pointer">
                      <input type="checkbox" name="is_featured" value="1" defaultChecked={editingProduct?.is_featured} className="accent-theme-primary w-4 h-4 cursor-pointer" />
                      Destacado (Home)
                    </label>
-                   <label className="flex items-center gap-2 text-sm text-gray-300 cursor-pointer">
+                   <label className="flex items-center gap-2 text-sm text-theme-text-body cursor-pointer">
                      <input type="checkbox" name="is_offer" value="1" checked={isOffer} onChange={(e) => setIsOffer(e.target.checked)} className="accent-theme-primary w-4 h-4 cursor-pointer" />
                      En Oferta
                    </label>
-                   <label className="flex items-center gap-2 text-sm text-gray-300 cursor-pointer">
+                   <label className="flex items-center gap-2 text-sm text-theme-text-body cursor-pointer">
                      <input type="checkbox" name="is_new" value="1" defaultChecked={editingProduct?.is_new} className="accent-theme-primary w-4 h-4 cursor-pointer" />
                      Recién Llegado
                    </label>
@@ -554,7 +555,7 @@ function ProductFormModal({ editingProduct, onClose, onSubmit, products }: any) 
                    {isOffer && (
                      <div className="w-full mt-2 transition-all">
                         <label className="block text-xs uppercase text-gray-500 font-bold mb-1">Precio de Oferta</label>
-                        <input name="offer_price" type="number" defaultValue={editingProduct?.offer_price || ''} className="w-full bg-theme-card border border-theme-border p-2 rounded text-white outline-none focus:border-theme-primary" placeholder="Ej: 15000" />
+                        <input name="offer_price" type="number" defaultValue={editingProduct?.offer_price || ''} className="w-full bg-theme-card border border-theme-border p-2 rounded text-theme-text-header outline-none focus:border-theme-primary" placeholder="Ej: 15000" />
                      </div>
                    )}
                  </div>
@@ -564,10 +565,10 @@ function ProductFormModal({ editingProduct, onClose, onSubmit, products }: any) 
              </div>
                
                <div className="pt-4 flex flex-row-reverse gap-4">
-                 <button type="submit" className="bg-theme-primary text-white px-6 py-2 rounded font-bold hover:bg-theme-primary-hover transition">
+                 <button type="submit" className="bg-theme-primary text-theme-text-header px-6 py-2 rounded font-bold hover:bg-theme-primary-hover transition">
                    {editingProduct ? 'Guardar Cambios' : 'Crear Producto'}
                  </button>
-                 <button type="button" onClick={onClose} className="px-4 py-2 text-gray-400 hover:text-white font-bold transition">
+                 <button type="button" onClick={onClose} className="px-4 py-2 text-theme-text-body\/60 hover:text-theme-text-header font-bold transition">
                    Cancelar
                  </button>
                </div>
@@ -1005,7 +1006,7 @@ export default function AdminDashboardPage() {
             <Package size={24} />
           </div>
           <div>
-            <p className="text-gray-400 text-sm">Total Productos</p>
+            <p className="text-theme-text-body\/60 text-sm">Total Productos</p>
             <p className="text-2xl font-bold">{products.length}</p>
           </div>
         </div>
@@ -1014,7 +1015,7 @@ export default function AdminDashboardPage() {
             <ShoppingCart size={24} />
           </div>
           <div>
-            <p className="text-gray-400 text-sm">Órdenes</p>
+            <p className="text-theme-text-body\/60 text-sm">Órdenes</p>
             <p className="text-2xl font-bold">{orders.length}</p>
           </div>
         </div>
@@ -1023,7 +1024,7 @@ export default function AdminDashboardPage() {
             <Users size={24} />
           </div>
           <div>
-            <p className="text-gray-400 text-sm">Usuarios</p>
+            <p className="text-theme-text-body\/60 text-sm">Usuarios</p>
             <p className="text-2xl font-bold">{users.length}</p>
           </div>
         </div>
@@ -1032,7 +1033,7 @@ export default function AdminDashboardPage() {
             <DollarSign size={24} />
           </div>
           <div>
-            <p className="text-gray-400 text-sm">Ingresos Totales</p>
+            <p className="text-theme-text-body\/60 text-sm">Ingresos Totales</p>
             <p className="text-xl font-bold">${totalRevenue.toLocaleString('es-CL')}</p>
           </div>
         </div>
@@ -1057,12 +1058,12 @@ export default function AdminDashboardPage() {
                  }
               }
             }}
-            className={`pb-2 px-4 font-medium transition-colors whitespace-nowrap capitalize ${
+            className={`pb-2 px-4 transition-colors whitespace-nowrap capitalize ${
               (tab === 'users' && activeTab === 'users' && userFilter === 'staff') ||
               (tab === 'customers' && activeTab === 'users' && userFilter === 'customers') ||
               (tab !== 'users' && tab !== 'customers' && activeTab === tab)
-                ? 'border-b-2 border-theme-primary text-theme-primary'
-                : 'text-gray-400 hover:text-white'
+                ? 'border-b-2 border-theme-primary text-theme-text-header font-bold'
+                : 'text-theme-text-body\/60 hover:text-theme-text-header font-medium'
             }`}
           >
             {tab === 'dashboard' ? 'Resumen' : tab === 'products' ? 'Productos' : tab === 'orders' ? 'Órdenes' : tab === 'users' ? 'Admin. Staff' : tab === 'customers' ? 'Clientes' : tab === 'newsletter' ? 'Suscriptores Boletín' : tab === 'pages' ? 'Páginas (CMS)' : 'Configuración'}
@@ -1122,7 +1123,7 @@ export default function AdminDashboardPage() {
                       <div className="flex items-center gap-3">
                         <img src={getProductImages(p.image)[0] || 'https://images.unsplash.com/photo-1590748152599-2a2ec96a40a4?auto=format&fit=crop&w=150&q=80'} className="w-10 h-10 rounded object-cover" />
                         <div>
-                          <p className="text-sm font-medium text-white line-clamp-1">{p.name}</p>
+                          <p className="text-sm font-medium text-theme-text-header line-clamp-1">{p.name}</p>
                           <p className="text-xs text-gray-500">{p.sku}</p>
                         </div>
                       </div>
@@ -1146,7 +1147,7 @@ export default function AdminDashboardPage() {
                <div className="text-center py-8 text-gray-500">Aún no hay órdenes.</div>
             ) : (
               <div className="overflow-x-auto">
-                <table className="w-full text-left text-sm text-gray-400">
+                <table className="w-full text-left text-sm text-theme-text-body\/60">
                   <thead className="bg-theme-base text-xs uppercase">
                     <tr>
                       <th className="px-6 py-3">ID</th>
@@ -1159,18 +1160,18 @@ export default function AdminDashboardPage() {
                   <tbody>
                     {recentOrders.map(o => (
                       <tr key={o.id} className="border-b border-theme-border hover:bg-theme-element/50">
-                        <td className="px-6 py-3 text-white font-mono text-xs">#{o.id}</td>
+                        <td className="px-6 py-3 text-theme-text-header font-mono text-xs">#{o.id}</td>
                         <td className="px-6 py-3">
-                          <p className="text-white text-sm">{o.customer_name}</p>
+                          <p className="text-theme-text-header text-sm">{o.customer_name}</p>
                         </td>
                         <td className="px-6 py-3 text-xs">{new Date(o.created_at).toLocaleDateString('es-CL')}</td>
-                        <td className="px-6 py-3 font-bold text-white">${o.total.toLocaleString('es-CL')}</td>
+                        <td className="px-6 py-3 font-bold text-theme-text-header">${o.total.toLocaleString('es-CL')}</td>
                         <td className="px-6 py-3">
                           <span className={`text-xs font-bold px-2 py-1 rounded ${
                             o.status === 'delivered' ? 'bg-green-900/40 text-green-400' :
                             o.status === 'paid' ? 'bg-blue-900/40 text-blue-400' :
                             o.status === 'pending' ? 'bg-yellow-900/40 text-yellow-500' :
-                            'bg-gray-800 text-gray-400'
+                            'bg-theme-element text-theme-text-body\/60'
                           }`}>
                             {o.status.toUpperCase()}
                           </span>
@@ -1189,35 +1190,35 @@ export default function AdminDashboardPage() {
       {activeTab === 'products' && (
         <div className="bg-theme-card border border-theme-border rounded-lg overflow-hidden flex flex-col min-h-[500px]">
           <div className="p-4 border-b border-theme-border flex flex-col sm:flex-row justify-between items-center gap-4">
-            <h2 className="font-bold text-lg flex items-center gap-2 text-white">
+            <h2 className="font-bold text-lg flex items-center gap-2 text-theme-text-header">
               Catálogo <span className="text-sm font-normal text-gray-500 bg-theme-base px-2 py-0.5 rounded-full">{filteredProducts.length}</span>
             </h2>
             <div className="flex gap-4 w-full sm:w-auto">
               <input 
                 type="text" 
                 placeholder="Buscar por nombre o SKU..." 
-                className="bg-theme-base border border-theme-border text-white text-sm rounded px-3 py-2 outline-none focus:border-theme-primary min-w-[250px]"
+                className="bg-theme-base border border-theme-border text-theme-text-header text-sm rounded px-3 py-2 outline-none focus:border-theme-primary min-w-[250px]"
                 value={productSearch}
                 onChange={e => { setProductSearch(e.target.value); setProductPage(1); }}
               />
               <button
                 onClick={startBulkOptimization}
                 disabled={isOptimizingAll}
-                className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white px-4 py-2 rounded text-sm font-bold flex items-center gap-2 transition disabled:opacity-50"
+                className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-theme-text-header px-4 py-2 rounded text-sm font-bold flex items-center gap-2 transition disabled:opacity-50"
               >
                 <Sparkles size={16} />
                 {isOptimizingAll ? `Procesando (${optimizeProgress.current}/${optimizeProgress.total})` : 'Optimizar Todo con IA'}
               </button>
               <button 
                 onClick={() => { setEditingProduct(null); setProductModalOpen(true); }}
-                className="bg-theme-primary text-white px-4 py-2 rounded text-sm font-bold flex items-center gap-2 hover:bg-theme-primary-hover transition"
+                className="bg-theme-primary text-theme-text-header px-4 py-2 rounded text-sm font-bold flex items-center gap-2 hover:bg-theme-primary-hover transition"
               >
                 <Plus size={16} /> Añadir Producto
               </button>
             </div>
           </div>
           <div className="overflow-x-auto flex-1">
-            <table className="w-full text-left text-sm text-gray-400">
+            <table className="w-full text-left text-sm text-theme-text-body\/60">
               <thead className="bg-theme-base text-xs uppercase">
                 <tr>
                   <th className="px-6 py-3">Imagen</th>
@@ -1249,8 +1250,8 @@ export default function AdminDashboardPage() {
                         <div>{p.sku}</div>
                         {p.mpn && <div className="text-gray-500 mt-1">{p.mpn}</div>}
                       </td>
-                      <td className="px-6 py-4 text-white font-medium">{p.name}</td>
-                      <td className="px-6 py-4 text-gray-400">
+                      <td className="px-6 py-4 text-theme-text-header font-medium">{p.name}</td>
+                      <td className="px-6 py-4 text-theme-text-body\/60">
                         ${(p.cost || 0).toLocaleString('es-CL')}
                       </td>
                       <td className="px-6 py-4">
@@ -1302,19 +1303,19 @@ export default function AdminDashboardPage() {
       {activeTab === 'orders' && (
         <div className="bg-theme-card border border-theme-border rounded-lg overflow-hidden flex flex-col min-h-[500px]">
           <div className="p-4 border-b border-theme-border flex flex-col sm:flex-row justify-between items-center gap-4">
-            <h2 className="font-bold text-lg flex items-center gap-2 text-white">
+            <h2 className="font-bold text-lg flex items-center gap-2 text-theme-text-header">
               Órdenes <span className="text-sm font-normal text-gray-500 bg-theme-base px-2 py-0.5 rounded-full">{filteredOrders.length}</span>
             </h2>
             <div className="flex gap-4 w-full sm:w-auto">
               <input 
                 type="text" 
                 placeholder="Buscar por ID, nombre o email..." 
-                className="bg-theme-base border border-theme-border text-white text-sm rounded px-3 py-2 outline-none focus:border-theme-primary min-w-[250px]"
+                className="bg-theme-base border border-theme-border text-theme-text-header text-sm rounded px-3 py-2 outline-none focus:border-theme-primary min-w-[250px]"
                 value={orderSearch}
                 onChange={e => { setOrderSearch(e.target.value); setOrderPage(1); }}
               />
               <select 
-                className="bg-theme-base border border-theme-border text-white text-sm rounded px-3 py-2 outline-none focus:border-theme-primary"
+                className="bg-theme-base border border-theme-border text-theme-text-header text-sm rounded px-3 py-2 outline-none focus:border-theme-primary"
                 value={orderStatusFilter}
                 onChange={e => { setOrderStatusFilter(e.target.value); setOrderPage(1); }}
               >
@@ -1328,7 +1329,7 @@ export default function AdminDashboardPage() {
             </div>
           </div>
           <div className="overflow-x-auto flex-1">
-            <table className="w-full text-left text-sm text-gray-400">
+            <table className="w-full text-left text-sm text-theme-text-body\/60">
               <thead className="bg-theme-base text-xs uppercase">
                 <tr>
                   <th className="px-6 py-3">Orden ID</th>
@@ -1347,13 +1348,13 @@ export default function AdminDashboardPage() {
                 ) : (
                   paginatedOrders.map(o => (
                     <tr key={o.id} className="border-b border-theme-border hover:bg-theme-element/50">
-                      <td className="px-6 py-4 text-white font-mono">#{o.id}</td>
+                      <td className="px-6 py-4 text-theme-text-header font-mono">#{o.id}</td>
                       <td className="px-6 py-4">
-                        <p className="text-white">{o.customer_name}</p>
+                        <p className="text-theme-text-header">{o.customer_name}</p>
                         <p className="text-xs">{o.customer_email}</p>
                       </td>
                       <td className="px-6 py-4 truncate max-w-[200px]" title={o.shipping_address}>{o.shipping_address}</td>
-                      <td className="px-6 py-4 font-bold text-white">${o.total.toLocaleString('es-CL')}</td>
+                      <td className="px-6 py-4 font-bold text-theme-text-header">${o.total.toLocaleString('es-CL')}</td>
                       <td className="px-6 py-4">
                         <select 
                           className={`border border-theme-border text-xs font-bold rounded px-2 py-1 outline-none ${
@@ -1366,12 +1367,12 @@ export default function AdminDashboardPage() {
                           value={o.status}
                           onChange={(e) => handleUpdateOrderStatus(o.id, e.target.value)}
                         >
-                          <option className="bg-theme-base text-white" value="pending">Pago Pendiente</option>
-                          <option className="bg-theme-base text-white" value="paid">Pago Confirmado (Pagado)</option>
-                          <option className="bg-theme-base text-white" value="shipped">Envío en Camino</option>
-                          <option className="bg-theme-base text-white" value="delivered">Entregado</option>
-                          <option className="bg-theme-base text-white" value="cancelled">Cancelado</option>
-                          <option className="bg-theme-base text-white" value="rejected">Pago Rechazado</option>
+                          <option value="pending">Pago Pendiente</option>
+                          <option value="paid">Pago Confirmado (Pagado)</option>
+                          <option value="shipped">Envío en Camino</option>
+                          <option value="delivered">Entregado</option>
+                          <option value="cancelled">Cancelado</option>
+                          <option value="rejected">Pago Rechazado</option>
                         </select>
                       </td>
                       <td className="px-6 py-4 text-xs">{new Date(o.created_at).toLocaleString('es-CL')}</td>
@@ -1404,27 +1405,27 @@ export default function AdminDashboardPage() {
       {activeTab === 'users' && (
         <div className="bg-theme-card border border-theme-border rounded-lg overflow-hidden flex flex-col min-h-[500px]">
           <div className="p-4 border-b border-theme-border flex flex-col sm:flex-row justify-between items-center gap-4">
-            <h2 className="font-bold text-lg flex items-center gap-2 text-white">
+            <h2 className="font-bold text-lg flex items-center gap-2 text-theme-text-header">
               {userFilter === 'customers' ? 'Gestión de Clientes' : 'Gestión de Staff'} <span className="text-sm font-normal text-gray-500 bg-theme-base px-2 py-0.5 rounded-full">{filteredUsers.length}</span>
             </h2>
             <div className="flex gap-4 w-full sm:w-auto">
               <input 
                 type="text" 
                 placeholder="Buscar por nombre, email o ID..." 
-                className="bg-theme-base border border-theme-border text-white text-sm rounded px-3 py-2 outline-none focus:border-theme-primary min-w-[250px]"
+                className="bg-theme-base border border-theme-border text-theme-text-header text-sm rounded px-3 py-2 outline-none focus:border-theme-primary min-w-[250px]"
                 value={userSearchText}
                 onChange={e => { setUserSearchText(e.target.value); setUserPage(1); }}
               />
               <button 
                 onClick={() => { setEditingUser(null); setUserModalOpen(true); }}
-                className="bg-theme-primary text-white px-4 py-2 rounded text-sm font-bold flex items-center gap-2 hover:bg-theme-primary-hover transition"
+                className="bg-theme-primary text-theme-text-header px-4 py-2 rounded text-sm font-bold flex items-center gap-2 hover:bg-theme-primary-hover transition"
               >
                 <Plus size={16} /> Añadir {userFilter === 'customers' ? 'Cliente' : 'Usuario Staff'}
               </button>
             </div>
           </div>
           <div className="overflow-x-auto flex-1">
-            <table className="w-full text-left text-sm text-gray-400">
+            <table className="w-full text-left text-sm text-theme-text-body\/60">
               <thead className="bg-theme-base text-xs uppercase">
                 <tr>
                   <th className="px-6 py-3">ID</th>
@@ -1444,15 +1445,15 @@ export default function AdminDashboardPage() {
                 ) : (
                   paginatedUsers.map((u: any) => (
                     <tr key={u.id} className="border-b border-theme-border hover:bg-theme-element/50">
-                      <td className="px-6 py-4 font-mono text-xs text-white">#{u.id}</td>
-                      <td className="px-6 py-4 text-white">
+                      <td className="px-6 py-4 font-mono text-xs text-theme-text-header">#{u.id}</td>
+                      <td className="px-6 py-4 text-theme-text-header">
                         <div className="flex items-center gap-2">
-                          <div className="w-6 h-6 rounded-full bg-gray-700 flex items-center justify-center text-xs font-bold text-white uppercase">{u.name.charAt(0)}</div>
+                          <div className="w-6 h-6 rounded-full bg-gray-700 flex items-center justify-center text-xs font-bold text-theme-text-header uppercase">{u.name.charAt(0)}</div>
                           {u.name}
                         </div>
                       </td>
-                      <td className="px-6 py-4 text-gray-300">{u.email}</td>
-                      <td className="px-6 py-4 text-gray-300 text-xs">{u.phone || '-'}</td>
+                      <td className="px-6 py-4 text-theme-text-body">{u.email}</td>
+                      <td className="px-6 py-4 text-theme-text-body text-xs">{u.phone || '-'}</td>
                       <td className="px-6 py-4">
                         <span className={`px-2 py-1 rounded text-xs font-bold ${u.role === 'admin' ? 'bg-red-500/20 text-red-500' : u.role === 'ejecutivo' ? 'bg-purple-500/20 text-purple-500' : 'bg-blue-500/20 text-blue-500'}`}>
                           {u.role.toUpperCase()}
@@ -1499,25 +1500,25 @@ export default function AdminDashboardPage() {
       {activeTab === 'newsletter' && (
         <div className="bg-theme-card border border-theme-border rounded-lg overflow-hidden flex flex-col min-h-[500px]">
           <div className="p-4 border-b border-theme-border flex flex-col sm:flex-row justify-between items-center gap-4">
-            <h2 className="font-bold text-lg flex items-center gap-2 text-white">
+            <h2 className="font-bold text-lg flex items-center gap-2 text-theme-text-header">
               Suscriptores al Boletín (Mock) <span className="text-sm font-normal text-gray-500 bg-theme-base px-2 py-0.5 rounded-full">{filteredNewsletters.length}</span>
             </h2>
             <div className="flex gap-4 w-full sm:w-auto">
               <input 
                 type="text" 
                 placeholder="Buscar por email..." 
-                className="bg-theme-base border border-theme-border text-white text-sm rounded px-3 py-2 outline-none focus:border-theme-primary min-w-[250px]"
+                className="bg-theme-base border border-theme-border text-theme-text-header text-sm rounded px-3 py-2 outline-none focus:border-theme-primary min-w-[250px]"
                 value={newsletterSearch}
                 onChange={e => { setNewsletterSearch(e.target.value); setNewsletterPage(1); }}
               />
-              <button className="bg-theme-primary text-white px-4 py-2 rounded text-sm font-bold flex items-center gap-2 hover:bg-theme-primary-hover transition">
+              <button className="bg-theme-primary text-theme-text-header px-4 py-2 rounded text-sm font-bold flex items-center gap-2 hover:bg-theme-primary-hover transition">
                 Exportar CSV
               </button>
             </div>
           </div>
           
           <div className="overflow-x-auto flex-1">
-            <table className="w-full text-left text-sm text-gray-400">
+            <table className="w-full text-left text-sm text-theme-text-body\/60">
               <thead className="bg-theme-base text-xs uppercase">
                 <tr>
                   <th className="px-6 py-3">Email</th>
@@ -1533,7 +1534,7 @@ export default function AdminDashboardPage() {
                 ) : (
                   paginatedNewsletters.map((sub, idx) => (
                     <tr key={idx} className="hover:bg-theme-element transition">
-                      <td className="px-6 py-4 font-medium text-white">{sub.email}</td>
+                      <td className="px-6 py-4 font-medium text-theme-text-header">{sub.email}</td>
                       <td className="px-6 py-4">{sub.date}</td>
                       <td className="px-6 py-4">
                         <span className={`px-2 py-1 rounded text-xs ${sub.status === 'Activo' ? 'bg-green-500/20 text-green-500' : 'bg-red-500/20 text-red-500'}`}>
@@ -1570,7 +1571,7 @@ export default function AdminDashboardPage() {
         <div className="space-y-6">
           <div className="bg-theme-card border border-theme-border rounded-lg overflow-hidden flex flex-col min-h-[400px]">
             <div className="p-4 border-b border-theme-border flex flex-col sm:flex-row justify-between items-center gap-4">
-              <h2 className="font-bold text-lg flex items-center gap-2 text-white">
+              <h2 className="font-bold text-lg flex items-center gap-2 text-theme-text-header">
                 CMS de Páginas <span className="text-sm font-normal text-gray-500 bg-theme-base px-2 py-0.5 rounded-full">
                   {pages.filter(p => 
                     (p.title || '').toLowerCase().includes(pageSearch.toLowerCase()) || 
@@ -1585,14 +1586,14 @@ export default function AdminDashboardPage() {
                   <input 
                     type="text" 
                     placeholder="Buscar páginas por título, slug..." 
-                    className="w-full bg-theme-base border border-theme-border text-white text-sm rounded pl-9 pr-3 py-2 outline-none focus:border-theme-primary"
+                    className="w-full bg-theme-base border border-theme-border text-theme-text-header text-sm rounded pl-9 pr-3 py-2 outline-none focus:border-theme-primary"
                     value={pageSearch}
                     onChange={e => setPageSearch(e.target.value)}
                   />
                 </div>
                 <button 
                   onClick={() => setEditingPage({})}
-                  className="bg-theme-primary text-white px-4 py-2 rounded text-sm font-bold flex items-center gap-2 hover:bg-theme-primary-hover transition"
+                  className="bg-theme-primary text-theme-text-header px-4 py-2 rounded text-sm font-bold flex items-center gap-2 hover:bg-theme-primary-hover transition"
                 >
                   <Plus size={16} /> Nueva Página
                 </button>
@@ -1603,8 +1604,8 @@ export default function AdminDashboardPage() {
             {saveError && <div className="m-4 bg-red-500/20 text-red-400 p-3 rounded border border-red-500/30 font-medium text-sm">{saveError}</div>}
 
             <div className="overflow-x-auto flex-1">
-              <table className="w-full text-left text-sm text-gray-400">
-                <thead className="bg-theme-base text-xs uppercase text-gray-400">
+              <table className="w-full text-left text-sm text-theme-text-body\/60">
+                <thead className="bg-theme-base text-xs uppercase text-theme-text-body\/60">
                   <tr>
                     <th className="px-6 py-3">Título de la Página</th>
                     <th className="px-6 py-3">Ruta del Enlace</th>
@@ -1630,8 +1631,8 @@ export default function AdminDashboardPage() {
                       (p.slug || '').toLowerCase().includes(pageSearch.toLowerCase()) ||
                       (p.content || '').toLowerCase().includes(pageSearch.toLowerCase())
                     ).map(page => (
-                      <tr key={page.slug} className="border-b border-theme-border hover:bg-theme-element/30 font-medium text-gray-300">
-                        <td className="px-6 py-4 font-semibold text-white">
+                      <tr key={page.slug} className="border-b border-theme-border hover:bg-theme-element/30 font-medium text-theme-text-body">
+                        <td className="px-6 py-4 font-semibold text-theme-text-header">
                           {page.title}
                         </td>
                         <td className="px-6 py-4 font-mono text-xs">
@@ -1639,14 +1640,14 @@ export default function AdminDashboardPage() {
                             href={`/p/${page.slug}`} 
                             target="_blank" 
                             rel="noopener noreferrer" 
-                            className="text-theme-primary hover:underline flex items-center gap-1 hover:text-white transition"
+                            className="text-theme-primary hover:underline flex items-center gap-1 hover:text-theme-text-header transition"
                           >
                             /p/{page.slug}
                             <Eye size={12} className="opacity-60" />
                           </a>
                         </td>
                         <td className="px-6 py-4 text-xs">
-                          <span className="px-2.5 py-1 bg-theme-base border border-theme-border rounded text-gray-400">
+                          <span className="px-2.5 py-1 bg-theme-base border border-theme-border rounded text-theme-text-body\/60">
                             {(page.content || '').length} caracteres
                           </span>
                         </td>
@@ -1657,13 +1658,13 @@ export default function AdminDashboardPage() {
                                 <span className="text-xs text-red-400">¿Eliminar?</span>
                                 <button 
                                   onClick={() => handleDeletePage(page.slug)}
-                                  className="bg-red-600 hover:bg-red-700 text-white text-xs px-2 py-1 rounded transition"
+                                  className="bg-red-600 hover:bg-red-700 text-theme-text-header text-xs px-2 py-1 rounded transition"
                                 >
                                   Sí
                                 </button>
                                 <button 
                                   onClick={() => setPageToDeleteConfirm(null)}
-                                  className="bg-theme-element hover:bg-theme-element-hover text-white text-xs px-2 py-1 rounded transition"
+                                  className="bg-theme-element hover:bg-theme-element-hover text-theme-text-header text-xs px-2 py-1 rounded transition"
                                 >
                                   No
                                 </button>
@@ -1714,12 +1715,12 @@ export default function AdminDashboardPage() {
             
             {/* UI Theme Section */}
             <div className="bg-theme-base rounded p-4 border border-theme-border">
-              <h3 className="font-bold text-white mb-4">Apariencia (Theme)</h3>
+              <h3 className="font-bold text-theme-text-header mb-4">Apariencia (Theme)</h3>
               <div className="flex flex-col gap-4">
                 <div>
                   <label className="block text-xs uppercase text-gray-500 font-bold mb-2">Tema Global (Paleta de Colores)</label>
                   <select 
-                    className="w-full bg-theme-card border border-theme-border text-white p-2 text-sm rounded outline-none focus:border-theme-primary"
+                    className="w-full bg-theme-card border border-theme-border text-theme-text-header p-2 text-sm rounded outline-none focus:border-theme-primary"
                     value={settings.theme || theme}
                     onChange={e => {
                       setTheme(e.target.value as any);
@@ -1739,12 +1740,12 @@ export default function AdminDashboardPage() {
 
             {/* Payment Section */}
             <div className="bg-theme-base rounded p-4 border border-theme-border">
-              <h3 className="font-bold text-white mb-4">Integración de Pagos (Flow.cl)</h3>
+              <h3 className="font-bold text-theme-text-header mb-4">Integración de Pagos (Flow.cl)</h3>
               <div className="flex flex-col gap-4">
                 <div>
                   <label className="block text-xs uppercase text-gray-500 font-bold mb-2">Estado de Pasarela</label>
                   <select 
-                    className="w-full bg-theme-card border border-theme-border text-white p-2 text-sm rounded outline-none focus:border-theme-primary"
+                    className="w-full bg-theme-card border border-theme-border text-theme-text-header p-2 text-sm rounded outline-none focus:border-theme-primary"
                     value={settings.payment_method || 'flow'}
                     onChange={e => setSettings({...settings, payment_method: e.target.value})}
                   >
@@ -1760,7 +1761,7 @@ export default function AdminDashboardPage() {
                     placeholder="Ingrese su API KEY de Flow"
                     value={settings.flow_api_key || ''}
                     onChange={e => setSettings({...settings, flow_api_key: e.target.value})}
-                    className="w-full bg-theme-card border border-theme-border text-white p-2 text-sm rounded outline-none focus:border-theme-primary font-mono"
+                    className="w-full bg-theme-card border border-theme-border text-theme-text-header p-2 text-sm rounded outline-none focus:border-theme-primary font-mono"
                   />
                 </div>
                 <div>
@@ -1770,7 +1771,7 @@ export default function AdminDashboardPage() {
                     placeholder="Ingrese su Secret de Flow"
                     value={settings.flow_secret || ''}
                     onChange={e => setSettings({...settings, flow_secret: e.target.value})}
-                    className="w-full bg-theme-card border border-theme-border text-white p-2 text-sm rounded outline-none focus:border-theme-primary font-mono"
+                    className="w-full bg-theme-card border border-theme-border text-theme-text-header p-2 text-sm rounded outline-none focus:border-theme-primary font-mono"
                   />
                 </div>
               </div>
@@ -1778,12 +1779,12 @@ export default function AdminDashboardPage() {
 
             {/* Shipping Section */}
             <div className="bg-theme-base rounded p-4 border border-theme-border">
-              <h3 className="font-bold text-white mb-4">Integración de Envíos (Chilexpress)</h3>
+              <h3 className="font-bold text-theme-text-header mb-4">Integración de Envíos (Chilexpress)</h3>
               <div className="flex flex-col gap-4">
                 <div>
                   <label className="block text-xs uppercase text-gray-500 font-bold mb-2">Método por defecto</label>
                   <select 
-                    className="w-full bg-theme-card border border-theme-border text-white p-2 text-sm rounded outline-none focus:border-theme-primary"
+                    className="w-full bg-theme-card border border-theme-border text-theme-text-header p-2 text-sm rounded outline-none focus:border-theme-primary"
                     value={settings.shipping_method || 'chilexpress'}
                     onChange={e => setSettings({...settings, shipping_method: e.target.value})}
                   >
@@ -1800,7 +1801,7 @@ export default function AdminDashboardPage() {
                       placeholder="Subscription Key"
                       value={settings.chx_key || ''}
                       onChange={e => setSettings({...settings, chx_key: e.target.value})}
-                      className="w-full bg-theme-card border border-theme-border text-white p-2 text-sm rounded outline-none focus:border-theme-primary font-mono"
+                      className="w-full bg-theme-card border border-theme-border text-theme-text-header p-2 text-sm rounded outline-none focus:border-theme-primary font-mono"
                     />
                   </div>
                 )}
@@ -1810,7 +1811,7 @@ export default function AdminDashboardPage() {
             <div className="flex justify-end">
               <button 
                 type="submit"
-                className="bg-theme-primary hover:bg-theme-primary-hover text-white font-bold py-2 px-6 rounded transition-colors flex items-center gap-2"
+                className="bg-theme-primary hover:bg-theme-primary-hover text-theme-text-header font-bold py-2 px-6 rounded transition-colors flex items-center gap-2"
               >
                 <Save size={18} /> Guardar Configuración
               </button>
@@ -1836,20 +1837,20 @@ export default function AdminDashboardPage() {
             <div className="mx-auto w-12 h-12 bg-red-500/20 text-red-500 rounded-full flex items-center justify-center mb-4">
               <AlertTriangle size={24} />
             </div>
-            <h2 className="text-lg font-bold text-white mb-2">¿Eliminar Producto?</h2>
-            <p className="text-sm text-gray-400 mb-6">
-              Estás a punto de eliminar el producto <span className="text-white font-medium">{productToDelete.name}</span>. Esta acción no se puede deshacer.
+            <h2 className="text-lg font-bold text-theme-text-header mb-2">¿Eliminar Producto?</h2>
+            <p className="text-sm text-theme-text-body\/60 mb-6">
+              Estás a punto de eliminar el producto <span className="text-theme-text-header font-medium">{productToDelete.name}</span>. Esta acción no se puede deshacer.
             </p>
             <div className="flex gap-4">
               <button 
                 onClick={() => setProductToDelete(null)}
-                className="flex-1 bg-theme-element text-white py-2 rounded font-bold hover:bg-gray-700 transition"
+                className="flex-1 bg-theme-element text-theme-text-header py-2 rounded font-bold hover:bg-gray-700 transition"
               >
                 Cancelar
               </button>
               <button 
                 onClick={confirmDeleteProduct}
-                className="flex-1 bg-red-600 text-white py-2 rounded font-bold hover:bg-red-700 transition"
+                className="flex-1 bg-red-600 text-theme-text-header py-2 rounded font-bold hover:bg-red-700 transition"
               >
                 Eliminar
               </button>
@@ -1864,65 +1865,65 @@ export default function AdminDashboardPage() {
           <div className="bg-theme-card border border-theme-border rounded-lg w-full max-w-md p-6">
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-xl font-bold">{editingUser ? 'Editar Usuario' : 'Añadir Usuario'}</h2>
-              <button onClick={() => setUserModalOpen(false)} className="text-gray-400 hover:text-white">
+              <button onClick={() => setUserModalOpen(false)} className="text-theme-text-body\/60 hover:text-theme-text-header">
                 <X size={24} />
               </button>
             </div>
             
             <form onSubmit={handleUserSubmit} className="space-y-4">
               <div>
-                <label className="block text-sm text-gray-400 mb-1">Nombre Completo</label>
+                <label className="block text-sm text-theme-text-body\/60 mb-1">Nombre Completo</label>
                 <input 
                   name="name"
                   type="text" 
                   defaultValue={editingUser?.name}
-                  className="w-full bg-theme-base border border-theme-border rounded p-2 text-white outline-none focus:border-theme-primary" 
+                  className="w-full bg-theme-base border border-theme-border rounded p-2 text-theme-text-header outline-none focus:border-theme-primary" 
                   required
                 />
               </div>
               <div>
-                <label className="block text-sm text-gray-400 mb-1">Correo Electrónico</label>
+                <label className="block text-sm text-theme-text-body\/60 mb-1">Correo Electrónico</label>
                 <input 
                   name="email"
                   type="email" 
                   defaultValue={editingUser?.email}
-                  className="w-full bg-theme-base border border-theme-border rounded p-2 text-white outline-none focus:border-theme-primary" 
+                  className="w-full bg-theme-base border border-theme-border rounded p-2 text-theme-text-header outline-none focus:border-theme-primary" 
                   required
                 />
               </div>
               <div>
-                <label className="block text-sm text-gray-400 mb-1">Teléfono</label>
+                <label className="block text-sm text-theme-text-body\/60 mb-1">Teléfono</label>
                 <input 
                   name="phone"
                   type="tel" 
                   defaultValue={editingUser?.phone}
                   placeholder="+56 9 1234 5678"
-                  className="w-full bg-theme-base border border-theme-border rounded p-2 text-white outline-none focus:border-theme-primary" 
+                  className="w-full bg-theme-base border border-theme-border rounded p-2 text-theme-text-header outline-none focus:border-theme-primary" 
                 />
               </div>
               <div>
-                <label className="block text-sm text-gray-400 mb-1">Fecha de Nacimiento</label>
+                <label className="block text-sm text-theme-text-body\/60 mb-1">Fecha de Nacimiento</label>
                 <input 
                   name="birthdate"
                   type="date" 
                   defaultValue={editingUser?.birthdate}
-                  className="w-full bg-theme-base border border-theme-border rounded p-2 text-white outline-none focus:border-theme-primary" 
+                  className="w-full bg-theme-base border border-theme-border rounded p-2 text-theme-text-header outline-none focus:border-theme-primary" 
                 />
               </div>
               <div>
-                <label className="block text-sm text-gray-400 mb-1">Dirección Primaria</label>
+                <label className="block text-sm text-theme-text-body\/60 mb-1">Dirección Primaria</label>
                 <input 
                   name="address"
                   type="text" 
                   defaultValue={editingUser?.address}
                   placeholder="Calle 123, Comuna..."
-                  className="w-full bg-theme-base border border-theme-border rounded p-2 text-white outline-none focus:border-theme-primary" 
+                  className="w-full bg-theme-base border border-theme-border rounded p-2 text-theme-text-header outline-none focus:border-theme-primary" 
                 />
               </div>
               
               <div>
-                <label className="block text-sm text-gray-400 mb-1">Libreta de Direcciones</label>
-                <div className="bg-theme-base border border-theme-border rounded p-3 overflow-y-auto max-h-32 text-sm text-gray-300">
+                <label className="block text-sm text-theme-text-body\/60 mb-1">Libreta de Direcciones</label>
+                <div className="bg-theme-base border border-theme-border rounded p-3 overflow-y-auto max-h-32 text-sm text-theme-text-body">
                   {(() => {
                     try {
                       if (!editingUser?.addresses) return <p className="text-gray-500">Sin direcciones adicionales</p>;
@@ -1941,21 +1942,21 @@ export default function AdminDashboardPage() {
               </div>
               {!editingUser && (
                 <div>
-                  <label className="block text-sm text-gray-400 mb-1">Contraseña</label>
+                  <label className="block text-sm text-theme-text-body\/60 mb-1">Contraseña</label>
                   <input 
                     name="password"
                     type="password" 
-                    className="w-full bg-theme-base border border-theme-border rounded p-2 text-white outline-none focus:border-theme-primary" 
+                    className="w-full bg-theme-base border border-theme-border rounded p-2 text-theme-text-header outline-none focus:border-theme-primary" 
                     required
                   />
                 </div>
               )}
               <div>
-                <label className="block text-sm text-gray-400 mb-1">Rol</label>
+                <label className="block text-sm text-theme-text-body\/60 mb-1">Rol</label>
                 <select 
                   name="role"
                   defaultValue={editingUser?.role || 'customer'}
-                  className="w-full bg-theme-base border border-theme-border rounded p-2 text-white outline-none focus:border-theme-primary"
+                  className="w-full bg-theme-base border border-theme-border rounded p-2 text-theme-text-header outline-none focus:border-theme-primary"
                 >
                   <option value="customer">Cliente</option>
                   <option value="ejecutivo">Ejecutivo de Ventas</option>
@@ -1967,13 +1968,13 @@ export default function AdminDashboardPage() {
                 <button 
                   type="button"
                   onClick={() => setUserModalOpen(false)}
-                  className="flex-1 bg-theme-element text-white py-2 rounded font-bold hover:bg-gray-700 transition"
+                  className="flex-1 bg-theme-element text-theme-text-header py-2 rounded font-bold hover:bg-gray-700 transition"
                 >
                   Cancelar
                 </button>
                 <button 
                   type="submit"
-                  className="flex-1 bg-theme-primary text-white py-2 rounded font-bold hover:bg-theme-primary-hover transition"
+                  className="flex-1 bg-theme-primary text-theme-text-header py-2 rounded font-bold hover:bg-theme-primary-hover transition"
                 >
                   Guardar
                 </button>
@@ -1988,8 +1989,8 @@ export default function AdminDashboardPage() {
         <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4">
           <div className="bg-theme-card border border-theme-border rounded-lg max-w-4xl w-full p-6 shadow-2xl relative my-auto max-h-[90vh] flex flex-col">
             <div className="flex justify-between items-center mb-6">
-              <h2 className="text-xl text-white font-bold">{editingPage.slug ? 'Editar Página' : 'Nueva Página'}</h2>
-              <button onClick={() => setEditingPage(null)} className="text-gray-400 hover:text-white">
+              <h2 className="text-xl text-theme-text-header font-bold">{editingPage.slug ? 'Editar Página' : 'Nueva Página'}</h2>
+              <button onClick={() => setEditingPage(null)} className="text-theme-text-body\/60 hover:text-theme-text-header">
                 <X size={24} />
               </button>
             </div>
@@ -1997,17 +1998,17 @@ export default function AdminDashboardPage() {
             <form onSubmit={handleSavePage} className="space-y-4 flex-1 flex flex-col min-h-0 overflow-y-auto">
               <div className="grid grid-cols-2 gap-4 shrink-0">
                 <div>
-                  <label className="block text-sm text-gray-400 mb-1">Título</label>
+                  <label className="block text-sm text-theme-text-body\/60 mb-1">Título</label>
                   <input 
                     name="title"
                     type="text" 
                     required
                     defaultValue={editingPage.title}
-                    className="w-full bg-theme-base border border-theme-border rounded p-2 text-white outline-none focus:border-theme-primary"
+                    className="w-full bg-theme-base border border-theme-border rounded p-2 text-theme-text-header outline-none focus:border-theme-primary"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm text-gray-400 mb-1">Slug (Ruta /p/slug)</label>
+                  <label className="block text-sm text-theme-text-body\/60 mb-1">Slug (Ruta /p/slug)</label>
                   <input 
                     name="slug"
                     type="text" 
@@ -2015,13 +2016,13 @@ export default function AdminDashboardPage() {
                     readOnly={!!editingPage.slug}
                     defaultValue={editingPage.slug}
                     placeholder="ej: envios"
-                    className="w-full bg-theme-base border border-theme-border rounded p-2 text-white outline-none focus:border-theme-primary read-only:opacity-50"
+                    className="w-full bg-theme-base border border-theme-border rounded p-2 text-theme-text-header outline-none focus:border-theme-primary read-only:opacity-50"
                   />
                 </div>
               </div>
               
               <div className="flex-1 flex flex-col shrink-0 min-h-[400px]">
-                <label className="block text-sm text-gray-400 mb-1">Contenido de la Página</label>
+                <label className="block text-sm text-theme-text-body\/60 mb-1">Contenido de la Página</label>
                 
                 {/* Visual / HTML editor tabs */}
                 <div className="flex border-b border-theme-border mb-2 shrink-0">
@@ -2033,7 +2034,7 @@ export default function AdminDashboardPage() {
                         setEditorTab('visual');
                       }
                     }}
-                    className={`px-4 py-2 text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 border-b-2 transition ${editorTab === 'visual' ? 'border-theme-primary text-theme-primary' : 'border-transparent text-gray-400 hover:text-white'}`}
+                    className={`px-4 py-2 text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 border-b-2 transition ${editorTab === 'visual' ? 'border-theme-primary text-theme-primary' : 'border-transparent text-theme-text-body\/60 hover:text-theme-text-header'}`}
                   >
                     <Eye size={14} /> Estilo Visual (WYSIWYG)
                   </button>
@@ -2045,7 +2046,7 @@ export default function AdminDashboardPage() {
                       }
                       setEditorTab('html');
                     }}
-                    className={`px-4 py-2 text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 border-b-2 transition ${editorTab === 'html' ? 'border-theme-primary text-theme-primary' : 'border-transparent text-gray-400 hover:text-white'}`}
+                    className={`px-4 py-2 text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 border-b-2 transition ${editorTab === 'html' ? 'border-theme-primary text-theme-primary' : 'border-transparent text-theme-text-body\/60 hover:text-theme-text-header'}`}
                   >
                     <Code size={14} /> Código Fuente HTML
                   </button>
@@ -2057,7 +2058,7 @@ export default function AdminDashboardPage() {
                     <button
                       type="button"
                       onClick={() => handleFormat('bold')}
-                      className="p-1.5 rounded hover:bg-theme-element text-gray-300 hover:text-white transition"
+                      className="p-1.5 rounded hover:bg-theme-element text-theme-text-body hover:text-theme-text-header transition"
                       title="Negrita"
                     >
                       <Bold size={14} />
@@ -2065,7 +2066,7 @@ export default function AdminDashboardPage() {
                     <button
                       type="button"
                       onClick={() => handleFormat('italic')}
-                      className="p-1.5 rounded hover:bg-theme-element text-gray-300 hover:text-white transition"
+                      className="p-1.5 rounded hover:bg-theme-element text-theme-text-body hover:text-theme-text-header transition"
                       title="Cursiva"
                     >
                       <Italic size={14} />
@@ -2073,7 +2074,7 @@ export default function AdminDashboardPage() {
                     <button
                       type="button"
                       onClick={() => handleFormat('underline')}
-                      className="p-1.5 rounded hover:bg-theme-element text-gray-300 hover:text-white transition"
+                      className="p-1.5 rounded hover:bg-theme-element text-theme-text-body hover:text-theme-text-header transition"
                       title="Subrayado"
                     >
                       <Underline size={14} />
@@ -2084,7 +2085,7 @@ export default function AdminDashboardPage() {
                     <button
                       type="button"
                       onClick={() => handleFormat('justifyLeft')}
-                      className="p-1.5 rounded hover:bg-theme-element text-gray-300 hover:text-white transition"
+                      className="p-1.5 rounded hover:bg-theme-element text-theme-text-body hover:text-theme-text-header transition"
                       title="Alinear Izquierda"
                     >
                       <AlignLeft size={14} />
@@ -2092,7 +2093,7 @@ export default function AdminDashboardPage() {
                     <button
                       type="button"
                       onClick={() => handleFormat('justifyCenter')}
-                      className="p-1.5 rounded hover:bg-theme-element text-gray-300 hover:text-white transition"
+                      className="p-1.5 rounded hover:bg-theme-element text-theme-text-body hover:text-theme-text-header transition"
                       title="Centrar"
                     >
                       <AlignCenter size={14} />
@@ -2100,7 +2101,7 @@ export default function AdminDashboardPage() {
                     <button
                       type="button"
                       onClick={() => handleFormat('justifyRight')}
-                      className="p-1.5 rounded hover:bg-theme-element text-gray-300 hover:text-white transition"
+                      className="p-1.5 rounded hover:bg-theme-element text-theme-text-body hover:text-theme-text-header transition"
                       title="Alinear Derecha"
                     >
                       <AlignRight size={14} />
@@ -2111,7 +2112,7 @@ export default function AdminDashboardPage() {
                     <button
                       type="button"
                       onClick={() => handleFormat('insertUnorderedList')}
-                      className="p-1.5 rounded hover:bg-theme-element text-gray-300 hover:text-white transition"
+                      className="p-1.5 rounded hover:bg-theme-element text-theme-text-body hover:text-theme-text-header transition"
                       title="Viñetas"
                     >
                       <List size={14} />
@@ -2119,7 +2120,7 @@ export default function AdminDashboardPage() {
                     <button
                       type="button"
                       onClick={() => handleFormat('insertOrderedList')}
-                      className="p-1.5 rounded hover:bg-theme-element text-gray-300 hover:text-white transition"
+                      className="p-1.5 rounded hover:bg-theme-element text-theme-text-body hover:text-theme-text-header transition"
                       title="Numeración"
                     >
                       <ListOrdered size={14} />
@@ -2127,10 +2128,10 @@ export default function AdminDashboardPage() {
                     <button
                       type="button"
                       onClick={() => handleFormat('insertHorizontalRule')}
-                      className="p-1.5 rounded hover:bg-theme-element text-gray-300 hover:text-white text-xs font-bold transition px-2"
+                      className="p-1.5 rounded hover:bg-theme-element text-theme-text-body hover:text-theme-text-header text-xs font-bold transition px-2"
                       title="Línea Horizontal"
                     >
-                      <span className="text-gray-400">LINEA</span>
+                      <span className="text-theme-text-body\/60">LINEA</span>
                     </button>
 
                     <div className="w-px h-6 bg-theme-border mx-1" />
@@ -2138,7 +2139,7 @@ export default function AdminDashboardPage() {
                     <select
                       onChange={(e) => handleFormat('formatBlock', e.target.value)}
                       defaultValue="p"
-                      className="bg-theme-card text-gray-300 border border-theme-border rounded px-2 py-1 text-xs outline-none"
+                      className="bg-theme-card text-theme-text-body border border-theme-border rounded px-2 py-1 text-xs outline-none"
                     >
                       <option value="p">Párrafo (Texto)</option>
                       <option value="h1">Título 1</option>
@@ -2153,7 +2154,7 @@ export default function AdminDashboardPage() {
                     <button
                       type="button"
                       onClick={handleInsertLink}
-                      className="p-1.5 rounded hover:bg-theme-element text-gray-300 hover:text-white transition"
+                      className="p-1.5 rounded hover:bg-theme-element text-theme-text-body hover:text-theme-text-header transition"
                       title="Añadir Enlace"
                     >
                       <LinkIcon size={14} />
@@ -2162,7 +2163,7 @@ export default function AdminDashboardPage() {
                     <button
                       type="button"
                       onClick={handleInsertImageUrl}
-                      className="p-1.5 rounded hover:bg-theme-element text-gray-300 hover:text-white transition"
+                      className="p-1.5 rounded hover:bg-theme-element text-theme-text-body hover:text-theme-text-header transition"
                       title="Añadir Imagen por URL"
                     >
                       <ImageIcon size={14} />
@@ -2171,7 +2172,7 @@ export default function AdminDashboardPage() {
                     <button
                       type="button"
                       onClick={() => editorImageInputRef.current?.click()}
-                      className="bg-theme-element hover:bg-theme-primary text-white text-xs px-2.5 py-1.5 rounded transition flex items-center gap-1.5 font-semibold"
+                      className="bg-theme-element hover:bg-theme-primary text-theme-text-header text-xs px-2.5 py-1.5 rounded transition flex items-center gap-1.5 font-semibold"
                       title="Subir Archivo de Imagen"
                     >
                       <Upload size={12} />
@@ -2204,14 +2205,14 @@ export default function AdminDashboardPage() {
                     <div
                       ref={editorRef}
                       contentEditable
-                      className="flex-1 w-full bg-theme-base border border-theme-border rounded-b p-4 text-white outline-none focus:border-theme-primary overflow-y-auto wysiwyg-editor-content text-base leading-relaxed"
+                      className="flex-1 w-full bg-theme-base border border-theme-border rounded-b p-4 text-theme-text-header outline-none focus:border-theme-primary overflow-y-auto wysiwyg-editor-content text-base leading-relaxed"
                       style={{ minHeight: '350px' }}
                     />
                   ) : (
                     <textarea
                       value={editorContent}
                       onChange={(e) => setEditorContent(e.target.value)}
-                      className="w-full flex-1 bg-theme-base border border-theme-border rounded p-4 text-white outline-none focus:border-theme-primary font-mono text-sm resize-none"
+                      className="w-full flex-1 bg-theme-base border border-theme-border rounded p-4 text-theme-text-header outline-none focus:border-theme-primary font-mono text-sm resize-none"
                       style={{ minHeight: '350px' }}
                       placeholder="<!-- Escribe tu código HTML aquí -->"
                     />
@@ -2237,13 +2238,13 @@ export default function AdminDashboardPage() {
                 <button 
                   type="button"
                   onClick={() => setEditingPage(null)}
-                  className="flex-1 bg-theme-element text-white py-2 rounded font-bold hover:bg-gray-700 transition"
+                  className="flex-1 bg-theme-element text-theme-text-header py-2 rounded font-bold hover:bg-gray-700 transition"
                 >
                   Cancelar
                 </button>
                 <button 
                   type="submit"
-                  className="flex-1 bg-theme-primary text-white py-2 rounded font-bold hover:bg-theme-primary-hover transition"
+                  className="flex-1 bg-theme-primary text-theme-text-header py-2 rounded font-bold hover:bg-theme-primary-hover transition"
                 >
                   Guardar
                 </button>

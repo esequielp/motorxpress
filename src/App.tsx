@@ -26,7 +26,7 @@ export default function App() {
   const theme = useThemeStore((state) => state.theme);
 
   useEffect(() => {
-    if (theme === 'racing') {
+    if (theme === 'marketplace') {
       document.documentElement.removeAttribute('data-theme');
     } else {
       document.documentElement.setAttribute('data-theme', theme);
@@ -37,7 +37,7 @@ export default function App() {
     <HelmetProvider>
       <Router>
         <ScrollToTop />
-        <div className="min-h-screen bg-theme-base font-sans text-white flex flex-col">
+        <div className="min-h-screen bg-theme-base font-sans text-theme-text-body flex flex-col">
           <Header />
           <main className="flex-1">
             <Routes>

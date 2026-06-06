@@ -56,8 +56,8 @@ export default function CheckoutPage() {
     return (
       <div className="container mx-auto px-4 py-20 text-center min-h-[50vh]">
         <h1 className="text-3xl font-bebas mb-4">CARRITO VACÍO</h1>
-        <p className="text-gray-400 mb-8">Agrega algunos productos antes de proceder al pago.</p>
-        <button onClick={() => navigate('/catalogo')} className="bg-theme-primary text-white px-8 py-3 rounded font-bold">
+        <p className="text-theme-text-body/60 mb-8">Agrega algunos productos antes de proceder al pago.</p>
+        <button onClick={() => navigate('/catalogo')} className="bg-theme-primary text-theme-text-header px-8 py-3 rounded font-bold hover:bg-theme-primary-hover transition-colors">
           Ir al catálogo
         </button>
       </div>
@@ -224,64 +224,64 @@ export default function CheckoutPage() {
 
         <div className="sticky top-24 space-y-6">
           <div className="bg-theme-card p-6 rounded-lg border border-theme-border">
-            <h2 className="text-xl font-bold text-white mb-4">Resumen del Pedido</h2>
+            <h2 className="text-xl font-bold text-theme-text-header mb-4">Resumen del Pedido</h2>
             <div className="space-y-4 mb-6 max-h-[40vh] overflow-y-auto pr-2">
               {items.map(item => (
                 <div key={item.sku} className="flex justify-between text-sm">
                   <div className="flex-1 pr-4">
-                    <p className="text-gray-300 line-clamp-1">{item.name}</p>
-                    <p className="text-gray-500">x{item.quantity}</p>
+                    <p className="text-theme-text-body line-clamp-1">{item.name}</p>
+                    <p className="text-theme-text-body/60">x{item.quantity}</p>
                   </div>
-                  <span className="text-white whitespace-nowrap">{formatCLP(item.price * item.quantity)}</span>
+                  <span className="text-theme-text-header font-medium whitespace-nowrap">{formatCLP(item.price * item.quantity)}</span>
                 </div>
               ))}
             </div>
             
             <div className="space-y-2 border-t border-theme-border pt-4 mb-4 text-sm">
-              <div className="flex justify-between text-gray-300">
+              <div className="flex justify-between text-theme-text-body">
                 <span>Subtotal</span>
                 <span>{formatCLP(subtotal)}</span>
               </div>
-              <div className="flex justify-between text-gray-300">
+              <div className="flex justify-between text-theme-text-body">
                 <span>Envío {shippingOption ? `(${shippingOption.serviceDescription.split(' ')[1] || ''})` : ''}</span>
                 <span>{shippingOption ? formatCLP(shippingCost) : 'Por calcular'}</span>
               </div>
             </div>
 
-            <div className="flex justify-between text-lg font-bold text-white border-t border-theme-border pt-4 mb-6">
+            <div className="flex justify-between text-lg font-bold text-theme-text-header border-t border-theme-border pt-4 mb-6">
               <span>TOTAL</span>
-              <span className="text-theme-primary">{formatCLP(finalTotal)}</span>
+              <span className="text-red font-extrabold">{formatCLP(finalTotal)}</span>
             </div>
 
             <button 
               disabled={step === 1 || !shippingOption || isProcessingPayment}
               onClick={handlePayment}
-              className="w-full bg-theme-primary hover:bg-theme-primary-hover disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-4 rounded-md transition-colors flex justify-center items-center gap-2"
+              className="w-full bg-theme-primary hover:bg-theme-primary-hover disabled:opacity-50 disabled:cursor-not-allowed text-theme-text-header font-bold py-4 rounded-md transition-colors flex justify-center items-center gap-2"
             >
               {isProcessingPayment ? <Loader2 className="w-5 h-5 animate-spin" /> : '🔒 PAGAR CON FLOW'}
             </button>
-            <p className="text-center text-xs text-gray-500 mt-4 mb-4">
+            <p className="text-center text-xs text-theme-text-body/60 mt-4 mb-4">
               Acepta: débito, crédito, transferencia, RedCompra
             </p>
           </div>
           
           {checkoutCrossSells.length > 0 && (
             <div className="bg-theme-card p-6 rounded-lg border border-theme-border">
-              <h3 className="font-bold text-xl mb-4 text-theme-primary flex items-center gap-2 leading-tight">
+              <h3 className="font-bold text-xl mb-4 text-theme-text-header flex items-center gap-2 leading-tight">
                 <span className="text-2xl pt-1">🔥</span> Ofertas exclusivas para tu pedido
               </h3>
-              <p className="text-gray-400 mb-6 text-xs">Agrega estos productos recomendados a tu carrito.</p>
+              <p className="text-theme-text-body/60 mb-6 text-xs">Agrega estos productos recomendados a tu carrito.</p>
               <div className="grid grid-cols-1 gap-4">
                 {checkoutCrossSells.map(product => (
                   <div key={product.id} className="flex gap-4 p-3 border border-theme-border rounded-lg bg-theme-base group hover:border-theme-primary transition-colors items-center">
                     <img src={getProductThumbnail(product.image)} alt={product.name} className="w-16 h-16 object-cover rounded bg-theme-card" />
                     <div className="flex-1 min-w-0">
-                      <p className="font-medium text-xs text-white line-clamp-2 leading-tight mb-1">{product.name}</p>
-                      <p className="text-theme-primary font-bold text-sm">{formatCLP(product.is_offer ? product.offer_price : product.price)}</p>
+                      <p className="font-medium text-xs text-theme-text-header line-clamp-2 leading-tight mb-1">{product.name}</p>
+                      <p className="text-red font-bold text-sm">{formatCLP(product.is_offer ? product.offer_price : product.price)}</p>
                     </div>
                     <button 
                       onClick={() => addItem(product)}
-                      className="flex-shrink-0 bg-theme-element hover:bg-theme-primary hover:text-white text-gray-400 p-2 rounded-md transition-colors"
+                      className="flex-shrink-0 bg-theme-element hover:bg-theme-primary hover:text-theme-text-header text-theme-text-body p-2 rounded-md transition-colors"
                       title="Agregar al carrito"
                     >
                       <Plus className="w-4 h-4" />

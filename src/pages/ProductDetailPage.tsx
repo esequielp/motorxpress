@@ -157,11 +157,11 @@ export default function ProductDetailPage() {
   };
 
   if (loading) {
-    return <div className="min-h-[60vh] flex items-center justify-center text-white">Cargando producto...</div>;
+    return <div className="min-h-[60vh] flex items-center justify-center text-theme-text-header">Cargando producto...</div>;
   }
 
   if (!product) {
-    return <div className="min-h-[60vh] flex items-center justify-center text-white">Producto no encontrado.</div>;
+    return <div className="min-h-[60vh] flex items-center justify-center text-theme-text-header">Producto no encontrado.</div>;
   }
 
   const metaTitle = product ? (product.meta_title || `${product.name} | MOTOR[X]PRESS`) : 'Producto | MOTOR[X]PRESS';
@@ -178,10 +178,10 @@ export default function ProductDetailPage() {
       </Helmet>
 
       {/* Breadcrumb */}
-      <div className="text-sm text-gray-500 mb-8 font-medium">
-        <Link to="/" className="hover:text-white">Inicio</Link> &gt;{' '}
-        <Link to="/catalogo" className="hover:text-white">Catálogo</Link> &gt;{' '}
-        <span className="text-gray-300">{product.name}</span>
+      <div className="text-sm text-theme-text-body/60 mb-8 font-medium">
+        <Link to="/" className="hover:text-theme-text-header">Inicio</Link> &gt;{' '}
+        <Link to="/catalogo" className="hover:text-theme-text-header">Catálogo</Link> &gt;{' '}
+        <span className="text-theme-text-body">{product.name}</span>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-12 border border-theme-border bg-theme-base rounded-2xl p-6 lg:p-12 shadow-2xl relative overflow-hidden">
@@ -230,29 +230,29 @@ export default function ProductDetailPage() {
             {product.mpn && <p className="text-gray-400 font-mono text-sm tracking-widest">| MPN: {product.mpn}</p>}
             {product.type === 'combo' && <span className="bg-purple-100 px-2 py-1 rounded text-purple-800 text-xs font-bold border border-purple-200">COMBO</span>}
           </div>
-          <h1 className="text-4xl lg:text-5xl font-bebas leading-none mb-6 text-white uppercase shadow-sm">
+          <h1 className="text-4xl lg:text-5xl font-bebas leading-none mb-6 text-theme-text-header uppercase shadow-sm">
             {product.name}
           </h1>
           
           <div className="mb-6 flex items-baseline gap-4">
              {product.type === 'variable' ? (
-                <span className="text-5xl font-bold tracking-tight text-white">
+                <span className="text-5xl font-bold tracking-tight text-theme-text-header">
                    {formatCLP(product.variations?.find((v:any) => v.id === selectedVariationId)?.price || product.price)}
                 </span>
              ) : product.is_offer === 1 && product.offer_price ? (
                <>
-                 <span className="text-5xl font-bold tracking-tight text-white">{formatCLP(product.offer_price)}</span>
+                 <span className="text-5xl font-bold tracking-tight text-theme-text-header">{formatCLP(product.offer_price)}</span>
                  <span className="text-xl text-gray-500 line-through decoration-[var(--theme-primary)]">{formatCLP(product.price)}</span>
                </>
              ) : (
-               <span className="text-5xl font-bold tracking-tight text-white">{formatCLP(product.price)}</span>
+               <span className="text-5xl font-bold tracking-tight text-theme-text-header">{formatCLP(product.price)}</span>
              )}
           </div>
 
           {/* Variations Selector */}
           {product.type === 'variable' && product.variations && (
              <div className="mb-8">
-               <h3 className="text-sm uppercase font-bold text-gray-400 mb-3">Selecciona una opción:</h3>
+               <h3 className="text-sm uppercase font-bold text-theme-text-header/60 mb-3">Selecciona una opción:</h3>
                <div className="flex flex-wrap gap-3">
                  {product.variations.map((v: any) => (
                    <button
@@ -260,8 +260,8 @@ export default function ProductDetailPage() {
                      onClick={() => handleVariationSelect(v.id)}
                      className={`px-4 py-2 border-2 rounded-lg font-medium text-sm transition-all ${
                         selectedVariationId === v.id 
-                        ? 'border-theme-primary bg-theme-primary/10 text-theme-primary shadow-sm' 
-                        : 'border-theme-border text-gray-300 hover:border-gray-500 bg-theme-card'
+                        ? 'border-theme-primary bg-theme-primary/15 text-theme-text-header shadow-sm' 
+                        : 'border-theme-border text-theme-text-body hover:border-theme-border-hover hover:bg-theme-element bg-theme-card font-medium'
                      }`}
                    >
                      {v.name}
@@ -282,31 +282,31 @@ export default function ProductDetailPage() {
              const savingsPercent = totalValue > 0 ? Math.round((savings / totalValue) * 100) : 0;
 
              return (
-               <div className="mb-8 p-4 bg-purple-100 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-500/30 rounded-lg">
-                 <h3 className="text-sm uppercase font-bold text-purple-700 dark:text-purple-400 mb-3 flex items-center gap-2">
+               <div className="mb-8 p-4 bg-purple-100 border border-purple-200 rounded-lg">
+                 <h3 className="text-sm uppercase font-bold text-purple-700 mb-3 flex items-center gap-2">
                     <Package className="w-4 h-4" /> Este bundle incluye:
                  </h3>
                  <div className="space-y-3 mb-4">
                    {product.combo_items.map((item: any, idx: number) => (
-                     <div key={idx} className="flex items-center justify-between gap-3 bg-white dark:bg-[#1e293b] p-2 rounded border border-gray-200 dark:border-gray-700">
+                     <div key={idx} className="flex items-center justify-between gap-3 bg-theme-card p-2 rounded border border-theme-border">
                        <div className="flex items-center gap-3 overflow-hidden">
                          {item.product?.image && (
-                            <img src={getProductThumbnail(item.product.image)} alt={item.product?.name} className="w-10 h-10 object-cover rounded border border-gray-200 dark:border-gray-700" />
+                            <img src={getProductThumbnail(item.product.image)} alt={item.product?.name} className="w-10 h-10 object-cover rounded border border-theme-border" />
                          )}
                          <div className="flex-1 min-w-0">
-                           <p className="text-sm font-bold text-gray-900 dark:text-gray-100 truncate">{item.product?.name || `Producto #${item.product_id}`}</p>
+                           <p className="text-sm font-bold text-theme-text-header truncate">{item.product?.name || `Producto #${item.product_id}`}</p>
                            <p className="text-xs text-gray-500">Precio unitario: {item.product ? formatCLP(item.product.price) : '--'}</p>
                          </div>
                        </div>
                        <div className="flex flex-col items-end shrink-0">
-                         <span className="text-sm font-bold bg-gray-100 dark:bg-[#0f172a] text-gray-800 dark:text-gray-300 px-2 py-0.5 rounded">x{item.quantity}</span>
-                         <span className="text-sm font-bold text-purple-700 dark:text-theme-primary">{item.product ? formatCLP(item.product.price * item.quantity) : '--'}</span>
+                         <span className="text-sm font-bold bg-gray-100 text-gray-800 px-2 py-0.5 rounded">x{item.quantity}</span>
+                         <span className="text-sm font-bold text-purple-700">{item.product ? formatCLP(item.product.price * item.quantity) : '--'}</span>
                        </div>
                      </div>
                    ))}
                  </div>
                  {savings > 0 && (
-                   <div className="flex justify-between items-center bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 p-3 rounded text-sm border border-green-200 dark:border-green-500/20">
+                   <div className="flex justify-between items-center bg-green-50 text-green-700 p-3 rounded text-sm border border-green-200">
                      <span className="font-bold">Valor real: <span className="line-through opacity-70">{formatCLP(totalValue)}</span></span>
                      <div className="flex items-center gap-1 font-bold">
                        Ahorras: {formatCLP(savings)} ({savingsPercent}%)
@@ -318,11 +318,11 @@ export default function ProductDetailPage() {
           })()}
 
           {/* Hook & Story / Sales Pitch */}
-          <div className="text-gray-300 text-lg leading-relaxed mb-6 space-y-4">
+          <div className="text-theme-text-body text-base leading-relaxed mb-6 space-y-4">
             <p>
-              ¿Tu <strong className="text-white">{product.vehicle.split(' ')[0] || 'vehículo'}</strong> está pidiendo a gritos un cambio? No te arriesgues con repuestos alternativos de dudosa procedencia.
+              ¿Tu <strong className="text-theme-text-header font-bold">{product.vehicle.split(' ')[0] || 'vehículo'}</strong> está pidiendo a gritos un cambio? No te arriesgues con repuestos alternativos de dudosa procedencia.
             </p>
-            <p className="bg-theme-card border-l-4 border-theme-primary p-4 text-sm font-medium italic text-gray-400">
+            <p className="bg-theme-card border-l-4 border-theme-primary p-4 text-sm font-medium italic text-theme-text-body/80">
               "El costo de una falla en ruta es 10 veces mayor que el precio de un buen repuesto hoy mismo."
             </p>
           </div>
@@ -330,24 +330,24 @@ export default function ProductDetailPage() {
           {/* Technical Description */}
           {product.description && (
             <div className="mb-8 p-4 border border-theme-border rounded-lg">
-              <h3 className="text-sm uppercase font-bold text-gray-500 mb-2">Especificaciones Técnicas</h3>
-              <p className="text-gray-300 text-sm">{product.description}</p>
+               <h3 className="text-sm uppercase font-bold text-theme-text-header/60 mb-2">Especificaciones Técnicas</h3>
+               <p className="text-theme-text-body text-sm">{product.description}</p>
             </div>
           )}
           
           <div className="space-y-3 mb-8 bg-theme-card border border-theme-border p-6 rounded-xl">
-            <h3 className="text-white font-bebas text-xl mb-4 tracking-wide">¿POR QUÉ LLEVARLO HOY?</h3>
-            <div className="flex items-center gap-3 text-sm text-gray-300">
+            <h3 className="text-theme-text-header font-bebas text-xl mb-4 tracking-wide">¿POR QUÉ LLEVARLO HOY?</h3>
+            <div className="flex items-center gap-3 text-sm text-theme-text-body">
               <CheckCircle2 className="w-5 h-5 text-green-500 flex-shrink-0" />
-              <span>Garantía de Compatibilidad Total para <strong className="text-white">{product.vehicle}</strong>.</span>
+              <span>Garantía de Compatibilidad Total para <strong className="text-theme-text-header font-bold">{product.vehicle}</strong>.</span>
             </div>
-            <div className="flex items-center gap-3 text-sm text-gray-300">
+            <div className="flex items-center gap-3 text-sm text-theme-text-body">
               <CheckCircle2 className="w-5 h-5 text-green-500 flex-shrink-0" />
               <span>Despacho el mismo día si compras antes de las 14:00 hrs.</span>
             </div>
-            <div className="flex items-center gap-3 text-sm text-gray-300">
+            <div className="flex items-center gap-3 text-sm text-theme-text-body">
               <CheckCircle2 className="w-5 h-5 text-green-500 flex-shrink-0" />
-              <span>Stock Crítico: <strong className="text-theme-primary">Sólo {product.type === 'variable' ? product.variations?.find((v:any) => v.id === selectedVariationId)?.stock : product.stock} unidades disponibles</strong> a este precio.</span>
+              <span>Stock Crítico: <strong className="text-theme-primary font-bold">Sólo {product.type === 'variable' ? product.variations?.find((v:any) => v.id === selectedVariationId)?.stock : product.stock} unidades disponibles</strong> a este precio.</span>
             </div>
           </div>
 
@@ -397,18 +397,18 @@ export default function ProductDetailPage() {
           })()}
 
           {/* Guarantees */}
-          <div className="mt-8 grid grid-cols-3 gap-4 text-center divide-x divide-[#1e293b]">
+          <div className="mt-8 grid grid-cols-3 gap-4 text-center divide-x divide-theme-border">
              <div className="flex flex-col items-center">
-                <ShieldCheck className="w-6 h-6 text-gray-400 mb-2" />
-                <span className="text-xs text-gray-500 uppercase tracking-wider font-bold">Compra Segura</span>
+                <ShieldCheck className="w-6 h-6 text-theme-text-body/60 mb-2" />
+                <span className="text-xs text-theme-text-body/70 uppercase tracking-wider font-bold">Compra Segura</span>
              </div>
              <div className="flex flex-col items-center">
-                <Truck className="w-6 h-6 text-gray-400 mb-2" />
-                <span className="text-xs text-gray-500 uppercase tracking-wider font-bold">Envío Express</span>
+                <Truck className="w-6 h-6 text-theme-text-body/60 mb-2" />
+                <span className="text-xs text-theme-text-body/70 uppercase tracking-wider font-bold">Envío Express</span>
              </div>
              <div className="flex flex-col items-center">
-                <Zap className="w-6 h-6 text-gray-400 mb-2" />
-                <span className="text-xs text-gray-500 uppercase tracking-wider font-bold">Calidad 100%</span>
+                <Zap className="w-6 h-6 text-theme-text-body/60 mb-2" />
+                <span className="text-xs text-theme-text-body/70 uppercase tracking-wider font-bold">Calidad 100%</span>
              </div>
           </div>
         </div>
@@ -417,7 +417,7 @@ export default function ProductDetailPage() {
       {/* RELATED PRODUCTS */}
       {relatedProducts.length > 0 && (
         <div className="mt-20">
-          <h2 className="text-3xl font-bebas text-white mb-6 border-b border-theme-border pb-4 uppercase">Productos Compatibles Recomendados</h2>
+          <h2 className="text-3xl font-bebas text-theme-text-header mb-6 border-b border-theme-border pb-4 uppercase">Productos Compatibles Recomendados</h2>
           <div className="flex overflow-x-auto snap-x snap-mandatory pb-6 gap-4 sm:gap-6 hide-scrollbar md:grid md:grid-cols-4 md:overflow-visible md:snap-none">
             {relatedProducts.map(p => (
               <div key={p.id} className="w-[75vw] max-w-[280px] sm:w-[300px] md:w-auto flex-shrink-0 snap-start snap-always">
@@ -437,7 +437,7 @@ export default function ProductDetailPage() {
           {/* Controls */}
           <button 
             onClick={(e) => { e.stopPropagation(); setIsModalOpen(false); }}
-            className="absolute top-6 right-6 text-white/70 hover:text-white bg-white/10 hover:bg-white/20 p-2 rounded-full transition-all"
+            className="absolute top-6 right-6 text-white/70 hover:text-white bg-theme-card/10 hover:bg-theme-card/20 p-2 rounded-full transition-all"
             aria-label="Cerrar"
           >
             <X className="w-8 h-8" />
@@ -445,7 +445,7 @@ export default function ProductDetailPage() {
 
           <button 
             onClick={prevImage}
-            className="absolute left-6 top-1/2 -translate-y-1/2 text-white/70 hover:text-white bg-white/5 hover:bg-white/20 p-3 rounded-full transition-all"
+            className="absolute left-6 top-1/2 -translate-y-1/2 text-white/70 hover:text-white bg-theme-card/5 hover:bg-theme-card/20 p-3 rounded-full transition-all"
             aria-label="Anterior"
           >
             <ChevronLeft className="w-10 h-10" />
@@ -453,7 +453,7 @@ export default function ProductDetailPage() {
 
           <button 
             onClick={nextImage}
-            className="absolute right-6 top-1/2 -translate-y-1/2 text-white/70 hover:text-white bg-white/5 hover:bg-white/20 p-3 rounded-full transition-all"
+            className="absolute right-6 top-1/2 -translate-y-1/2 text-white/70 hover:text-white bg-theme-card/5 hover:bg-theme-card/20 p-3 rounded-full transition-all"
             aria-label="Siguiente"
           >
             <ChevronRight className="w-10 h-10" />
@@ -477,7 +477,7 @@ export default function ProductDetailPage() {
               <button
                 key={idx}
                 onClick={(e) => { e.stopPropagation(); setActiveImage(idx); }}
-                className={`w-3 h-3 rounded-full transition-all ${activeImage === idx ? 'bg-theme-primary scale-125' : 'bg-white/30 hover:bg-white/60'}`}
+                className={`w-3 h-3 rounded-full transition-all ${activeImage === idx ? 'bg-theme-primary scale-125' : 'bg-theme-card/30 hover:bg-theme-card/60'}`}
                 aria-label={`Ir a imagen ${idx + 1}`}
               />
             ))}

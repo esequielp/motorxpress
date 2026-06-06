@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
-type Theme = 'racing' | 'corporate' | 'modern' | 'enterprise';
+type Theme = 'racing' | 'corporate' | 'modern' | 'enterprise' | 'marketplace' | 'minimal';
 
 interface ThemeState {
   theme: Theme;
@@ -11,10 +11,10 @@ interface ThemeState {
 export const useThemeStore = create<ThemeState>()(
   persist(
     (set) => ({
-      theme: 'racing',
+      theme: 'marketplace',
       setTheme: (theme) => {
         set({ theme });
-        if (theme === 'racing') {
+        if (theme === 'marketplace') {
           document.documentElement.removeAttribute('data-theme');
         } else {
           document.documentElement.setAttribute('data-theme', theme);
@@ -25,7 +25,7 @@ export const useThemeStore = create<ThemeState>()(
       name: 'motorxpress-theme',
       onRehydrateStorage: () => (state) => {
         if (state) {
-          if (state.theme === 'racing') {
+          if (state.theme === 'marketplace') {
             document.documentElement.removeAttribute('data-theme');
           } else {
             document.documentElement.setAttribute('data-theme', state.theme);
